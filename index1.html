@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Manajemen Toko 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+        }
+
+        .header .year-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 30px;
+            border-radius: 30px;
+            margin-top: 15px;
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .menu-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .menu-card:nth-child(1) { animation-delay: 0.1s; }
+        .menu-card:nth-child(2) { animation-delay: 0.2s; }
+        .menu-card:nth-child(3) { animation-delay: 0.3s; }
+        .menu-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .menu-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-card:hover .menu-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .menu-card h2 {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .menu-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .menu-card .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            opacity: 0.9;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.9; }
+        }
+
+        .footer p {
+            font-size: 0.95em;
+        }
+
+        /* Responsif untuk mobile */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .menu-card {
+                padding: 30px 20px;
+            }
+
+            .menu-icon {
+                font-size: 3em;
+            }
+        }
+
+        /* Animasi loading saat klik */
+        .menu-card:active {
+            transform: translateY(-5px) scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Dashboard Manajemen Toko</h1>
+            <p>Sistem Informasi Terintegrasi</p>
+            <div class="year-badge">📅 Tahun 2025</div>
+        </div>
+        
+        <div class="menu-grid">
+            <a href="surplus-kas.html" class="menu-card">
+                <span class="menu-icon">💰</span>
+                <h2>Pembagian Surplus Kas</h2>
+                <p>Laporan dan pembagian surplus kas untuk tahun 2025</p>
+                <span class="badge">Keuangan</span>
+            </a>
+            
+            <a href="laporan-listrik.html" class="menu-card">
+                <span class="menu-icon">⚡</span>
+                <h2>Pembayaran Listrik Toko</h2>
+                <p>Monitoring tagihan dan pembayaran listrik bulanan</p>
+                <span class="badge">Utilitas</span>
+            </a>
+            
+            <a href="perbaikan-toko.html" class="menu-card">
+                <span class="menu-icon">🔧</span>
+                <h2>Kebutuhan Perbaikan Toko</h2>
+                <p>Daftar kebutuhan dan jadwal perbaikan toko</p>
+                <span class="badge">Maintenance</span>
+            </a>
+            
+            <a href="data-karyawan.html" class="menu-card">
+                <span class="menu-icon">👥</span>
+                <h2>Data Karyawan Toko</h2>
+                <p>Informasi lengkap karyawan dan manajemen SDM</p>
+                <span class="badge">SDM</span>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 Dashboard Manajemen Toko. All rights reserved.</p>
+            <p style="margin-top: 8px; font-size: 0.85em;">Dikembangkan dengan ❤️ untuk efisiensi bisnis yang lebih baik</p>
+        </div>
+    </div>
+
+    <script>
+        // Animasi smooth scroll (jika dibutuhkan di masa depan)
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Tambahkan efek loading atau feedback visual lainnya jika diperlukan
+                this.style.opacity = '0.7';
+                setTimeout(() => {
+                    this.style.opacity = '1';
+                }, 200);
+            });
+        });
+
+        // Log klik untuk analytics (opsional)
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const menuName = this.querySelector('h2').textContent;
+                console.log('Menu diklik:', menuName);
+                // Di sini bisa ditambahkan Google Analytics atau tracking lainnya
+            });
+        });
+    </script>
+</body>
+</html>
