@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Laporan Tagihan Listrik</title>
+    <title>Login - Dashboard Toko</title>
     <style>
         * {
             margin: 0;
@@ -121,18 +121,27 @@
             transform: none;
         }
         
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
+        .message {
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #f5c6cb;
             font-size: 0.9em;
             display: none;
         }
 
-        .error-message.show {
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #c3e6cb;
+        }
+
+        .message.show {
             display: block;
             animation: shake 0.5s;
         }
@@ -181,12 +190,12 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>⚡ Login</h1>
-            <p>Laporan Tagihan Listrik Toko</p>
+            <h1>🏪 Login</h1>
+            <p>Dashboard Manajemen Toko 2025</p>
         </div>
         
         <div class="login-body">
-            <div class="error-message" id="errorMessage"></div>
+            <div class="message" id="message"></div>
             
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
@@ -214,8 +223,19 @@
         const CONFIG = {
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            SHEET_NAME: 'Users'  // Nama sheet untuk data login
+            SHEET_NAME: 'Users'
         };
+
+        // Cookie Management
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
 
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -230,13 +250,13 @@
             }
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
+        function showMessage(message, type = 'error') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = 'message ' + type + ' show';
             
             setTimeout(() => {
-                errorDiv.classList.remove('show');
+                messageDiv.classList.remove('show');
             }, 5000);
         }
 
@@ -260,7 +280,7 @@
             const password = document.getElementById('password').value;
             
             if (!username || !password) {
-                showError('Username dan password harus diisi!');
+                showMessage('Username dan password harus diisi!', 'error');
                 return;
             }
             
@@ -280,44 +300,52 @@
                     throw new Error('Database user kosong.');
                 }
                 
-                // Baris pertama adalah header, data dimulai dari baris ke-2
                 const users = data.values.slice(1);
                 
-                // Cari user yang cocok (kolom 0 = username, kolom 1 = password)
                 const validUser = users.find(user => 
                     user[0] && user[0].trim() === username && 
                     user[1] && user[1].trim() === password
                 );
                 
                 if (validUser) {
-                    // Login berhasil - simpan status login
-                    const loginData = {
+                    // Login berhasil - simpan ke cookie
+                    const authData = {
                         username: username,
+                        fullName: validUser[2] || username,
                         loginTime: new Date().toISOString(),
-                        fullName: validUser[2] || username  // Kolom ke-3 untuk nama lengkap (opsional)
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                     };
                     
-                    // Simpan ke sessionStorage
-                    const loginDataString = JSON.stringify(loginData);
-                    const encodedData = btoa(loginDataString);
-                    window.location.href = 'laporan-listrik.html?auth=' + encodedData;
+                    const encoded = btoa(JSON.stringify(authData));
+                    setCookie('userAuth', encoded, 1);
+                    
+                    // Redirect ke halaman yang diminta atau homepage
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectTo = urlParams.get('redirect') || 'index.html';
+                    
+                    showMessage('✓ Login berhasil! Mengalihkan...', 'success');
+                    setTimeout(() => {
+                        window.location.href = redirectTo;
+                    }, 1000);
                     
                 } else {
-                    showError('❌ Username atau password salah!');
+                    showMessage('❌ Username atau password salah!', 'error');
                     setLoading(false);
                 }
                 
             } catch (error) {
-                showError('❌ ' + error.message);
+                showMessage('❌ ' + error.message, 'error');
                 setLoading(false);
             }
         }
 
-        // Cek jika sudah login (opsional - auto redirect)
+        // Tampilkan pesan jika ada
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('logout')) {
-                showError('✓ Anda telah berhasil logout.');
+            const message = urlParams.get('message');
+            
+            if (message) {
+                showMessage(decodeURIComponent(message), 'error');
             }
         });
     </script>
