@@ -275,6 +275,69 @@
         }
     </style>
 </head>
+
+
+<script>
+// ============ AUTH PROTECTION ============
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function getAuthData() {
+    try {
+        const authString = getCookie('userAuth');
+        if (!authString) return null;
+        const decoded = atob(authString);
+        return JSON.parse(decoded);
+    } catch (e) {
+        return null;
+    }
+}
+
+function checkAuth() {
+    const authData = getAuthData();
+    if (!authData) {
+        const currentPage = window.location.pathname;
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(currentPage);
+        return false;
+    }
+    
+    // Cek expired (24 jam)
+    if (authData.expiresAt) {
+        const expiresAt = new Date(authData.expiresAt);
+        if (new Date() > expiresAt) {
+            deleteCookie('userAuth');
+            window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+            return false;
+        }
+    }
+    return true;
+}
+
+function logout(message = null) {
+    if (!message && !confirm('Yakin ingin logout?')) return;
+    deleteCookie('userAuth');
+    window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+}
+
+// CEK AUTH SAAT HALAMAN LOAD
+if (!checkAuth()) {
+    // Akan redirect otomatis
+}
+</script>
+
+    
 <body>
     <div class="container">
         <div class="header">
@@ -500,3 +563,4 @@
 </body>
 
 </html>
+
