@@ -51,6 +51,36 @@
             border: 2px solid rgba(255,255,255,0.3);
         }
 
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #764ba2;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+        }
+
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -176,8 +206,16 @@
 
         /* Responsif untuk mobile */
         @media (max-width: 768px) {
+            .logout-btn {
+                top: 10px;
+                right: 10px;
+                padding: 10px 20px;
+                font-size: 0.85em;
+            }
+
             .header h1 {
                 font-size: 2em;
+                padding-right: 10px;
             }
             
             .header p {
@@ -266,6 +304,11 @@ if (!checkAuth()) {
 </script>
     
 <body>
+    <button onclick="logout()" class="logout-btn">
+        <span>🚪</span>
+        <span>Logout</span>
+    </button>
+
     <div class="container">
         <div class="header">
             <h1>🏪 Dashboard Manajemen Toko</h1>
@@ -333,4 +376,3 @@ if (!checkAuth()) {
 </body>
 
 </html>
-
