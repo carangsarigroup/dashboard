@@ -391,21 +391,23 @@ if (!checkAuth()) {
         <div class="controls">
             <div class="select-wrapper">
                 <select id="sheetSelect" onchange="loadData()">
-                    <option value="F4SD">F4SD - Indomaret SPBU Gatsu Timur Denpasar</option>
-                    <option value="FKOM">FKOM - Indomaret Wanagiri SRA Buleleng</option>
-                    <option value="FHEN">FHEN - Indomaret SPBU Cempaga Bangli</option>
-                    <option value="FEHU">FEHU - Indomaret Latusari 2 Mambal Badung</option>
-                    <option value="FIVI">FIVI - Indomaret Toko Anugrah Ketapang</option>
-                    <option value="FZ7Y">FZ7Y - Indomaret Pemuda 28 Mataram</option>
-                    <option value="1SFY">1SFY - Alfamart Bright Batukliang</option>
-                    <option value="Q789">Q789 - Alfamart Bright SPBU Dewa Anom Rendang</option>
+                    <option value="TRIWULAN SURKAS">Triwulan Surkas</option>
+                    <option value="Sheet2">Sheet 2</option>
+                    <option value="Sheet3">Sheet 3</option>
+                    <option value="Sheet4">Sheet 4</option>
+                    <option value="Sheet5">Sheet 5</option>
+                    <option value="Sheet6">Sheet 6</option>
+                    <option value="Sheet7">Sheet 7</option>
+                    <option value="Sheet8">Sheet 8</option>
                 </select>
             </div>
             <div class="select-wrapper">
                 <select id="yearSelect" onchange="loadData()">
+                    <option value="2023">Tahun 2023</option>
                     <option value="2024">Tahun 2024</option>
                     <option value="2025" selected>Tahun 2025</option>
-                 </select>
+                    <option value="2026">Tahun 2026</option>
+                </select>
             </div>
             <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
         </div>
@@ -425,14 +427,14 @@ if (!checkAuth()) {
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
             // Daftar nama sheet yang tersedia
             SHEETS: {
-                'F4SD': 'F4SD',
-                'FKOM': 'FKOM',
-                'FHEN': 'FHEN',
-                'FEHU': 'FEHU',
-                'FIVI': 'FIVI',
-                'FZ7Y': 'FZ7Y',
-                '1SFY': '1SFY',
-                'Q789': 'Q789'
+                'TRIWULAN SURKAS': 'Triwulan Surkas',
+                'Sheet2': 'Sheet 2',
+                'Sheet3': 'Sheet 3',
+                'Sheet4': 'Sheet 4',
+                'Sheet5': 'Sheet 5',
+                'Sheet6': 'Sheet 6',
+                'Sheet7': 'Sheet 7',
+                'Sheet8': 'Sheet 8'
             }
         };
 
@@ -663,4 +665,3 @@ if (!checkAuth()) {
     </script>
 </body>
 </html>
-
