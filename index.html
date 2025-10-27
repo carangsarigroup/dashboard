@@ -51,10 +51,38 @@
             border: 2px solid rgba(255,255,255,0.3);
         }
 
-        .logout-btn {
+        .user-bar {
             position: fixed;
             top: 20px;
             right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #764ba2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-name {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
             background: rgba(255,255,255,0.95);
             border: none;
             padding: 12px 25px;
@@ -65,7 +93,6 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
-            z-index: 1000;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -206,9 +233,24 @@
 
         /* Responsif untuk mobile */
         @media (max-width: 768px) {
-            .logout-btn {
+            .user-bar {
                 top: 10px;
                 right: 10px;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+            }
+
+            .user-info {
+                padding: 10px 20px;
+                font-size: 0.85em;
+            }
+
+            .user-name {
+                max-width: 120px;
+            }
+
+            .logout-btn {
                 padding: 10px 20px;
                 font-size: 0.85em;
             }
@@ -300,14 +342,31 @@ function logout(message = null) {
 // CEK AUTH SAAT HALAMAN LOAD
 if (!checkAuth()) {
     // Akan redirect otomatis
+} else {
+    // Tampilkan nama user di header
+    const authData = getAuthData();
+    if (authData && authData.username) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayElement = document.getElementById('displayUsername');
+            if (displayElement) {
+                displayElement.textContent = authData.username;
+            }
+        });
+    }
 }
 </script>
     
 <body>
-    <button onclick="logout()" class="logout-btn">
-        <span>🚪</span>
-        <span>Logout</span>
-    </button>
+    <div class="user-bar">
+        <div class="user-info">
+            <span>👤</span>
+            <span class="user-name" id="displayUsername">Loading...</span>
+        </div>
+        <button onclick="logout()" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </button>
+    </div>
 
     <div class="container">
         <div class="header">
