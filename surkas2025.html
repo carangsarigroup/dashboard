@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Surplus Kas Toko</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            transition: border-color 0.3s;
+        }
+
+        .select-wrapper select:hover {
+            border-color: #667eea;
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #667eea;
+            font-size: 12px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            border-left: 5px solid #f5c6cb;
+        }
+
+        .error strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 1em;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            white-space: nowrap;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            color: #495057;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        td.triwulan {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            background: #f8f9fa;
+            color: #667eea;
+        }
+
+        td.month {
+            font-weight: 500;
+            padding-left: 30px;
+        }
+
+        td.currency {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        td.currency.positive {
+            color: #28a745;
+        }
+
+        td.currency.negative {
+            color: #dc3545;
+        }
+
+        td.currency.zero {
+            color: #6c757d;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.2s;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .last-update {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .year-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .summary-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-item .label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+        }
+    </style>
+</head>
+
+<script>
+// ============ AUTH PROTECTION ============
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function getAuthData() {
+    try {
+        const authString = getCookie('userAuth');
+        if (!authString) return null;
+        const decoded = atob(authString);
+        return JSON.parse(decoded);
+    } catch (e) {
+        return null;
+    }
+}
+
+function checkAuth() {
+    const authData = getAuthData();
+    if (!authData) {
+        const currentPage = window.location.pathname;
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(currentPage);
+        return false;
+    }
+    
+    if (authData.expiresAt) {
+        const expiresAt = new Date(authData.expiresAt);
+        if (new Date() > expiresAt) {
+            deleteCookie('userAuth');
+            window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+            return false;
+        }
+    }
+    return true;
+}
+
+if (!checkAuth()) {
+    // Akan redirect otomatis
+}
+</script>
+    
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Laporan Surplus Kas Toko</h1>
+            <p>Monitoring Pembagian Laba & Kas Triwulanan</p>
+        </div>
+        
+        <div class="controls">
+            <div class="select-wrapper">
+                <select id="yearSelect" onchange="loadDataByYear()">
+                    <option value="2023">Tahun 2023</option>
+                    <option value="2024">Tahun 2024</option>
+                    <option value="2025" selected>Tahun 2025</option>
+                    <option value="2026">Tahun 2026</option>
+                </select>
+            </div>
+            <button class="refresh-btn" onclick="loadDataByYear()">🔄 Refresh</button>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Memuat data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚙️ KONFIGURASI - UBAH BAGIAN INI
+        const CONFIG = {
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
+            SHEET_NAME: 'TRIWULAN SURKAS'  // Sesuaikan dengan nama sheet Anda
+        };
+
+        let lastUpdate = null;
+
+        // Fungsi untuk format angka ke Rupiah
+        function formatRupiah(angka) {
+            if (!angka || angka === '-' || angka === '') return 'Rp0';
+            
+            let number = angka.toString().replace(/[^\d.-]/g, '');
+            number = parseFloat(number);
+            
+            if (isNaN(number)) return angka;
+            
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(number);
+        }
+
+        // Fungsi untuk memuat data berdasarkan tahun
+        async function loadDataByYear() {
+            const yearSelect = document.getElementById('yearSelect');
+            const selectedYear = yearSelect.value;
+            const content = document.getElementById('content');
+            
+            content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data...</div></div>';
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.values || data.values.length === 0) {
+                    content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet ini.</div>';
+                    return;
+                }
+                
+                lastUpdate = new Date();
+                displayData(data.values, selectedYear);
+                
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Gagal Memuat Data</strong>
+                        ${error.message}
+                        <br><br>
+                        <strong>Kemungkinan penyebab:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>API Key atau Spreadsheet ID salah</li>
+                            <li>Google Sheets API belum di-enable</li>
+                            <li>Sheet belum di-share sebagai public</li>
+                            <li>Nama sheet tidak sesuai: "${CONFIG.SHEET_NAME}"</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fungsi untuk menampilkan data
+        function displayData(values, selectedYear) {
+            const content = document.getElementById('content');
+            
+            // Header ada di baris 1 (index 0)
+            const headers = values[0];
+            
+            // Data dimulai dari baris 2 (index 1)
+            const dataRows = values.slice(1);
+
+            // Filter data berdasarkan tahun yang dipilih
+            const filteredRows = dataRows.filter(row => {
+                if (row.length > 1 && row[1]) {
+                    const bulan = row[1].toString();
+                    return bulan.includes(selectedYear);
+                }
+                return false;
+            });
+
+            if (filteredRows.length === 0) {
+                content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data untuk tahun ${selectedYear}.</div>`;
+                return;
+            }
+
+            // Hitung summary
+            let totalEbitdaLR = 0;
+            let totalLabaKas = 0;
+            let totalNetDitrans = 0;
+            let totalBayarListrik = 0;
+            let totalSisaSurkas = 0;
+
+            filteredRows.forEach(row => {
+                if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
+                    totalEbitdaLR += parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '') || 0);
+                    totalLabaKas += parseFloat(row[3]?.toString().replace(/[^\d.-]/g, '') || 0);
+                    totalNetDitrans += parseFloat(row[4]?.toString().replace(/[^\d.-]/g, '') || 0);
+                    totalBayarListrik += parseFloat(row[5]?.toString().replace(/[^\d.-]/g, '') || 0);
+                    totalSisaSurkas += parseFloat(row[6]?.toString().replace(/[^\d.-]/g, '') || 0);
+                }
+            });
+
+            const updateTime = lastUpdate.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            let html = `
+                <div class="year-badge">📅 Tahun ${selectedYear}</div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>${formatRupiah(totalEbitdaLR)}</h3>
+                        <p>Total EBITDA LR</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${formatRupiah(totalSisaSurkas)}</h3>
+                        <p>Total Sisa Surplus Kas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${formatRupiah(totalBayarListrik)}</h3>
+                        <p>Total Bayar Listrik</p>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TRIWULAN SURKAS</th>
+                                <th>BULAN</th>
+                                <th>EBITDA LR</th>
+                                <th>AMBIL LABA KAS DARI KA</th>
+                                <th>NET DITRANS</th>
+                                <th>BAYAR LISTRIK</th>
+                                <th>SISA SURKAS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            filteredRows.forEach((row, index) => {
+                // A (0) = Triwulan, B (1) = Bulan, C (2) = EBITDA LR
+                // D (3) = Ambil Laba Kas, E (4) = Net Ditrans
+                // F (5) = Bayar Listrik, G (6) = Sisa Surkas
+                
+                const triwulan = row[0] || '';
+                const bulan = row[1] || '';
+                const ebitdaLR = row[2] || '0';
+                const labaKas = row[3] || '0';
+                const netDitrans = row[4] || '0';
+                const bayarListrik = row[5] || '0';
+                const sisaSurkas = row[6] || '0';
+
+                // Parse untuk warna
+                const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
+                let colorClass = 'zero';
+                if (sisaSurkasNum > 0) colorClass = 'positive';
+                else if (sisaSurkasNum < 0) colorClass = 'negative';
+
+                html += `
+                    <tr>
+                        <td class="triwulan">${triwulan}</td>
+                        <td class="month">${bulan}</td>
+                        <td class="currency">${formatRupiah(ebitdaLR)}</td>
+                        <td class="currency">${formatRupiah(labaKas)}</td>
+                        <td class="currency">${formatRupiah(netDitrans)}</td>
+                        <td class="currency">${formatRupiah(bayarListrik)}</td>
+                        <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-section">
+                    <h3>📊 Ringkasan Tahunan ${selectedYear}</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="label">Total EBITDA LR</div>
+                            <div class="value">${formatRupiah(totalEbitdaLR)}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Ambil Laba Kas</div>
+                            <div class="value">${formatRupiah(totalLabaKas)}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Net Ditrans</div>
+                            <div class="value">${formatRupiah(totalNetDitrans)}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Bayar Listrik</div>
+                            <div class="value">${formatRupiah(totalBayarListrik)}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Sisa Surplus Kas</div>
+                            <div class="value">${formatRupiah(totalSisaSurkas)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="last-update">
+                    ⏱️ Terakhir diperbarui: ${updateTime}
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        // Auto-load saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', loadDataByYear);
+    </script>
+</body>
+</html>
