@@ -390,14 +390,26 @@ if (!checkAuth()) {
         
         <div class="controls">
             <div class="select-wrapper">
-                <select id="yearSelect" onchange="loadDataByYear()">
+                <select id="sheetSelect" onchange="loadData()">
+                    <option value="TRIWULAN SURKAS">Triwulan Surkas</option>
+                    <option value="Sheet2">Sheet 2</option>
+                    <option value="Sheet3">Sheet 3</option>
+                    <option value="Sheet4">Sheet 4</option>
+                    <option value="Sheet5">Sheet 5</option>
+                    <option value="Sheet6">Sheet 6</option>
+                    <option value="Sheet7">Sheet 7</option>
+                    <option value="Sheet8">Sheet 8</option>
+                </select>
+            </div>
+            <div class="select-wrapper">
+                <select id="yearSelect" onchange="loadData()">
                     <option value="2023">Tahun 2023</option>
                     <option value="2024">Tahun 2024</option>
                     <option value="2025" selected>Tahun 2025</option>
                     <option value="2026">Tahun 2026</option>
                 </select>
             </div>
-            <button class="refresh-btn" onclick="loadDataByYear()">🔄 Refresh</button>
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
         </div>
         
         <div class="content" id="content">
@@ -413,7 +425,17 @@ if (!checkAuth()) {
         const CONFIG = {
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            SHEET_NAME: 'TRIWULAN SURKAS'  // Sesuaikan dengan nama sheet Anda
+            // Daftar nama sheet yang tersedia
+            SHEETS: {
+                'TRIWULAN SURKAS': 'Triwulan Surkas',
+                'Sheet2': 'Sheet 2',
+                'Sheet3': 'Sheet 3',
+                'Sheet4': 'Sheet 4',
+                'Sheet5': 'Sheet 5',
+                'Sheet6': 'Sheet 6',
+                'Sheet7': 'Sheet 7',
+                'Sheet8': 'Sheet 8'
+            }
         };
 
         let lastUpdate = null;
@@ -435,16 +457,18 @@ if (!checkAuth()) {
             }).format(number);
         }
 
-        // Fungsi untuk memuat data berdasarkan tahun
-        async function loadDataByYear() {
+        // Fungsi untuk memuat data
+        async function loadData() {
+            const sheetSelect = document.getElementById('sheetSelect');
             const yearSelect = document.getElementById('yearSelect');
+            const selectedSheet = sheetSelect.value;
             const selectedYear = yearSelect.value;
             const content = document.getElementById('content');
             
             content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data...</div></div>';
             
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
                 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -459,7 +483,7 @@ if (!checkAuth()) {
                 }
                 
                 lastUpdate = new Date();
-                displayData(data.values, selectedYear);
+                displayData(data.values, selectedYear, selectedSheet);
                 
             } catch (error) {
                 content.innerHTML = `
@@ -472,7 +496,7 @@ if (!checkAuth()) {
                             <li>API Key atau Spreadsheet ID salah</li>
                             <li>Google Sheets API belum di-enable</li>
                             <li>Sheet belum di-share sebagai public</li>
-                            <li>Nama sheet tidak sesuai: "${CONFIG.SHEET_NAME}"</li>
+                            <li>Nama sheet tidak sesuai: "${selectedSheet}"</li>
                         </ul>
                     </div>
                 `;
@@ -480,7 +504,7 @@ if (!checkAuth()) {
         }
         
         // Fungsi untuk menampilkan data
-        function displayData(values, selectedYear) {
+        function displayData(values, selectedYear, sheetName) {
             const content = document.getElementById('content');
             
             // Header ada di baris 1 (index 0)
@@ -499,7 +523,7 @@ if (!checkAuth()) {
             });
 
             if (filteredRows.length === 0) {
-                content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data untuk tahun ${selectedYear}.</div>`;
+                content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data untuk tahun ${selectedYear} di sheet "${sheetName}".</div>`;
                 return;
             }
 
@@ -528,9 +552,11 @@ if (!checkAuth()) {
                 minute: '2-digit',
                 second: '2-digit'
             });
+
+            const sheetDisplayName = CONFIG.SHEETS[sheetName] || sheetName;
             
             let html = `
-                <div class="year-badge">📅 Tahun ${selectedYear}</div>
+                <div class="year-badge">📊 ${sheetDisplayName} - Tahun ${selectedYear}</div>
                 
                 <div class="stats">
                     <div class="stat-card">
@@ -601,7 +627,7 @@ if (!checkAuth()) {
                 </div>
 
                 <div class="summary-section">
-                    <h3>📊 Ringkasan Tahunan ${selectedYear}</h3>
+                    <h3>📊 Ringkasan ${sheetDisplayName} - Tahun ${selectedYear}</h3>
                     <div class="summary-grid">
                         <div class="summary-item">
                             <div class="label">Total EBITDA LR</div>
@@ -635,7 +661,7 @@ if (!checkAuth()) {
         }
 
         // Auto-load saat halaman dibuka
-        window.addEventListener('DOMContentLoaded', loadDataByYear);
+        window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
