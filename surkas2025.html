@@ -520,21 +520,18 @@ if (!checkAuth()) {
             }
 
             // Hitung summary
-            let totalEbitdaLR = 0;
-            let totalLabaKas = 0;
-            let totalNetDitrans = 0;
-            let totalBayarListrik = 0;
-            let totalSisaSurkas = 0;
+            let totalPenggunaanLabaKas = 0;
+            let totalLabaNetDitransfer = 0;
 
             filteredRows.forEach(row => {
-                if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
-                    totalEbitdaLR += parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalLabaKas += parseFloat(row[3]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalNetDitrans += parseFloat(row[4]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalBayarListrik += parseFloat(row[5]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalSisaSurkas += parseFloat(row[6]?.toString().replace(/[^\d.-]/g, '') || 0);
-                }
-            });
+            if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
+            totalEbitdaLR += parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '') || 0);
+            totalPenggunaanLabaKas += parseFloat(row[3]?.toString().replace(/[^\d.-]/g, '') || 0);
+            totalLabaNetDitransfer += parseFloat(row[4]?.toString().replace(/[^\d.-]/g, '') || 0);
+            totalBayarListrik += parseFloat(row[5]?.toString().replace(/[^\d.-]/g, '') || 0);
+            totalSisaSurkas += parseFloat(row[6]?.toString().replace(/[^\d.-]/g, '') || 0);
+    }
+});
 
             const updateTime = lastUpdate.toLocaleString('id-ID', {
                 year: 'numeric',
@@ -653,4 +650,5 @@ filteredRows.forEach((row, index) => {
     </script>
 </body>
 </html>
+
 
