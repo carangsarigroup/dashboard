@@ -391,22 +391,14 @@ if (!checkAuth()) {
         <div class="controls">
             <div class="select-wrapper">
                 <select id="sheetSelect" onchange="loadData()">
-                    <option value="TRIWULAN SURKAS">Triwulan Surkas</option>
-                    <option value="Sheet2">Sheet 2</option>
-                    <option value="Sheet3">Sheet 3</option>
-                    <option value="Sheet4">Sheet 4</option>
-                    <option value="Sheet5">Sheet 5</option>
-                    <option value="Sheet6">Sheet 6</option>
-                    <option value="Sheet7">Sheet 7</option>
-                    <option value="Sheet8">Sheet 8</option>
-                </select>
-            </div>
-            <div class="select-wrapper">
-                <select id="yearSelect" onchange="loadData()">
-                    <option value="2023">Tahun 2023</option>
-                    <option value="2024">Tahun 2024</option>
-                    <option value="2025" selected>Tahun 2025</option>
-                    <option value="2026">Tahun 2026</option>
+                    <option value="F4SD">F4SD Indomaret Gatsu Timur</option>
+                    <option value="FKOM">FKOM Indomaret Wanagiri</option>
+                    <option value="FHEN">FHEN Indomaret SPBU Bangli</option>
+                    <option value="FEHU">FEHU Indomaret Latu Mambal</option>
+                    <option value="FIVI">FIVI Indomaret Toko Anugrah Banyuwangi</option>
+                    <option value="FZ7Y">FZ7Y Indomaret Pemuda 28 Mataram</option>
+                    <option value="1SFY">1SFY Alfamart SPBU Mantang</option>
+                    <option value="Q789">Q789 Alfamart SPBU Dewa Anom Rendang</option>
                 </select>
             </div>
             <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
@@ -555,71 +547,67 @@ if (!checkAuth()) {
 
             const sheetDisplayName = CONFIG.SHEETS[sheetName] || sheetName;
             
-            let html = `
-                <div class="year-badge">📊 ${sheetDisplayName} - Tahun ${selectedYear}</div>
-                
-                <div class="stats">
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totalEbitdaLR)}</h3>
-                        <p>Total EBITDA LR</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totalSisaSurkas)}</h3>
-                        <p>Total Sisa Surplus Kas</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totalBayarListrik)}</h3>
-                        <p>Total Bayar Listrik</p>
-                    </div>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TRIWULAN SURKAS</th>
-                                <th>BULAN</th>
-                                <th>EBITDA LR</th>
-                                <th>AMBIL LABA KAS DARI KA</th>
-                                <th>NET DITRANS</th>
-                                <th>BAYAR LISTRIK</th>
-                                <th>SISA SURKAS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            filteredRows.forEach((row, index) => {
-                // A (0) = Triwulan, B (1) = Bulan, C (2) = EBITDA LR
-                // D (3) = Ambil Laba Kas, E (4) = Net Ditrans
-                // F (5) = Bayar Listrik, G (6) = Sisa Surkas
-                
-                const triwulan = row[0] || '';
-                const bulan = row[1] || '';
-                const ebitdaLR = row[2] || '0';
-                const labaKas = row[3] || '0';
-                const netDitrans = row[4] || '0';
-                const bayarListrik = row[5] || '0';
-                const sisaSurkas = row[6] || '0';
+let html = `
+    <div class="year-badge">📊 ${sheetDisplayName} - Tahun ${selectedYear}</div>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <h3>${formatRupiah(totalEbitdaLR)}</h3>
+            <p>Total EBITDA LR</p>
+        </div>
+        <div class="stat-card">
+            <h3>${formatRupiah(totalSisaSurkas)}</h3>
+            <p>Total Sisa Surplus Kas</p>
+        </div>
+        <div class="stat-card">
+            <h3>${formatRupiah(totalBayarListrik)}</h3>
+            <p>Total Bayar Listrik</p>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TRIWULAN SURKAS</th>
+                    <th>BULAN</th>
+                    <th>EBITDA LR</th>
+                    <th>PENGGUNAAN LABA KAS DARI FRCSOR</th>
+                    <th>LABA NET DITRANSFER</th>
+                    <th>BAYAR LISTRIK</th>
+                    <th>SISA SURKAS</th>
+                </tr>
+            </thead>
+            <tbody>
+`;
 
-                // Parse untuk warna
-                const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
-                let colorClass = 'zero';
-                if (sisaSurkasNum > 0) colorClass = 'positive';
-                else if (sisaSurkasNum < 0) colorClass = 'negative';
+filteredRows.forEach((row, index) => {
+    const triwulan = row[0] || '';
+    const bulan = row[1] || '';
+    const ebitdaLR = row[2] || '0';
+    const penggunaanLabaKas = row[3] || '0';  // Kolom D
+    const labaNetDitransfer = row[4] || '0';  // Kolom E
+    const bayarListrik = row[5] || '0';       // Kolom F
+    const sisaSurkas = row[6] || '0';         // Kolom G
+    
+    // Parse untuk warna
+    const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
+    let colorClass = 'zero';
+    if (sisaSurkasNum > 0) colorClass = 'positive';
+    else if (sisaSurkasNum < 0) colorClass = 'negative';
 
-                html += `
-                    <tr>
-                        <td class="triwulan">${triwulan}</td>
-                        <td class="month">${bulan}</td>
-                        <td class="currency">${formatRupiah(ebitdaLR)}</td>
-                        <td class="currency">${formatRupiah(labaKas)}</td>
-                        <td class="currency">${formatRupiah(netDitrans)}</td>
-                        <td class="currency">${formatRupiah(bayarListrik)}</td>
-                        <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
-                    </tr>
-                `;
-            });
+    html += `
+        <tr>
+            <td class="triwulan">${triwulan}</td>
+            <td class="month">${bulan}</td>
+            <td class="currency">${formatRupiah(ebitdaLR)}</td>
+            <td class="currency">${formatRupiah(penggunaanLabaKas)}</td>
+            <td class="currency">${formatRupiah(labaNetDitransfer)}</td>
+            <td class="currency">${formatRupiah(bayarListrik)}</td>
+            <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
+        </tr>
+    `;
+});
 
             html += `
                         </tbody>
@@ -665,3 +653,4 @@ if (!checkAuth()) {
     </script>
 </body>
 </html>
+
