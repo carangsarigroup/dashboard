@@ -414,52 +414,18 @@ if (!checkAuth()) {
 
     <script>
         // ⚙️ KONFIGURASI - UBAH BAGIAN INI
-        const CONFIG = {
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            // Daftar nama sheet yang tersedia
-            SHEETS: {
-                'F4SD': 'F4SD',
-                'FKOM': 'FKOM',
-                'FHEN': 'FHEN',
-                'FEHU': 'FEHU',
-                'FIVI': 'FIVI',
-                'FZ7Y': 'FZ7Y',
-                '1SFY': '1SFY',
-                'Q789': 'Q789'
-            }
-        };
+    const CONFIG = {
+    API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+    SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ'
+};
 
-        let lastUpdate = null;
+let lastUpdate = null;
+let availableSheets = [];
 
-        // Fungsi untuk format angka ke Rupiah
-        function formatRupiah(angka) {
-            if (!angka || angka === '-' || angka === '') return 'Rp0';
-            
-            let number = angka.toString().replace(/[^\d.-]/g, '');
-            number = parseFloat(number);
-            
-            if (isNaN(number)) return angka;
-            
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(number);
-        }
-
-        // Fungsi untuk memuat data
-       async function loadData() {
-    const sheetSelect = document.getElementById('sheetSelect');
-    const selectedSheet = sheetSelect.value;
-    const content = document.getElementById('content');
-    
-    content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data...</div></div>';
-    
+// Fungsi untuk load daftar sheet
+async function loadSheetsList() {
     try {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
-        
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
         const response = await fetch(url);
         const data = await response.json();
         
@@ -467,183 +433,263 @@ if (!checkAuth()) {
             throw new Error(data.error.message);
         }
         
-        if (!data.values || data.values.length === 0) {
-            content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet ini.</div>';
-            return;
-        }
+        // Ambil semua nama sheet
+        availableSheets = data.sheets.map(sheet => sheet.properties.title);
         
-        lastUpdate = new Date();
-        displayData(data.values, selectedSheet); // Hapus parameter selectedYear
+        // Populate dropdown
+        const sheetSelect = document.getElementById('sheetSelect');
+        sheetSelect.innerHTML = availableSheets.map(sheetName => 
+            `<option value="${sheetName}">${sheetName}</option>`
+        ).join('');
+        
+        // Load data sheet pertama
+        loadData();
         
     } catch (error) {
+        console.error('Error loading sheets list:', error);
+        const content = document.getElementById('content');
         content.innerHTML = `
             <div class="error">
-                <strong>❌ Gagal Memuat Data</strong>
+                <strong>❌ Gagal Memuat Daftar Sheet</strong>
                 ${error.message}
                 <br><br>
-                <strong>Kemungkinan penyebab:</strong>
+                <strong>Pastikan:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
-                    <li>API Key atau Spreadsheet ID salah</li>
-                    <li>Google Sheets API belum di-enable</li>
-                    <li>Sheet belum di-share sebagai public</li>
-                    <li>Nama sheet tidak sesuai: "${selectedSheet}"</li>
+                    <li>Spreadsheet ID benar: ${CONFIG.SPREADSHEET_ID}</li>
+                    <li>API Key valid: ${CONFIG.API_KEY.substring(0, 20)}...</li>
+                    <li>Google Sheets API sudah di-enable</li>
+                    <li>Sheet sudah di-share sebagai public (Anyone with link - Viewer)</li>
                 </ul>
             </div>
         `;
     }
 }
+
+// Fungsi untuk format angka ke Rupiah
+function formatRupiah(angka) {
+    if (!angka || angka === '-' || angka === '') return 'Rp0';
+    
+    let number = angka.toString().replace(/[^\d.-]/g, '');
+    number = parseFloat(number);
+    
+    if (isNaN(number)) return angka;
+    
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(number);
+}
+
+// Fungsi untuk memuat data
+async function loadData() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    const content = document.getElementById('content');
+    
+    if (!selectedSheet) {
+        content.innerHTML = '<div class="error"><strong>❌ Error</strong>Pilih sheet terlebih dahulu.</div>';
+        return;
+    }
+    
+    content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data dari sheet: ' + selectedSheet + '</div></div>';
+    
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
         
-        // Fungsi untuk menampilkan data
-        function displayData(values, selectedYear, sheetName) {
-            const content = document.getElementById('content');
-            
-            // Header ada di baris 1 (index 0)
-            const headers = values[0];
-            
-            // Data dimulai dari baris 2 (index 1)
-            const dataRows = values.slice(1);
+        console.log('Fetching data from:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('Response:', data);
+        
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+        
+        if (!data.values || data.values.length === 0) {
+            content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet "' + selectedSheet + '".</div>';
+            return;
+        }
+        
+        lastUpdate = new Date();
+        displayData(data.values, selectedSheet);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        content.innerHTML = `
+            <div class="error">
+                <strong>❌ Gagal Memuat Data</strong>
+                ${error.message}
+                <br><br>
+                <strong>Sheet yang dicoba:</strong> "${selectedSheet}"
+                <br><br>
+                <strong>Kemungkinan penyebab:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Nama sheet tidak sesuai (case-sensitive, perhatikan spasi)</li>
+                    <li>Sheet tidak ada di spreadsheet</li>
+                    <li>Sheet belum di-share sebagai public</li>
+                </ul>
+            </div>
+        `;
+    }
+}
 
-          const filteredRows = dataRows.filter(row => {
-            // Tampilkan semua baris yang memiliki data bulan
-            return row.length > 1 && row[1] && row[1].toString().trim() !== '';
-            });
+// Fungsi untuk menampilkan data
+function displayData(values, sheetName) {
+    const content = document.getElementById('content');
+    
+    // Header ada di baris 1 (index 0)
+    const headers = values[0];
+    
+    // Data dimulai dari baris 2 (index 1)
+    const dataRows = values.slice(1);
 
-            if (filteredRows.length === 0) {
-                content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data untuk tahun ${selectedYear} di sheet "${sheetName}".</div>`;
-                return;
-            }
+    // Filter hanya baris yang memiliki data
+    const filteredRows = dataRows.filter(row => {
+        return row.length > 1 && row[1] && row[1].toString().trim() !== '';
+    });
 
-            // Hitung summary
-            let totalPenggunaanLabaKas = 0;
-            let totalLabaNetDitransfer = 0;
+    if (filteredRows.length === 0) {
+        content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data di sheet "${sheetName}".</div>`;
+        return;
+    }
 
-            filteredRows.forEach(row => {
-            if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
+    // Hitung summary
+    let totalEbitdaLR = 0;
+    let totalPenggunaanLabaKas = 0;
+    let totalLabaNetDitransfer = 0;
+    let totalBayarListrik = 0;
+    let totalSisaSurkas = 0;
+
+    filteredRows.forEach(row => {
+        if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
             totalEbitdaLR += parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '') || 0);
             totalPenggunaanLabaKas += parseFloat(row[3]?.toString().replace(/[^\d.-]/g, '') || 0);
             totalLabaNetDitransfer += parseFloat(row[4]?.toString().replace(/[^\d.-]/g, '') || 0);
             totalBayarListrik += parseFloat(row[5]?.toString().replace(/[^\d.-]/g, '') || 0);
             totalSisaSurkas += parseFloat(row[6]?.toString().replace(/[^\d.-]/g, '') || 0);
-    }
-});
+        }
+    });
 
-            const updateTime = lastUpdate.toLocaleString('id-ID', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+    const updateTime = lastUpdate.toLocaleString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    let html = `
+        <div class="year-badge">📊 ${sheetName}</div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>${formatRupiah(totalEbitdaLR)}</h3>
+                <p>Total EBITDA LR</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totalSisaSurkas)}</h3>
+                <p>Total Sisa Surplus Kas</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totalBayarListrik)}</h3>
+                <p>Total Bayar Listrik</p>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TRIWULAN SURKAS</th>
+                        <th>BULAN</th>
+                        <th>EBITDA LR</th>
+                        <th>PENGGUNAAN LABA KAS DARI FRCSOR</th>
+                        <th>LABA NET DITRANSFER</th>
+                        <th>BAYAR LISTRIK</th>
+                        <th>SISA SURKAS</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    filteredRows.forEach((row, index) => {
+        const triwulan = row[0] || '';
+        const bulan = row[1] || '';
+        const ebitdaLR = row[2] || '0';
+        const penggunaanLabaKas = row[3] || '0';
+        const labaNetDitransfer = row[4] || '0';
+        const bayarListrik = row[5] || '0';
+        const sisaSurkas = row[6] || '0';
 
-            const sheetDisplayName = CONFIG.SHEETS[sheetName] || sheetName;
-            
-let html = `
-    <div class="year-badge">📊 ${sheetDisplayName} - Tahun ${selectedYear}</div>
-    
-    <div class="stats">
-        <div class="stat-card">
-            <h3>${formatRupiah(totalEbitdaLR)}</h3>
-            <p>Total EBITDA LR</p>
-        </div>
-        <div class="stat-card">
-            <h3>${formatRupiah(totalSisaSurkas)}</h3>
-            <p>Total Sisa Surplus Kas</p>
-        </div>
-        <div class="stat-card">
-            <h3>${formatRupiah(totalBayarListrik)}</h3>
-            <p>Total Bayar Listrik</p>
-        </div>
-    </div>
-    
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>TRIWULAN SURKAS</th>
-                    <th>BULAN</th>
-                    <th>EBITDA LR</th>
-                    <th>PENGGUNAAN LABA KAS DARI FRCSOR</th>
-                    <th>LABA NET DITRANSFER</th>
-                    <th>BAYAR LISTRIK</th>
-                    <th>SISA SURKAS</th>
-                </tr>
-            </thead>
-            <tbody>
-`;
+        // Parse untuk warna
+        const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
+        let colorClass = 'zero';
+        if (sisaSurkasNum > 0) colorClass = 'positive';
+        else if (sisaSurkasNum < 0) colorClass = 'negative';
 
-filteredRows.forEach((row, index) => {
-    const triwulan = row[0] || '';
-    const bulan = row[1] || '';
-    const ebitdaLR = row[2] || '0';
-    const penggunaanLabaKas = row[3] || '0';  // Kolom D
-    const labaNetDitransfer = row[4] || '0';  // Kolom E
-    const bayarListrik = row[5] || '0';       // Kolom F
-    const sisaSurkas = row[6] || '0';         // Kolom G
-    
-    // Parse untuk warna
-    const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
-    let colorClass = 'zero';
-    if (sisaSurkasNum > 0) colorClass = 'positive';
-    else if (sisaSurkasNum < 0) colorClass = 'negative';
+        html += `
+            <tr>
+                <td class="triwulan">${triwulan}</td>
+                <td class="month">${bulan}</td>
+                <td class="currency">${formatRupiah(ebitdaLR)}</td>
+                <td class="currency">${formatRupiah(penggunaanLabaKas)}</td>
+                <td class="currency">${formatRupiah(labaNetDitransfer)}</td>
+                <td class="currency">${formatRupiah(bayarListrik)}</td>
+                <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
+            </tr>
+        `;
+    });
 
     html += `
-        <tr>
-            <td class="triwulan">${triwulan}</td>
-            <td class="month">${bulan}</td>
-            <td class="currency">${formatRupiah(ebitdaLR)}</td>
-            <td class="currency">${formatRupiah(penggunaanLabaKas)}</td>
-            <td class="currency">${formatRupiah(labaNetDitransfer)}</td>
-            <td class="currency">${formatRupiah(bayarListrik)}</td>
-            <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
-        </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-section">
+            <h3>📊 Ringkasan ${sheetName}</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Total EBITDA LR</div>
+                    <div class="value">${formatRupiah(totalEbitdaLR)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Penggunaan Laba Kas</div>
+                    <div class="value">${formatRupiah(totalPenggunaanLabaKas)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Laba Net Ditransfer</div>
+                    <div class="value">${formatRupiah(totalLabaNetDitransfer)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Bayar Listrik</div>
+                    <div class="value">${formatRupiah(totalBayarListrik)}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Sisa Surplus Kas</div>
+                    <div class="value">${formatRupiah(totalSisaSurkas)}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-update">
+            ⏱️ Terakhir diperbarui: ${updateTime}
+        </div>
     `;
-});
+    
+    content.innerHTML = html;
+}
 
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="summary-section">
-                    <h3>📊 Ringkasan ${sheetDisplayName} - Tahun ${selectedYear}</h3>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="label">Total EBITDA LR</div>
-                            <div class="value">${formatRupiah(totalEbitdaLR)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Ambil Laba Kas</div>
-                            <div class="value">${formatRupiah(totalLabaKas)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Net Ditrans</div>
-                            <div class="value">${formatRupiah(totalNetDitrans)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Bayar Listrik</div>
-                            <div class="value">${formatRupiah(totalBayarListrik)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Sisa Surplus Kas</div>
-                            <div class="value">${formatRupiah(totalSisaSurkas)}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="last-update">
-                    ⏱️ Terakhir diperbarui: ${updateTime}
-                </div>
-            `;
-            
-            content.innerHTML = html;
-        }
-
-        // Auto-load saat halaman dibuka
-        window.addEventListener('DOMContentLoaded', loadData);
+// Auto-load saat halaman dibuka
+window.addEventListener('DOMContentLoaded', loadSheetsList);
     </script>
 </body>
 </html>
+
 
 
 
