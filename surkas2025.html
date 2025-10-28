@@ -450,50 +450,48 @@ if (!checkAuth()) {
         }
 
         // Fungsi untuk memuat data
-        async function loadData() {
-            const sheetSelect = document.getElementById('sheetSelect');
-            const yearSelect = document.getElementById('yearSelect');
-            const selectedSheet = sheetSelect.value;
-            const selectedYear = yearSelect.value;
-            const content = document.getElementById('content');
-            
-            content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data...</div></div>';
-            
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                if (!data.values || data.values.length === 0) {
-                    content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet ini.</div>';
-                    return;
-                }
-                
-                lastUpdate = new Date();
-                displayData(data.values, selectedYear, selectedSheet);
-                
-            } catch (error) {
-                content.innerHTML = `
-                    <div class="error">
-                        <strong>❌ Gagal Memuat Data</strong>
-                        ${error.message}
-                        <br><br>
-                        <strong>Kemungkinan penyebab:</strong>
-                        <ul style="margin-top: 10px; margin-left: 20px;">
-                            <li>API Key atau Spreadsheet ID salah</li>
-                            <li>Google Sheets API belum di-enable</li>
-                            <li>Sheet belum di-share sebagai public</li>
-                            <li>Nama sheet tidak sesuai: "${selectedSheet}"</li>
-                        </ul>
-                    </div>
-                `;
-            }
+       async function loadData() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    const content = document.getElementById('content');
+    
+    content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data...</div></div>';
+    
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.message);
         }
+        
+        if (!data.values || data.values.length === 0) {
+            content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet ini.</div>';
+            return;
+        }
+        
+        lastUpdate = new Date();
+        displayData(data.values, selectedSheet); // Hapus parameter selectedYear
+        
+    } catch (error) {
+        content.innerHTML = `
+            <div class="error">
+                <strong>❌ Gagal Memuat Data</strong>
+                ${error.message}
+                <br><br>
+                <strong>Kemungkinan penyebab:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>API Key atau Spreadsheet ID salah</li>
+                    <li>Google Sheets API belum di-enable</li>
+                    <li>Sheet belum di-share sebagai public</li>
+                    <li>Nama sheet tidak sesuai: "${selectedSheet}"</li>
+                </ul>
+            </div>
+        `;
+    }
+}
         
         // Fungsi untuk menampilkan data
         function displayData(values, selectedYear, sheetName) {
@@ -505,13 +503,9 @@ if (!checkAuth()) {
             // Data dimulai dari baris 2 (index 1)
             const dataRows = values.slice(1);
 
-            // Filter data berdasarkan tahun yang dipilih
-            const filteredRows = dataRows.filter(row => {
-                if (row.length > 1 && row[1]) {
-                    const bulan = row[1].toString();
-                    return bulan.includes(selectedYear);
-                }
-                return false;
+          const filteredRows = dataRows.filter(row => {
+            // Tampilkan semua baris yang memiliki data bulan
+            return row.length > 1 && row[1] && row[1].toString().trim() !== '';
             });
 
             if (filteredRows.length === 0) {
@@ -650,6 +644,7 @@ filteredRows.forEach((row, index) => {
     </script>
 </body>
 </html>
+
 
 
 
