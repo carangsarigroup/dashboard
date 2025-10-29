@@ -814,12 +814,25 @@ if (!checkAuth()) {
             let totalSisaSurkas = 0;
 
             filteredRows.forEach(row => {
-                if (row[1] && !isNaN(parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '')))) {
-                    totalEbitdaLR += parseFloat(row[2]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalPenggunaanLabaKas += parseFloat(row[3]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalLabaNetDitransfer += parseFloat(row[4]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalBayarListrik += parseFloat(row[5]?.toString().replace(/[^\d.-]/g, '') || 0);
-                    totalSisaSurkas += parseFloat(row[6]?.toString().replace(/[^\d.-]/g, '') || 0);
+                if (row[1] && row.length > 2) {
+                    // Parse semua nilai dengan handling untuk undefined
+                    const ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const penggunaan = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const labaDitransfer = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const listrik = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const surkas = parseFloat((row[6] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+
+                    totalEbitdaLR += ebitda;
+                    totalPenggunaanLabaKas += penggunaan;
+                    totalLabaNetDitransfer += labaDitransfer;
+                    totalBayarListrik += listrik;
+                    
+                    // Jika sisa surkas kosong, hitung dari laba - listrik
+                    if (surkas === 0 && labaDitransfer > 0) {
+                        totalSisaSurkas += (labaDitransfer - listrik);
+                    } else {
+                        totalSisaSurkas += surkas;
+                    }
                 }
             });
 
@@ -933,7 +946,4 @@ if (!checkAuth()) {
         window.addEventListener('DOMContentLoaded', loadSheetsList);
     </script>
 </body>
-</html>(ebitdaLR)}</td>
-                        <td class="currency">${formatRupiah(penggunaanLabaKas)}</td>
-                        <td class="currency">${formatRupiah(labaNetDitransfer)}</td>
-                        <td class="currency">${formatRupiah
+</html>
