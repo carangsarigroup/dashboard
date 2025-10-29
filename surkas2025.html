@@ -795,10 +795,23 @@ if (!checkAuth()) {
         function displayData(values, sheetName) {
             const content = document.getElementById('content');
             
-            console.log('Raw data from sheet:', values); // Debug
+            console.log('Raw data from sheet:', values);
             
             const headers = values[0];
-            console.log('Headers:', headers); // Debug
+            console.log('Headers:', headers);
+            
+            // Cari index kolom berdasarkan nama header
+            const colIndexes = {
+                triwulan: 0,
+                bulan: 1,
+                ebitda: headers.findIndex(h => h && h.toString().toUpperCase().includes('EBITDA')),
+                penggunaan: headers.findIndex(h => h && h.toString().toUpperCase().includes('PENGGUNAAN')),
+                laba: headers.findIndex(h => h && h.toString().toUpperCase().includes('LABA NET')),
+                listrik: headers.findIndex(h => h && h.toString().toUpperCase().includes('BAYAR LISTRIK')),
+                surkas: headers.findIndex(h => h && h.toString().toUpperCase().includes('SISA'))
+            };
+            
+            console.log('Column indexes found:', colIndexes);
             
             const dataRows = values.slice(1);
 
@@ -806,7 +819,7 @@ if (!checkAuth()) {
                 return row.length > 1 && row[1] && row[1].toString().trim() !== '';
             });
 
-            console.log('Filtered rows:', filteredRows); // Debug
+            console.log('Filtered rows:', filteredRows);
 
             if (filteredRows.length === 0) {
                 content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data di sheet "${sheetName}".</div>`;
@@ -820,14 +833,14 @@ if (!checkAuth()) {
             let totalSisaSurkas = 0;
 
             filteredRows.forEach((row, idx) => {
-                console.log(`Row ${idx}:`, row); // Debug setiap row
+                console.log(`Row ${idx}:`, row);
                 if (row[1]) {
-                    // Ambil nilai dari setiap kolom
-                    const ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const penggunaan = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const labaDitransfer = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const listrik = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const surkas = parseFloat((row[6] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    // Ambil nilai berdasarkan index yang ditemukan
+                    const ebitda = parseFloat((row[colIndexes.ebitda] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const penggunaan = parseFloat((row[colIndexes.penggunaan] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const labaDitransfer = parseFloat((row[colIndexes.laba] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const listrik = parseFloat((row[colIndexes.listrik] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    const surkas = parseFloat((row[colIndexes.surkas] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
 
                     console.log(`Parsed - EBITDA: ${ebitda}, Penggunaan: ${penggunaan}, Laba: ${labaDitransfer}, Listrik: ${listrik}, Surkas: ${surkas}`);
 
