@@ -795,12 +795,18 @@ if (!checkAuth()) {
         function displayData(values, sheetName) {
             const content = document.getElementById('content');
             
+            console.log('Raw data from sheet:', values); // Debug
+            
             const headers = values[0];
+            console.log('Headers:', headers); // Debug
+            
             const dataRows = values.slice(1);
 
             const filteredRows = dataRows.filter(row => {
                 return row.length > 1 && row[1] && row[1].toString().trim() !== '';
             });
+
+            console.log('Filtered rows:', filteredRows); // Debug
 
             if (filteredRows.length === 0) {
                 content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data di sheet "${sheetName}".</div>`;
@@ -813,26 +819,23 @@ if (!checkAuth()) {
             let totalBayarListrik = 0;
             let totalSisaSurkas = 0;
 
-            filteredRows.forEach(row => {
-                if (row[1] && row.length > 2) {
-                    // Parse semua nilai dengan handling untuk undefined
+            filteredRows.forEach((row, idx) => {
+                console.log(`Row ${idx}:`, row); // Debug setiap row
+                if (row[1]) {
+                    // Ambil nilai dari setiap kolom
                     const ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
                     const penggunaan = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
                     const labaDitransfer = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
                     const listrik = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
                     const surkas = parseFloat((row[6] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
 
+                    console.log(`Parsed - EBITDA: ${ebitda}, Penggunaan: ${penggunaan}, Laba: ${labaDitransfer}, Listrik: ${listrik}, Surkas: ${surkas}`);
+
                     totalEbitdaLR += ebitda;
                     totalPenggunaanLabaKas += penggunaan;
                     totalLabaNetDitransfer += labaDitransfer;
                     totalBayarListrik += listrik;
-                    
-                    // Jika sisa surkas kosong, hitung dari laba - listrik
-                    if (surkas === 0 && labaDitransfer > 0) {
-                        totalSisaSurkas += (labaDitransfer - listrik);
-                    } else {
-                        totalSisaSurkas += surkas;
-                    }
+                    totalSisaSurkas += surkas || (labaDitransfer - listrik);
                 }
             });
 
