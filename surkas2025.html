@@ -315,6 +315,13 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        .summary-item-finale {
+            background: green;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         .summary-item .label {
             font-size: 0.9em;
             color: #6c757d;
@@ -669,7 +676,7 @@ function displayData(values, sheetName) {
                     <div class="label">Total Bayar Listrik</div>
                     <div class="value">${formatRupiah(totalBayarListrik)}</div>
                 </div>
-                <div class="summary-item">
+                <div class="summary-item-finale">
                     <div class="label">Total Sisa Surplus Kas</div>
                     <div class="value">${formatRupiah(totalSisaSurkas)}</div>
                 </div>
@@ -689,6 +696,7 @@ window.addEventListener('DOMContentLoaded', loadSheetsList);
     </script>
 </body>
 </html>
+
 
 
 
