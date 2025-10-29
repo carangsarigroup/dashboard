@@ -799,19 +799,7 @@ if (!checkAuth()) {
             
             const headers = values[0];
             console.log('Headers:', headers);
-            
-            // Cari index kolom berdasarkan nama header
-            const colIndexes = {
-                triwulan: 0,
-                bulan: 1,
-                ebitda: headers.findIndex(h => h && h.toString().toUpperCase().includes('EBITDA')),
-                penggunaan: headers.findIndex(h => h && h.toString().toUpperCase().includes('PENGGUNAAN')),
-                laba: headers.findIndex(h => h && h.toString().toUpperCase().includes('LABA NET')),
-                listrik: headers.findIndex(h => h && h.toString().toUpperCase().includes('BAYAR LISTRIK')),
-                surkas: headers.findIndex(h => h && h.toString().toUpperCase().includes('SISA'))
-            };
-            
-            console.log('Column indexes found:', colIndexes);
+            console.log('Number of headers:', headers.length);
             
             const dataRows = values.slice(1);
 
@@ -820,6 +808,7 @@ if (!checkAuth()) {
             });
 
             console.log('Filtered rows:', filteredRows);
+            console.log('First data row length:', filteredRows[0]?.length);
 
             if (filteredRows.length === 0) {
                 content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data di sheet "${sheetName}".</div>`;
@@ -833,16 +822,33 @@ if (!checkAuth()) {
             let totalSisaSurkas = 0;
 
             filteredRows.forEach((row, idx) => {
-                console.log(`Row ${idx}:`, row);
+                console.log(`Processing row ${idx}, length: ${row.length}`, row);
                 if (row[1]) {
-                    // Ambil nilai berdasarkan index yang ditemukan
-                    const ebitda = parseFloat((row[colIndexes.ebitda] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const penggunaan = parseFloat((row[colIndexes.penggunaan] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const labaDitransfer = parseFloat((row[colIndexes.laba] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const listrik = parseFloat((row[colIndexes.listrik] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    const surkas = parseFloat((row[colIndexes.surkas] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    // Mapping untuk data dengan cell kosong di tengah
+                    // Row structure: [0]=Triwulan, [1]=Bulan, [2]=EBITDA, [3]=Penggunaan(bisa kosong), [4]=Laba, [5]=Listrik, [6]=Surkas
+                    // Tapi kalau [3] kosong, maka [4] jadi index 3, dst
+                    
+                    // Cek apakah ada 7 elemen (lengkap dengan cell kosong)
+                    let ebitda, penggunaan, labaDitransfer, listrik, surkas;
+                    
+                    if (row.length >= 7) {
+                        // Format lengkap dengan cell kosong
+                        ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        penggunaan = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        labaDitransfer = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        listrik = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        surkas = parseFloat((row[6] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    } else {
+                        // Format dimana cell kosong di-skip oleh Google Sheets API
+                        // [0]=Triwulan, [1]=Bulan, [2]=EBITDA, [3]=Laba, [4]=Listrik, [5]=Surkas
+                        ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        penggunaan = 0; // Kosong
+                        labaDitransfer = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        listrik = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                        surkas = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+                    }
 
-                    console.log(`Parsed - EBITDA: ${ebitda}, Penggunaan: ${penggunaan}, Laba: ${labaDitransfer}, Listrik: ${listrik}, Surkas: ${surkas}`);
+                    console.log(`Parsed row ${idx} - EBITDA: ${ebitda}, Penggunaan: ${penggunaan}, Laba: ${labaDitransfer}, Listrik: ${listrik}, Surkas: ${surkas}`);
 
                     totalEbitdaLR += ebitda;
                     totalPenggunaanLabaKas += penggunaan;
