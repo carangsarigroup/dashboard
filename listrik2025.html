@@ -45,14 +45,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .header {
@@ -83,21 +77,25 @@
             flex-wrap: wrap;
         }
 
-        .back-btn {
-            background: rgba(255, 105, 180, 0.1);
-            color: #FF69B4;
+        .btn {
             padding: 12px 30px;
-            border: 2px solid #FF69B4;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             white-space: nowrap;
+            border: none;
+        }
+
+        .back-btn {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+            border: 2px solid #FF69B4;
+            text-decoration: none;
         }
 
         .back-btn:hover {
@@ -105,6 +103,17 @@
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
 
         .select-wrapper {
@@ -130,12 +139,6 @@
             box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
         }
 
-        .select-wrapper select:focus {
-            outline: none;
-            border-color: #FF69B4;
-            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
-        }
-
         .select-wrapper::after {
             content: '▼';
             position: absolute;
@@ -150,18 +153,7 @@
         .refresh-btn {
             background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
         
         .refresh-btn:hover {
@@ -209,12 +201,6 @@
             border-left: 5px solid #f5c6cb;
         }
 
-        .error strong {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -242,38 +228,11 @@
             margin-bottom: 8px;
             font-weight: 700;
         }
-        
-        .stat-card p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
 
         .stat-card-finale {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-            transition: transform 0.3s ease;
         }
 
-        .stat-card-finale:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-        }
-        
-        .stat-card-finale h3 {
-            font-size: 1.8em;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        
-        .stat-card-finale p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
-        
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
@@ -299,26 +258,12 @@
             white-space: nowrap;
             border-right: 1px solid rgba(255,255,255,0.2);
         }
-
-        th:last-child {
-            border-right: none;
-        }
         
         td {
             padding: 14px 16px;
             border-bottom: 1px solid #e9ecef;
             border-right: 1px solid #e9ecef;
             color: #495057;
-        }
-
-        td:last-child {
-            border-right: none;
-        }
-
-        td:first-child {
-            text-align: center;
-            font-weight: 600;
-            color: #6c757d;
         }
 
         td.toko-name {
@@ -337,6 +282,42 @@
             font-family: 'Courier New', monospace;
             color: #28a745;
         }
+
+        td.actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin: 0 3px;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .edit-btn:hover {
+            background: #ffb300;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
         
         tbody tr {
             transition: background 0.2s ease;
@@ -345,48 +326,15 @@
         tbody tr:hover {
             background: #f8f9fa;
         }
-        
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
 
         .total-row {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             font-weight: 700;
-            border-top: 3px solid #28a745;
         }
 
         .total-row td {
-            padding: 18px 16px;
+            color: white;
             font-size: 1.1em;
-            color: white;
-            border-bottom: none;
-        }
-
-        .total-row td:first-child {
-            color: white;
-        }
-
-        .last-update {
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .month-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
         }
 
         .user-bar {
@@ -394,21 +342,14 @@
             top: 20px;
             right: 20px;
             display: flex;
-            align-items: center;
             gap: 15px;
             z-index: 1000;
             animation: fadeInDown 0.8s ease-out;
         }
 
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .user-info {
@@ -443,78 +384,153 @@
         .logout-btn:hover {
             background: white;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .summary-section {
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #FF69B4;
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .summary-section h3 {
-            color: #FF69B4;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+        .modal.active {
+            display: flex;
         }
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .summary-item {
+        .modal-content {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
         }
 
-        .summary-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .summary-item .label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 5px;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .summary-item .value {
-            font-size: 1.3em;
-            font-weight: 700;
+        .modal-header h2 {
             color: #FF69B4;
+            font-size: 1.5em;
         }
 
-        .summary-item-finale {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            padding: 15px;
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #FF69B4;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
-            transition: transform 0.2s ease;
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
-        .summary-item-finale:hover {
+        .form-group input:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .form-group input:disabled {
+            background: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .modal-actions button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-save:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
-        .summary-item-finale .label {
-            font-size: 0.9em;
-            color: #ffffff;
-            margin-bottom: 5px;
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .summary-item-finale .value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #ffffff;
-        }
-        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -526,52 +542,45 @@
             margin-bottom: 20px;
         }
 
-        .empty-state h2 {
-            color: #FF69B4;
-            margin-bottom: 10px;
+        .notice {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .notice strong {
+            color: #ff6f00;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .notice p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.6;
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .user-bar {
-                top: 10px;
-                right: 10px;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-            }
-
-            .header h1 {
-                font-size: 1.8em;
-            }
-
             .controls {
                 padding: 20px;
                 flex-direction: column;
             }
 
-            .select-wrapper {
+            .select-wrapper, .btn {
                 min-width: 100%;
-            }
-
-            .back-btn, .refresh-btn {
-                width: 100%;
                 justify-content: center;
             }
 
-            .content {
+            .modal-content {
                 padding: 20px;
             }
 
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .table-container {
-                font-size: 0.85em;
+            .action-btn {
+                display: block;
+                width: 100%;
+                margin: 3px 0;
             }
         }
     </style>
@@ -592,13 +601,13 @@
     <div class="container">
         <div class="header">
             <h1>⚡ Laporan Tagihan Listrik Toko</h1>
-            <p>Monitoring Penggunaan dan Biaya Listrik</p>
+            <p>Monitoring & Manajemen Data Listrik</p>
         </div>
         
         <div class="controls">
-            <a href="index.html" class="back-btn">
+            <a href="index.html" class="back-btn btn">
                 <span>🏠</span>
-                <span>Kembali ke Dashboard</span>
+                <span>Dashboard</span>
             </a>
             <div class="select-wrapper">
                 <select id="monthSelect" onchange="handleMonthChange()">
@@ -617,7 +626,11 @@
                     <option value="Desember_2025">Desember 2025</option>
                 </select>
             </div>
-            <button class="refresh-btn" onclick="handleRefresh()">
+            <button class="add-btn btn" onclick="openAddModal()">
+                <span>➕</span>
+                <span>Tambah Data</span>
+            </button>
+            <button class="refresh-btn btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
             </button>
@@ -627,13 +640,67 @@
             <div class="empty-state">
                 <div class="empty-state-icon">⚡</div>
                 <h2>Pilih Bulan untuk Melihat Data</h2>
-                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+                <p>Gunakan dropdown di atas untuk memilih bulan</p>
             </div>
         </div>
     </div>
 
+    <!-- Modal Add/Edit -->
+    <div class="modal" id="dataModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">➕ Tambah Data Listrik</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="notice">
+                <strong>⚠️ Perhatian</strong>
+                <p>Fitur ini adalah DEMO. Untuk implementasi penuh, diperlukan Google Apps Script atau backend server untuk mengupdate Google Sheets secara langsung.</p>
+            </div>
+
+            <form id="dataForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="editIndex" value="">
+                
+                <div class="form-group">
+                    <label for="namaToko">Nama Toko *</label>
+                    <input type="text" id="namaToko" required placeholder="Contoh: Toko Carang Sari 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="dayaListrik">Daya Listrik (VA)</label>
+                    <input type="number" id="dayaListrik" placeholder="Contoh: 2200">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAwal">Stand Meter Awal *</label>
+                    <input type="number" id="standAwal" required placeholder="Contoh: 12345">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAkhir">Stand Meter Akhir *</label>
+                    <input type="number" id="standAkhir" required placeholder="Contoh: 12456">
+                </div>
+
+                <div class="form-group">
+                    <label for="penggunaan">Penggunaan (kWh)</label>
+                    <input type="number" id="penggunaan" readonly placeholder="Auto-calculated">
+                </div>
+
+                <div class="form-group">
+                    <label for="biayaListrik">Biaya Listrik (Rp) *</label>
+                    <input type="number" id="biayaListrik" required placeholder="Contoh: 150000">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-save" id="submitBtn">💾 Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // ============ AUTH SYSTEM ============
+        // ============ AUTH & CONFIG ============
         function getCookie(name) {
             const nameEQ = name + "=";
             const ca = document.cookie.split(';');
@@ -654,7 +721,6 @@
                 if (!authString) return null;
                 return JSON.parse(atob(authString));
             } catch (e) {
-                console.error('Auth parse error:', e);
                 return null;
             }
         }
@@ -674,13 +740,12 @@
             return true;
         }
 
-        function logout(message = null) {
-            if (!message && !confirm('Yakin ingin logout?')) return;
+        function logout() {
+            if (!confirm('Yakin ingin logout?')) return;
             deleteCookie('userAuth');
-            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+            window.location.href = 'login.html';
         }
 
-        // Initialize auth
         if (checkAuth()) {
             const authData = getAuthData();
             if (authData?.username) {
@@ -688,54 +753,42 @@
             }
         }
 
-        // ============ CONFIG ============
         const CONFIG = {
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
+            CACHE_DURATION: 5 * 60 * 1000
         };
 
-        // ============ STATE MANAGEMENT ============
+        // ============ STATE ============
         let appState = {
             currentMonth: null,
             cache: {},
-            lastUpdate: null
+            lastUpdate: null,
+            currentData: []
         };
 
-        // ============ UTILITY FUNCTIONS ============
+        // ============ UTILITIES ============
         function formatRupiah(value) {
             if (!value && value !== 0) return 'Rp0';
-            
-            const num = typeof value === 'string' 
-                ? parseFloat(value.replace(/[^\d.-]/g, ''))
-                : value;
-            
+            const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
             if (isNaN(num)) return 'Rp0';
-            
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                minimumFractionDigits: 0
             }).format(num);
         }
 
         function formatNumber(value) {
             if (!value) return '-';
-            
-            const num = typeof value === 'string'
-                ? parseFloat(value.replace(/[^\d.-]/g, ''))
-                : value;
-            
+            const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
             if (isNaN(num)) return value;
-            
             return new Intl.NumberFormat('id-ID').format(num);
         }
 
         function parseNumber(value) {
             if (!value) return 0;
-            const str = value.toString().replace(/[^\d.-]/g, '');
-            const num = parseFloat(str);
+            const num = parseFloat(value.toString().replace(/[^\d.-]/g, ''));
             return isNaN(num) ? 0 : num;
         }
 
@@ -762,40 +815,31 @@
                 <div class="empty-state">
                     <div class="empty-state-icon">⚡</div>
                     <h2>Pilih Bulan untuk Melihat Data</h2>
-                    <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+                    <p>Gunakan dropdown di atas untuk memilih bulan</p>
                 </div>
             `;
         }
 
-        // ============ CACHE MANAGEMENT ============
+        // ============ CACHE ============
         function getCachedData(monthName) {
             const cached = appState.cache[monthName];
             if (!cached) return null;
-            
-            const now = Date.now();
-            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+            if (Date.now() - cached.timestamp > CONFIG.CACHE_DURATION) {
                 delete appState.cache[monthName];
                 return null;
             }
-            
             return cached.data;
         }
 
         function setCachedData(monthName, data) {
-            appState.cache[monthName] = {
-                data: data,
-                timestamp: Date.now()
-            };
+            appState.cache[monthName] = { data, timestamp: Date.now() };
         }
 
-        // ============ LOCAL STORAGE ============
+        // ============ SESSION STORAGE ============
         function saveLastMonth(monthName) {
             try {
-                const data = { month: monthName, timestamp: Date.now() };
-                sessionStorage.setItem('lastMonth', JSON.stringify(data));
-            } catch (e) {
-                console.warn('Could not save to sessionStorage:', e);
-            }
+                sessionStorage.setItem('lastMonth', JSON.stringify({ month: monthName, timestamp: Date.now() }));
+            } catch (e) {}
         }
 
         function getLastMonth() {
@@ -820,7 +864,7 @@
             if (!forceRefresh) {
                 const cached = getCachedData(monthName);
                 if (cached) {
-                    console.log('Using cached data for:', monthName);
+                    console.log('Using cached data');
                     displayData(cached, monthName);
                     return;
                 }
@@ -834,10 +878,7 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
+                if (data.error) throw new Error(data.error.message);
                 if (!data.values || data.values.length === 0) {
                     showError('Data Kosong', `Tidak ada data di bulan "${monthName.replace('_', ' ')}"`);
                     return;
@@ -845,45 +886,32 @@
                 
                 setCachedData(monthName, data.values);
                 appState.lastUpdate = new Date();
-                
                 displayData(data.values, monthName);
                 
             } catch (error) {
-                console.error('Error loading data:', error);
-                showError('Gagal Memuat Data', `
-                    ${error.message}
-                    <br><br>
-                    <strong>Bulan:</strong> "${monthName.replace('_', ' ')}"
-                    <br><br>
-                    <strong>Pastikan:</strong>
-                    <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Spreadsheet ID benar</li>
-                        <li>API Key valid</li>
-                        <li>Google Sheets API sudah enabled</li>
-                        <li>Sheet sudah public</li>
-                        <li>Nama sheet sesuai format</li>
-                    </ul>
-                `);
+                console.error('Error:', error);
+                showError('Gagal Memuat Data', `${error.message}<br><br><strong>Bulan:</strong> "${monthName.replace('_', ' ')}"`);
             }
         }
 
-        // ============ DISPLAY FUNCTIONS ============
+        // ============ DISPLAY ============
         function displayData(values, sheetName) {
             const headers = values[0];
-            const dataRows = values.slice(1).filter(row => row[1]); // Filter rows with nama toko
+            const dataRows = values.slice(1).filter(row => row[1]);
             
             if (dataRows.length === 0) {
                 showError('Data Kosong', `Tidak ada data valid di bulan "${sheetName.replace('_', ' ')}"`);
                 return;
             }
 
-            // Calculate totals
+            appState.currentData = dataRows;
+
             let totalPenggunaan = 0;
             let totalTagihan = 0;
 
             dataRows.forEach(row => {
-                totalPenggunaan += parseNumber(row[5]); // Penggunaan (kolom F)
-                totalTagihan += parseNumber(row[6]); // Biaya (kolom G)
+                totalPenggunaan += parseNumber(row[5]);
+                totalTagihan += parseNumber(row[6]);
             });
 
             const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
@@ -898,8 +926,11 @@
             const monthDisplay = sheetName.replace('_', ' ');
             
             let html = `
-                <div class="month-badge">📅 ${monthDisplay}</div>
-                
+                <div class="notice">
+                    <strong>ℹ️ Mode Demo</strong>
+                    <p>Fitur Edit & Hapus saat ini hanya mengubah tampilan lokal (tidak tersimpan ke Google Sheets). Untuk implementasi penuh, diperlukan Google Apps Script atau backend API.</p>
+                </div>
+
                 <div class="stats">
                     <div class="stat-card">
                         <h3>${dataRows.length}</h3>
@@ -921,10 +952,12 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama Toko</th>
+                                <th>Daya (VA)</th>
                                 <th>Stand Awal</th>
                                 <th>Stand Akhir</th>
                                 <th>Penggunaan (kWh)</th>
                                 <th>Biaya Listrik</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -933,6 +966,7 @@
             dataRows.forEach((row, index) => {
                 const nomor = row[0] || (index + 1);
                 const namaToko = row[1] || '-';
+                const dayaListrik = row[2] || '-';
                 const standAwal = row[3] || '-';
                 const standAkhir = row[4] || '-';
                 const penggunaan = row[5] || '-';
@@ -940,58 +974,216 @@
 
                 html += `
                     <tr>
-                        <td>${nomor}</td>
+                        <td style="text-align: center;">${nomor}</td>
                         <td class="toko-name">${namaToko}</td>
+                        <td class="number">${formatNumber(dayaListrik)}</td>
                         <td class="number">${formatNumber(standAwal)}</td>
                         <td class="number">${formatNumber(standAkhir)}</td>
                         <td class="number">${formatNumber(penggunaan)}</td>
                         <td class="currency">${formatRupiah(biaya)}</td>
+                        <td class="actions">
+                            <button class="action-btn edit-btn" onclick="openEditModal(${index})">✏️ Edit</button>
+                            <button class="action-btn delete-btn" onclick="deleteData(${index})">🗑️ Hapus</button>
+                        </td>
                     </tr>
                 `;
             });
 
             html += `
                             <tr class="total-row">
-                                <td colspan="4" style="text-align: right; padding-right: 20px;">TOTAL</td>
-                                <td class="number" style="color: white;">${formatNumber(totalPenggunaan)}</td>
-                                <td class="currency" style="color: white;">${formatRupiah(totalTagihan)}</td>
+                                <td colspan="5" style="text-align: right; padding-right: 20px;">TOTAL</td>
+                                <td class="number">${formatNumber(totalPenggunaan)}</td>
+                                <td class="currency">${formatRupiah(totalTagihan)}</td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="summary-section">
-                    <h3>📊 Ringkasan ${monthDisplay}</h3>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="label">Jumlah Toko</div>
-                            <div class="value">${dataRows.length} Toko</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Penggunaan Listrik</div>
-                            <div class="value">${formatNumber(totalPenggunaan)} kWh</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Rata-rata Penggunaan per Toko</div>
-                            <div class="value">${formatNumber(Math.round(totalPenggunaan / dataRows.length))} kWh</div>
-                        </div>
-                        <div class="summary-item-finale">
-                            <div class="label">Total Biaya Listrik</div>
-                            <div class="value">${formatRupiah(totalTagihan)}</div>
-                        </div>
-                        <div class="summary-item-finale">
-                            <div class="label">Rata-rata Biaya per Toko</div>
-                            <div class="value">${formatRupiah(Math.round(totalTagihan / dataRows.length))}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="last-update">
+                <div style="text-align: center; color: #6c757d; font-size: 0.9em; margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
                     ⏱️ Terakhir diperbarui: ${updateTime}
                 </div>
             `;
             
             document.getElementById('content').innerHTML = html;
+        }
+
+        // ============ MODAL FUNCTIONS ============
+        function openAddModal() {
+            if (!appState.currentMonth) {
+                alert('Pilih bulan terlebih dahulu!');
+                return;
+            }
+
+            document.getElementById('modalTitle').innerHTML = '➕ Tambah Data Listrik';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editIndex').value = '';
+            document.getElementById('submitBtn').innerHTML = '💾 Simpan Data';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function openEditModal(index) {
+            const row = appState.currentData[index];
+            
+            document.getElementById('modalTitle').innerHTML = '✏️ Edit Data Listrik';
+            document.getElementById('editIndex').value = index;
+            document.getElementById('namaToko').value = row[1] || '';
+            document.getElementById('dayaListrik').value = row[2] || '';
+            document.getElementById('standAwal').value = row[3] || '';
+            document.getElementById('standAkhir').value = row[4] || '';
+            document.getElementById('penggunaan').value = row[5] || '';
+            document.getElementById('biayaListrik').value = row[6] || '';
+            document.getElementById('submitBtn').innerHTML = '💾 Update Data';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            document.getElementById('dataForm').reset();
+        }
+
+        // Auto-calculate penggunaan
+        document.getElementById('standAwal').addEventListener('input', calculatePenggunaan);
+        document.getElementById('standAkhir').addEventListener('input', calculatePenggunaan);
+
+        function calculatePenggunaan() {
+            const standAwal = parseFloat(document.getElementById('standAwal').value) || 0;
+            const standAkhir = parseFloat(document.getElementById('standAkhir').value) || 0;
+            const penggunaan = standAkhir - standAwal;
+            
+            if (penggunaan >= 0) {
+                document.getElementById('penggunaan').value = penggunaan;
+            }
+        }
+
+        // ============ CRUD OPERATIONS ============
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const editIndex = document.getElementById('editIndex').value;
+            const formData = {
+                namaToko: document.getElementById('namaToko').value,
+                dayaListrik: document.getElementById('dayaListrik').value || '0',
+                standAwal: document.getElementById('standAwal').value,
+                standAkhir: document.getElementById('standAkhir').value,
+                penggunaan: document.getElementById('penggunaan').value,
+                biayaListrik: document.getElementById('biayaListrik').value
+            };
+
+            // Validation
+            if (parseFloat(formData.standAkhir) < parseFloat(formData.standAwal)) {
+                alert('Stand Akhir tidak boleh lebih kecil dari Stand Awal!');
+                return;
+            }
+
+            if (editIndex === '') {
+                // ADD NEW
+                addData(formData);
+            } else {
+                // UPDATE
+                updateData(parseInt(editIndex), formData);
+            }
+        }
+
+        function addData(formData) {
+            const newRow = [
+                appState.currentData.length + 1, // Nomor
+                formData.namaToko,
+                formData.dayaListrik,
+                formData.standAwal,
+                formData.standAkhir,
+                formData.penggunaan,
+                formData.biayaListrik
+            ];
+
+            appState.currentData.push(newRow);
+            
+            // Update cache
+            const cachedData = getCachedData(appState.currentMonth);
+            if (cachedData) {
+                cachedData.push(newRow);
+                setCachedData(appState.currentMonth, cachedData);
+            }
+
+            displayData([['No', 'Nama Toko', 'Daya', 'Stand Awal', 'Stand Akhir', 'Penggunaan', 'Biaya'], ...appState.currentData], appState.currentMonth);
+            closeModal();
+            
+            showSuccessMessage('✅ Data berhasil ditambahkan (mode demo - tidak tersimpan ke Google Sheets)');
+        }
+
+        function updateData(index, formData) {
+            appState.currentData[index] = [
+                appState.currentData[index][0], // Keep original number
+                formData.namaToko,
+                formData.dayaListrik,
+                formData.standAwal,
+                formData.standAkhir,
+                formData.penggunaan,
+                formData.biayaListrik
+            ];
+
+            // Update cache
+            const cachedData = getCachedData(appState.currentMonth);
+            if (cachedData) {
+                cachedData[index + 1] = appState.currentData[index]; // +1 for header
+                setCachedData(appState.currentMonth, cachedData);
+            }
+
+            displayData([['No', 'Nama Toko', 'Daya', 'Stand Awal', 'Stand Akhir', 'Penggunaan', 'Biaya'], ...appState.currentData], appState.currentMonth);
+            closeModal();
+            
+            showSuccessMessage('✅ Data berhasil diupdate (mode demo - tidak tersimpan ke Google Sheets)');
+        }
+
+        function deleteData(index) {
+            const row = appState.currentData[index];
+            const namaToko = row[1];
+
+            if (!confirm(`Hapus data "${namaToko}"?\n\n⚠️ Mode Demo: Perubahan hanya di tampilan lokal`)) {
+                return;
+            }
+
+            appState.currentData.splice(index, 1);
+
+            // Renumber
+            appState.currentData.forEach((row, idx) => {
+                row[0] = idx + 1;
+            });
+
+            // Update cache
+            const cachedData = getCachedData(appState.currentMonth);
+            if (cachedData) {
+                cachedData.splice(index + 1, 1); // +1 for header
+                setCachedData(appState.currentMonth, cachedData);
+            }
+
+            displayData([['No', 'Nama Toko', 'Daya', 'Stand Awal', 'Stand Akhir', 'Penggunaan', 'Biaya'], ...appState.currentData], appState.currentMonth);
+            
+            showSuccessMessage('✅ Data berhasil dihapus (mode demo - tidak tersimpan ke Google Sheets)');
+        }
+
+        function showSuccessMessage(message) {
+            const tempDiv = document.createElement('div');
+            tempDiv.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+                z-index: 3000;
+                animation: slideInRight 0.3s ease-out;
+                font-weight: 600;
+            `;
+            tempDiv.textContent = message;
+            document.body.appendChild(tempDiv);
+
+            setTimeout(() => {
+                tempDiv.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => tempDiv.remove(), 300);
+            }, 3000);
         }
 
         // ============ EVENT HANDLERS ============
@@ -1019,9 +1211,22 @@
             loadMonthData(selectedMonth, true);
         }
 
+        // Close modal on outside click
+        document.getElementById('dataModal').addEventListener('click', (e) => {
+            if (e.target.id === 'dataModal') {
+                closeModal();
+            }
+        });
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('dataModal').classList.contains('active')) {
+                closeModal();
+            }
+        });
+
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
-            // Auto-select current month or last selected month
             const currentMonth = new Date().toLocaleString('id-ID', { month: 'long' });
             const currentYear = new Date().getFullYear();
             const monthKey = `${currentMonth}_${currentYear}`;
@@ -1037,7 +1242,20 @@
                 loadMonthData(monthKey);
             }
         });
+
+        // Add animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
-
