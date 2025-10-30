@@ -248,6 +248,32 @@
             font-size: 0.95em;
         }
 
+        .stat-card-finale {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card-finale:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .stat-card-finale h3 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card-finale p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+        
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
@@ -464,6 +490,31 @@
             color: #FF69B4;
         }
 
+        .summary-item-finale {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .summary-item-finale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .summary-item-finale .label {
+            font-size: 0.9em;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .summary-item-finale .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -858,7 +909,7 @@
                         <h3>${formatNumber(totalPenggunaan)} kWh</h3>
                         <p>Total Penggunaan</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card-finale">
                         <h3>${formatRupiah(totalTagihan)}</h3>
                         <p>Total Tagihan</p>
                     </div>
@@ -924,11 +975,11 @@
                             <div class="label">Rata-rata Penggunaan per Toko</div>
                             <div class="value">${formatNumber(Math.round(totalPenggunaan / dataRows.length))} kWh</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item-finale">
                             <div class="label">Total Biaya Listrik</div>
                             <div class="value">${formatRupiah(totalTagihan)}</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item-finale">
                             <div class="label">Rata-rata Biaya per Toko</div>
                             <div class="value">${formatRupiah(Math.round(totalTagihan / dataRows.length))}</div>
                         </div>
@@ -989,3 +1040,4 @@
     </script>
 </body>
 </html>
+
