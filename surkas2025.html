@@ -228,6 +228,33 @@
             font-size: 0.95em;
         }
 
+        
+        .stat-card-finale {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: forestgreen;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+        
         .refresh-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -904,7 +931,7 @@
                         <h3>${formatRupiah(totals.bayarListrik)}</h3>
                         <p>Total Bayar Listrik</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card-finale">
                         <h3>${formatRupiah(totals.sisaSurkas)}</h3>
                         <p>Total Sisa Surplus Kas</p>
                     </div>
