@@ -13,9 +13,27 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            /* Ganti URL dibawah ini dengan path foto Anda */
+            background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=1920');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             min-height: 100vh;
             padding: 20px;
+            /* Overlay gelap agar teks tetap terbaca */
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Overlay transparan gelap */
+            z-index: -1;
         }
         
         .container {
@@ -210,32 +228,6 @@
             font-size: 0.95em;
         }
 
-        .stat-card-finale {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: forestgreen;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card-finale:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .stat-card-finale h3 {
-            font-size: 1.8em;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        
-        .stat-card-finale p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
-        
         .refresh-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -1044,4 +1036,3 @@
     </script>
 </body>
 </html>
-
