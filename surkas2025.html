@@ -130,10 +130,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         }
-
-        .back-btn:active {
-            transform: translateY(0);
-        }
         
         .content {
             padding: 30px;
@@ -182,15 +178,13 @@
         }
         
         .stats {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
-            flex-wrap: wrap;
         }
         
         .stat-card {
-            flex: 1;
-            min-width: 200px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 25px;
@@ -206,14 +200,14 @@
         }
         
         .stat-card h3 {
-            font-size: 2em;
+            font-size: 1.8em;
             margin-bottom: 8px;
             font-weight: 700;
         }
         
         .stat-card p {
             opacity: 0.95;
-            font-size: 1em;
+            font-size: 0.95em;
         }
 
         .refresh-btn {
@@ -238,14 +232,11 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .refresh-btn:active {
-            transform: translateY(0);
-        }
-
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
         
         table {
@@ -320,20 +311,6 @@
         tbody tr:hover {
             background: #f8f9fa;
         }
-        
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .last-update {
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
 
         .year-badge {
             display: inline-block;
@@ -348,7 +325,6 @@
         }
 
         .summary-section {
-            margin-top: 30px;
             padding: 25px;
             background: #f8f9fa;
             border-radius: 12px;
@@ -397,12 +373,6 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
-            transition: transform 0.2s ease;
-        }
-
-        .summary-item-finale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
         }
 
         .summary-item-finale .label {
@@ -452,13 +422,6 @@
             gap: 8px;
         }
 
-        .user-name {
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
         .logout-btn {
             background: rgba(255,255,255,0.95);
             border: none;
@@ -481,11 +444,32 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .logout-btn:active {
-            transform: translateY(0);
+        .last-update {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
 
-        /* Responsif untuk mobile */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -499,26 +483,8 @@
                 gap: 10px;
             }
 
-            .user-info {
-                padding: 10px 20px;
-                font-size: 0.85em;
-            }
-
-            .user-name {
-                max-width: 120px;
-            }
-
-            .logout-btn {
-                padding: 10px 20px;
-                font-size: 0.85em;
-            }
-
             .header h1 {
                 font-size: 1.8em;
-            }
-
-            .header p {
-                font-size: 0.95em;
             }
 
             .controls {
@@ -535,14 +501,6 @@
                 justify-content: center;
             }
 
-            .stats {
-                flex-direction: column;
-            }
-
-            .stat-card {
-                min-width: 100%;
-            }
-
             .content {
                 padding: 20px;
             }
@@ -554,81 +512,11 @@
     </style>
 </head>
 
-<script>
-// ============ AUTH PROTECTION ============
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
-function deleteCookie(name) {
-    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
-
-function getAuthData() {
-    try {
-        const authString = getCookie('userAuth');
-        if (!authString) return null;
-        const decoded = atob(authString);
-        return JSON.parse(decoded);
-    } catch (e) {
-        return null;
-    }
-}
-
-function checkAuth() {
-    const authData = getAuthData();
-    if (!authData) {
-        const currentPage = window.location.pathname;
-        window.location.href = 'login.html?redirect=' + encodeURIComponent(currentPage);
-        return false;
-    }
-    
-    if (authData.expiresAt) {
-        const expiresAt = new Date(authData.expiresAt);
-        if (new Date() > expiresAt) {
-            deleteCookie('userAuth');
-            window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-            return false;
-        }
-    }
-    return true;
-}
-
-function logout(message = null) {
-    if (!message && !confirm('Yakin ingin logout?')) return;
-    deleteCookie('userAuth');
-    window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
-}
-
-// CEK AUTH SAAT HALAMAN LOAD
-if (!checkAuth()) {
-    // Akan redirect otomatis
-} else {
-    // Tampilkan nama user di header
-    const authData = getAuthData();
-    if (authData && authData.username) {
-        document.addEventListener('DOMContentLoaded', function() {
-            const displayElement = document.getElementById('displayUsername');
-            if (displayElement) {
-                displayElement.textContent = authData.username;
-            }
-        });
-    }
-}
-</script>
-    
 <body>
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
-            <span class="user-name" id="displayUsername">Loading...</span>
+            <span id="displayUsername">Guest</span>
         </div>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
@@ -648,11 +536,11 @@ if (!checkAuth()) {
                 <span>Kembali ke Dashboard</span>
             </a>
             <div class="select-wrapper">
-                <select id="sheetSelect" onchange="loadData()">
+                <select id="sheetSelect" onchange="handleSheetChange()">
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
-            <button class="refresh-btn" onclick="loadData()">
+            <button class="refresh-btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
             </button>
@@ -667,16 +555,174 @@ if (!checkAuth()) {
     </div>
 
     <script>
-        // ⚙️ KONFIGURASI
+        // ============ AUTH SYSTEM ============
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+        function getAuthData() {
+            try {
+                const authString = getCookie('userAuth');
+                if (!authString) return null;
+                return JSON.parse(atob(authString));
+            } catch (e) {
+                console.error('Auth parse error:', e);
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const authData = getAuthData();
+            if (!authData) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            
+            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+                deleteCookie('userAuth');
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+                return false;
+            }
+            return true;
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            deleteCookie('userAuth');
+            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+        }
+
+        // Initialize auth
+        if (checkAuth()) {
+            const authData = getAuthData();
+            if (authData?.username) {
+                document.getElementById('displayUsername').textContent = authData.username;
+            }
+        }
+
+        // ============ CONFIG ============
         const CONFIG = {
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM'
+            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
+            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
         };
 
-        let lastUpdate = null;
-        let availableSheets = [];
+        // ============ STATE MANAGEMENT ============
+        let appState = {
+            sheets: [],
+            currentSheet: null,
+            cache: {},
+            lastUpdate: null
+        };
 
-        // Fungsi untuk load daftar sheet
+        // ============ UTILITY FUNCTIONS ============
+        function formatRupiah(value) {
+            if (!value && value !== 0) return 'Rp0';
+            
+            const num = typeof value === 'string' 
+                ? parseFloat(value.replace(/[^\d.-]/g, ''))
+                : value;
+            
+            if (isNaN(num)) return 'Rp0';
+            
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        }
+
+        function parseNumber(value) {
+            if (!value) return 0;
+            const str = value.toString().replace(/[^\d.-]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function showLoading(message = 'Memuat data...') {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            `;
+        }
+
+        function showError(title, message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <strong>❌ ${title}</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h2>Pilih Toko untuk Melihat Data</h2>
+                    <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
+                </div>
+            `;
+        }
+
+        // ============ CACHE MANAGEMENT ============
+        function getCachedData(sheetName) {
+            const cached = appState.cache[sheetName];
+            if (!cached) return null;
+            
+            const now = Date.now();
+            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+                delete appState.cache[sheetName];
+                return null;
+            }
+            
+            return cached.data;
+        }
+
+        function setCachedData(sheetName, data) {
+            appState.cache[sheetName] = {
+                data: data,
+                timestamp: Date.now()
+            };
+        }
+
+        // ============ LOCAL STORAGE ============
+        function saveLastSheet(sheetName) {
+            try {
+                const data = { sheet: sheetName, timestamp: Date.now() };
+                sessionStorage.setItem('lastSheet', JSON.stringify(data));
+            } catch (e) {
+                console.warn('Could not save to sessionStorage:', e);
+            }
+        }
+
+        function getLastSheet() {
+            try {
+                const stored = sessionStorage.getItem('lastSheet');
+                if (!stored) return null;
+                const data = JSON.parse(stored);
+                // Valid for 1 hour
+                if (Date.now() - data.timestamp > 3600000) return null;
+                return data.sheet;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============ API FUNCTIONS ============
         async function loadSheetsList() {
             try {
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
@@ -687,82 +733,60 @@ if (!checkAuth()) {
                     throw new Error(data.error.message);
                 }
                 
-                availableSheets = data.sheets.map(sheet => sheet.properties.title);
+                appState.sheets = data.sheets.map(sheet => sheet.properties.title);
                 
                 const sheetSelect = document.getElementById('sheetSelect');
                 sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
-                    availableSheets.map(sheetName => 
-                        `<option value="${sheetName}">${sheetName}</option>`
+                    appState.sheets.map(name => 
+                        `<option value="${name}">${name}</option>`
                     ).join('');
                 
-                const content = document.getElementById('content');
-                content.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; color: #6c757d;">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📊</div>
-                        <h2 style="color: #667eea; margin-bottom: 10px;">Pilih Toko untuk Melihat Data</h2>
-                        <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
-                    </div>
-                `;
+                // Restore last selected sheet
+                const lastSheet = getLastSheet();
+                if (lastSheet && appState.sheets.includes(lastSheet)) {
+                    sheetSelect.value = lastSheet;
+                    loadSheetData(lastSheet);
+                } else {
+                    showEmptyState();
+                }
                 
             } catch (error) {
-                console.error('Error loading sheets list:', error);
-                const content = document.getElementById('content');
-                content.innerHTML = `
-                    <div class="error">
-                        <strong>❌ Gagal Memuat Daftar Sheet</strong>
-                        ${error.message}
-                        <br><br>
-                        <strong>Pastikan:</strong>
-                        <ul style="margin-top: 10px; margin-left: 20px;">
-                            <li>Spreadsheet ID benar</li>
-                            <li>API Key valid</li>
-                            <li>Google Sheets API sudah di-enable</li>
-                            <li>Sheet sudah di-share sebagai public</li>
-                        </ul>
-                    </div>
-                `;
+                console.error('Error loading sheets:', error);
+                showError('Gagal Memuat Daftar Sheet', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Pastikan:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Spreadsheet ID benar</li>
+                        <li>API Key valid</li>
+                        <li>Google Sheets API sudah enabled</li>
+                        <li>Sheet sudah public</li>
+                    </ul>
+                `);
             }
         }
 
-        // Fungsi untuk format angka ke Rupiah
-        function formatRupiah(angka) {
-            if (!angka || angka === '-' || angka === '') return 'Rp0';
-            
-            let number = angka.toString().replace(/[^\d.-]/g, '');
-            number = parseFloat(number);
-            
-            if (isNaN(number)) return angka;
-            
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(number);
-        }
-
-        // Fungsi untuk memuat data
-        async function loadData() {
-            const sheetSelect = document.getElementById('sheetSelect');
-            const selectedSheet = sheetSelect.value;
-            const content = document.getElementById('content');
-            
-            if (!selectedSheet) {
-                content.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; color: #6c757d;">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📊</div>
-                        <h2 style="color: #667eea; margin-bottom: 10px;">Pilih Toko untuk Melihat Data</h2>
-                        <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
-                    </div>
-                `;
+        async function loadSheetData(sheetName, forceRefresh = false) {
+            if (!sheetName) {
+                showEmptyState();
                 return;
             }
+
+            // Check cache first
+            if (!forceRefresh) {
+                const cached = getCachedData(sheetName);
+                if (cached) {
+                    console.log('Using cached data for:', sheetName);
+                    displayData(cached, sheetName);
+                    return;
+                }
+            }
             
-            content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Memuat data: ' + selectedSheet + '</div></div>';
+            showLoading(`Memuat data: ${sheetName}`);
+            appState.currentSheet = sheetName;
             
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(selectedSheet)}?key=${CONFIG.API_KEY}`;
-                
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -771,94 +795,92 @@ if (!checkAuth()) {
                 }
                 
                 if (!data.values || data.values.length === 0) {
-                    content.innerHTML = '<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data yang ditemukan di sheet "' + selectedSheet + '".</div>';
+                    showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
                     return;
                 }
                 
-                lastUpdate = new Date();
-                displayData(data.values, selectedSheet);
+                // Cache the data
+                setCachedData(sheetName, data.values);
+                appState.lastUpdate = new Date();
+                
+                displayData(data.values, sheetName);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
-                content.innerHTML = `
-                    <div class="error">
-                        <strong>❌ Gagal Memuat Data</strong>
-                        ${error.message}
-                        <br><br>
-                        <strong>Sheet yang dicoba:</strong> "${selectedSheet}"
-                    </div>
-                `;
+                showError('Gagal Memuat Data', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Sheet:</strong> "${sheetName}"
+                `);
             }
         }
 
-        // Fungsi untuk menampilkan data
-        function displayData(values, sheetName) {
-            const content = document.getElementById('content');
+        // ============ DATA PROCESSING ============
+        function processRowData(row) {
+            // Struktur data yang konsisten:
+            // [0] = Triwulan
+            // [1] = Bulan
+            // [2] = EBITDA LR
+            // [3] = Penggunaan Laba Kas (bisa kosong/undefined)
+            // [4] = Laba Net Ditransfer
+            // [5] = Bayar Listrik
+            // [6] = Sisa Surkas (bisa kosong, akan dihitung)
             
-            console.log('Raw data from sheet:', values);
+            const triwulan = row[0] || '';
+            const bulan = row[1] || '';
+            const ebitdaLR = parseNumber(row[2]);
+            const penggunaanLabaKas = parseNumber(row[3]);
+            const labaNetDitransfer = parseNumber(row[4]);
+            const bayarListrik = parseNumber(row[5]);
             
-            const headers = values[0];
-            console.log('Headers:', headers);
-            console.log('Number of headers:', headers.length);
+            // Hitung sisa surkas jika tidak ada
+            let sisaSurkas = parseNumber(row[6]);
+            if (!sisaSurkas && labaNetDitransfer && bayarListrik) {
+                sisaSurkas = labaNetDitransfer - bayarListrik;
+            }
             
-            const dataRows = values.slice(1);
+            return {
+                triwulan,
+                bulan,
+                ebitdaLR,
+                penggunaanLabaKas,
+                labaNetDitransfer,
+                bayarListrik,
+                sisaSurkas
+            };
+        }
 
-            const filteredRows = dataRows.filter(row => {
-                return row.length > 1 && row[1] && row[1].toString().trim() !== '';
+        function calculateTotals(rows) {
+            return rows.reduce((totals, row) => {
+                const data = processRowData(row);
+                return {
+                    ebitdaLR: totals.ebitdaLR + data.ebitdaLR,
+                    penggunaanLabaKas: totals.penggunaanLabaKas + data.penggunaanLabaKas,
+                    labaNetDitransfer: totals.labaNetDitransfer + data.labaNetDitransfer,
+                    bayarListrik: totals.bayarListrik + data.bayarListrik,
+                    sisaSurkas: totals.sisaSurkas + data.sisaSurkas
+                };
+            }, {
+                ebitdaLR: 0,
+                penggunaanLabaKas: 0,
+                labaNetDitransfer: 0,
+                bayarListrik: 0,
+                sisaSurkas: 0
             });
+        }
 
-            console.log('Filtered rows:', filteredRows);
-            console.log('First data row length:', filteredRows[0]?.length);
-
-            if (filteredRows.length === 0) {
-                content.innerHTML = `<div class="error"><strong>❌ Data Kosong</strong>Tidak ada data di sheet "${sheetName}".</div>`;
+        // ============ DISPLAY FUNCTIONS ============
+        function displayData(values, sheetName) {
+            const headers = values[0];
+            const dataRows = values.slice(1).filter(row => row[1]); // Filter rows with month
+            
+            if (dataRows.length === 0) {
+                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"`);
                 return;
             }
 
-            let totalEbitdaLR = 0;
-            let totalPenggunaanLabaKas = 0;
-            let totalLabaNetDitransfer = 0;
-            let totalBayarListrik = 0;
-            let totalSisaSurkas = 0;
-
-            filteredRows.forEach((row, idx) => {
-                console.log(`Processing row ${idx}, length: ${row.length}`, row);
-                if (row[1]) {
-                    // Mapping untuk data dengan cell kosong di tengah
-                    // Row structure: [0]=Triwulan, [1]=Bulan, [2]=EBITDA, [3]=Penggunaan(bisa kosong), [4]=Laba, [5]=Listrik, [6]=Surkas
-                    // Tapi kalau [3] kosong, maka [4] jadi index 3, dst
-                    
-                    // Cek apakah ada 7 elemen (lengkap dengan cell kosong)
-                    let ebitda, penggunaan, labaDitransfer, listrik, surkas;
-                    
-                    if (row.length >= 7) {
-                        // Format lengkap dengan cell kosong
-                        ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        penggunaan = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        labaDitransfer = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        listrik = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        surkas = parseFloat((row[6] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    } else {
-                        // Format dimana cell kosong di-skip oleh Google Sheets API
-                        // [0]=Triwulan, [1]=Bulan, [2]=EBITDA, [3]=Laba, [4]=Listrik, [5]=Surkas
-                        ebitda = parseFloat((row[2] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        penggunaan = 0; // Kosong
-                        labaDitransfer = parseFloat((row[3] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        listrik = parseFloat((row[4] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                        surkas = parseFloat((row[5] || '0').toString().replace(/[^\d.-]/g, '')) || 0;
-                    }
-
-                    console.log(`Parsed row ${idx} - EBITDA: ${ebitda}, Penggunaan: ${penggunaan}, Laba: ${labaDitransfer}, Listrik: ${listrik}, Surkas: ${surkas}`);
-
-                    totalEbitdaLR += ebitda;
-                    totalPenggunaanLabaKas += penggunaan;
-                    totalLabaNetDitransfer += labaDitransfer;
-                    totalBayarListrik += listrik;
-                    totalSisaSurkas += surkas || (labaDitransfer - listrik);
-                }
-            });
-
-            const updateTime = lastUpdate.toLocaleString('id-ID', {
+            const totals = calculateTotals(dataRows);
+            const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -872,15 +894,19 @@ if (!checkAuth()) {
                 
                 <div class="stats">
                     <div class="stat-card">
-                        <h3>${formatRupiah(totalLabaNetDitransfer)}</h3>
+                        <h3>${formatRupiah(totals.ebitdaLR)}</h3>
+                        <p>Total EBITDA LR</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
                         <p>Total Laba Net Ditransfer</p>
                     </div>
                     <div class="stat-card">
-                        <h3>${formatRupiah(totalBayarListrik)}</h3>
+                        <h3>${formatRupiah(totals.bayarListrik)}</h3>
                         <p>Total Bayar Listrik</p>
                     </div>
                     <div class="stat-card">
-                        <h3>${formatRupiah(totalSisaSurkas)}</h3>
+                        <h3>${formatRupiah(totals.sisaSurkas)}</h3>
                         <p>Total Sisa Surplus Kas</p>
                     </div>
                 </div>
@@ -889,10 +915,10 @@ if (!checkAuth()) {
                     <table>
                         <thead>
                             <tr>
-                                <th>TRIWULAN SURKAS</th>
+                                <th>TRIWULAN</th>
                                 <th>BULAN</th>
                                 <th>EBITDA LR</th>
-                                <th>PENGGUNAAN LABA KAS DARI FRCSOR</th>
+                                <th>PENGGUNAAN LABA KAS</th>
                                 <th>LABA NET DITRANSFER</th>
                                 <th>BAYAR LISTRIK</th>
                                 <th>SISA SURKAS</th>
@@ -901,26 +927,21 @@ if (!checkAuth()) {
                         <tbody>
             `;
             
-            filteredRows.forEach((row) => {
-                const triwulan = row[0] || '';
-                const bulan = row[1] || '';
-                const ebitdaLR = row[2] || '0';
-                const penggunaanLabaKas = row[3] || '0';
-                const labaNetDitransfer = row[4] || '0';
-                const bayarListrik = row[5] || '0';
-                const sisaSurkas = row[6] || '0';
-
-                const sisaSurkasNum = parseFloat(sisaSurkas.toString().replace(/[^\d.-]/g, ''));
+            dataRows.forEach(row => {
+                const data = processRowData(row);
                 let colorClass = 'zero';
-                if (sisaSurkasNum > 0) colorClass = 'positive';
-                else if (sisaSurkasNum < 0) colorClass = 'negative';
+                if (data.sisaSurkas > 0) colorClass = 'positive';
+                else if (data.sisaSurkas < 0) colorClass = 'negative';
 
                 html += `
                     <tr>
-                        <td class="triwulan">${triwulan}</td>
-                        <td class="month">${bulan}</td>
-                        <td class="currency">${formatRupiah(bayarListrik)}</td>
-                        <td class="currency ${colorClass}">${formatRupiah(sisaSurkas)}</td>
+                        <td class="triwulan">${data.triwulan}</td>
+                        <td class="month">${data.bulan}</td>
+                        <td class="currency">${formatRupiah(data.ebitdaLR)}</td>
+                        <td class="currency">${formatRupiah(data.penggunaanLabaKas)}</td>
+                        <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
+                        <td class="currency">${formatRupiah(data.bayarListrik)}</td>
+                        <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
                     </tr>
                 `;
             });
@@ -935,23 +956,23 @@ if (!checkAuth()) {
                     <div class="summary-grid">
                         <div class="summary-item">
                             <div class="label">Total EBITDA LR</div>
-                            <div class="value">${formatRupiah(totalEbitdaLR)}</div>
+                            <div class="value">${formatRupiah(totals.ebitdaLR)}</div>
                         </div>
                         <div class="summary-item">
                             <div class="label">Total Penggunaan Laba Kas</div>
-                            <div class="value">${formatRupiah(totalPenggunaanLabaKas)}</div>
+                            <div class="value">${formatRupiah(totals.penggunaanLabaKas)}</div>
                         </div>
                         <div class="summary-item">
                             <div class="label">Total Laba Net Ditransfer</div>
-                            <div class="value">${formatRupiah(totalLabaNetDitransfer)}</div>
+                            <div class="value">${formatRupiah(totals.labaNetDitransfer)}</div>
                         </div>
                         <div class="summary-item">
                             <div class="label">Total Bayar Listrik</div>
-                            <div class="value">${formatRupiah(totalBayarListrik)}</div>
+                            <div class="value">${formatRupiah(totals.bayarListrik)}</div>
                         </div>
                         <div class="summary-item-finale">
                             <div class="label">Total Sisa Surplus Kas</div>
-                            <div class="value">${formatRupiah(totalSisaSurkas)}</div>
+                            <div class="value">${formatRupiah(totals.sisaSurkas)}</div>
                         </div>
                     </div>
                 </div>
@@ -961,11 +982,39 @@ if (!checkAuth()) {
                 </div>
             `;
             
-            content.innerHTML = html;
+            document.getElementById('content').innerHTML = html;
         }
 
-        // Auto-load saat halaman dibuka
-        window.addEventListener('DOMContentLoaded', loadSheetsList);
+        // ============ EVENT HANDLERS ============
+        function handleSheetChange() {
+            const sheetSelect = document.getElementById('sheetSelect');
+            const selectedSheet = sheetSelect.value;
+            
+            if (selectedSheet) {
+                saveLastSheet(selectedSheet);
+                loadSheetData(selectedSheet);
+            } else {
+                showEmptyState();
+            }
+        }
+
+        function handleRefresh() {
+            const sheetSelect = document.getElementById('sheetSelect');
+            const selectedSheet = sheetSelect.value;
+            
+            if (!selectedSheet) {
+                alert('Pilih toko terlebih dahulu');
+                return;
+            }
+            
+            // Force refresh - bypass cache
+            loadSheetData(selectedSheet, true);
+        }
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSheetsList();
+        });
     </script>
 </body>
 </html>
