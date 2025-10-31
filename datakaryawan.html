@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Karyawan Toko 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .user-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn, .logout-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover, .logout-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+        }
+
+        .stat-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #FF69B4;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #FF69B4;
+            border-radius: 10px;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .employee-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-icon {
+            font-size: 3em;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h3 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .card-title .subtitle {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+
+        .badge.coordinator {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+        }
+
+        .info-row .icon {
+            font-size: 1.2em;
+            width: 25px;
+            text-align: center;
+        }
+
+        .info-row .label {
+            font-weight: 600;
+            color: #666;
+            min-width: 100px;
+        }
+
+        .info-row .value {
+            color: #333;
+            flex: 1;
+        }
+
+        .whatsapp-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn:hover {
+            background: #1fb855;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.8em;
+            margin: 40px 0 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            opacity: 0.9;
+            animation: fadeIn 1s ease-out 0.5s both;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.95; }
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            color: #666;
+        }
+
+        .no-results .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .user-bar {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="user-bar">
+        <div class="user-info">
+            <span>👤</span>
+            <span class="user-name" id="displayUsername">Guest</span>
+        </div>
+        <a href="dashboard.html" class="back-btn">
+            <span>🏠</span>
+            <span>Dashboard</span>
+        </a>
+        <button onclick="logout()" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>👥 Data Karyawan Toko</h1>
+            <p>Informasi Lengkap Karyawan dan Manajemen SDM 2025</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="icon">👥</div>
+                <div class="value" id="totalEmployees">0</div>
+                <div class="label">Total Karyawan</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">👔</div>
+                <div class="value" id="totalCoordinators">0</div>
+                <div class="label">Koordinator</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🏪</div>
+                <div class="value" id="totalStores">0</div>
+                <div class="label">Total Toko</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📱</div>
+                <div class="value" id="totalWithPhone">0</div>
+                <div class="label">Memiliki WhatsApp</div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
+        </div>
+
+        <div id="employeeData"></div>
+
+        <div class="footer">
+            <p>© 2025 Dashboard Manajemen Toko. All rights reserved.</p>
+            <p>Dikembangkan dengan ❤️ untuk manajemen SDM yang lebih baik</p>
+        </div>
+    </div>
+
+    <script>
+        // ============ AUTH SYSTEM ============
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+        function getAuthData() {
+            try {
+                const authString = getCookie('userAuth');
+                if (!authString) return null;
+                return JSON.parse(atob(authString));
+            } catch (e) {
+                console.error('Auth parse error:', e);
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const authData = getAuthData();
+            if (!authData) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            
+            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+                deleteCookie('userAuth');
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+                return false;
+            }
+            return true;
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            deleteCookie('userAuth');
+            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+        }
+
+        // Initialize auth
+        if (checkAuth()) {
+            const authData = getAuthData();
+            if (authData?.username) {
+                document.getElementById('displayUsername').textContent = authData.username;
+            }
+        }
+
+        // ============ DATA KARYAWAN ============
+        const employeeData = {
+            stores: [
+                {
+                    name: "Toko 1",
+                    coordinator: { name: "Sukma", whatsapp: "" },
+                    employees: [
+                        { name: "Faiz" },
+                        { name: "Nadila" },
+                        { name: "Kevin" }
+                    ]
+                },
+                {
+                    name: "Toko 2",
+                    coordinator: { name: "Gung Gandhi", whatsapp: "" },
+                    employees: [
+                        { name: "Mega" },
+                        { name: "Gung Hangga" }
+                    ]
+                },
+                {
+                    name: "Toko 3",
+                    coordinator: { name: "Rusmini", whatsapp: "" },
+                    employees: [
+                        { name: "Lukman" },
+                        { name: "Datrawan" },
+                        { name: "Alit" },
+                        { name: "Rayhan" }
+                    ]
+                },
+                {
+                    name: "Toko 4",
+                    coordinator: { name: "Mira", whatsapp: "" },
+                    employees: [
+                        { name: "Junie" }
+                    ]
+                },
+                {
+                    name: "Toko 5",
+                    coordinator: { name: "Yogi", whatsapp: "" },
+                    employees: [
+                        { name: "Ricky" },
+                        { name: "Fariz" },
+                        { name: "Nabil" },
+                        { name: "Adelia" }
+                    ]
+                },
+                {
+                    name: "Toko 6",
+                    coordinator: { name: "Heri", whatsapp: "" },
+                    employees: [
+                        { name: "Putri" },
+                        { name: "Dila" },
+                        { name: "Yulia" },
+                        { name: "Ryo" }
+                    ]
+                },
+                {
+                    name: "Toko 7",
+                    coordinator: { name: "Sujarman", whatsapp: "" },
+                    employees: [
+                        { name: "Farida" },
+                        { name: "Nely" },
+                        { name: "Paezal" },
+                        { name: "Adam" },
+                        { name: "Liza" }
+                    ]
+                },
+                {
+                    name: "Toko 8",
+                    coordinator: { name: "Novi", whatsapp: "" },
+                    employees: [
+                        { name: "Desak" },
+                        { name: "Ari" },
+                        { name: "Hendrikus" },
+                        { name: "Salim" }
+                    ]
+                }
+            ]
+        };
+
+        let allEmployees = [];
+
+        function initializeData() {
+            // Flatten all employees for easier searching
+            employeeData.stores.forEach(store => {
+                allEmployees.push({
+                    type: 'coordinator',
+                    name: store.coordinator.name,
+                    whatsapp: store.coordinator.whatsapp,
+                    store: store.name
+                });
+                
+                store.employees.forEach(emp => {
+                    allEmployees.push({
+                        type: 'employee',
+                        name: emp.name,
+                        whatsapp: emp.whatsapp || '',
+                        store: store.name,
+                        coordinator: store.coordinator.name
+                    });
+                });
+            });
+
+            updateStats();
+            renderEmployees(allEmployees);
+        }
+
+        function updateStats() {
+            const totalEmployees = allEmployees.filter(e => e.type === 'employee').length;
+            const totalCoordinators = allEmployees.filter(e => e.type === 'coordinator').length;
+            const totalStores = employeeData.stores.length;
+            const totalWithPhone = allEmployees.filter(e => e.whatsapp).length;
+
+            document.getElementById('totalEmployees').textContent = totalEmployees;
+            document.getElementById('totalCoordinators').textContent = totalCoordinators;
+            document.getElementById('totalStores').textContent = totalStores;
+            document.getElementById('totalWithPhone').textContent = totalWithPhone;
+        }
+
+        function renderEmployees(employees) {
+            const container = document.getElementById('employeeData');
+            
+            if (employees.length === 0) {
+                container.innerHTML = `
+                    <div class="data-grid">
+                        <div class="no-results">
+                            <div class="icon">🔍</div>
+                            <h3>Tidak ada data ditemukan</h3>
+                            <p>Coba ubah kata kunci pencarian Anda</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by store
+            const groupedByStore = {};
+            employees.forEach(emp => {
+                if (!groupedByStore[emp.store]) {
+                    groupedByStore[emp.store] = [];
+                }
+                groupedByStore[emp.store].push(emp);
+            });
+
+            let html = '';
+            Object.keys(groupedByStore).sort().forEach(storeName => {
+                html += `<h2 class="section-title">🏪 ${storeName}</h2>`;
+                html += '<div class="data-grid">';
+                
+                groupedByStore[storeName].forEach(emp => {
+                    const isCoordinator = emp.type === 'coordinator';
+                    const icon = isCoordinator ? '👔' : '👤';
+                    const badgeClass = isCoordinator ? 'coordinator' : '';
+                    
+                    html += `
+                        <div class="employee-card">
+                            <div class="card-header">
+                                <span class="card-icon">${icon}</span>
+                                <div class="card-title">
+                                    <h3>${emp.name}</h3>
+                                    <div class="subtitle">${emp.store}</div>
+                                </div>
+                                <span class="badge ${badgeClass}">
+                                    ${isCoordinator ? 'Koordinator' : 'Karyawan'}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                ${!isCoordinator ? `
+                                    <div class="info-row">
+                                        <span class="icon">👔</span>
+                                        <span class="label">Koordinator:</span>
+                                        <span class="value">${emp.coordinator}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="info-row">
+                                    <span class="icon">📱</span>
+                                    <span class="label">WhatsApp:</span>
+                                    <span class="value">${emp.whatsapp || 'Belum ada data'}</span>
+                                </div>
+                                ${emp.whatsapp ? `
+                                    <a href="https://wa.me/${emp.whatsapp.replace(/\D/g, '')}" 
+                                       class="whatsapp-btn" 
+                                       target="_blank">
+                                        <span>💬</span>
+                                        <span>Hubungi via WhatsApp</span>
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderEmployees(allEmployees);
+                return;
+            }
+
+            const filtered = allEmployees.filter(emp => 
+                emp.name.toLowerCase().includes(searchTerm) ||
+                emp.store.toLowerCase().includes(searchTerm) ||
+                (emp.coordinator && emp.coordinator.toLowerCase().includes(searchTerm))
+            );
+
+            renderEmployees(filtered);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initializeData);
+    </script>
+</body>
+</html>
