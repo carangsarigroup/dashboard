@@ -661,13 +661,77 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // ============ GOOGLE SHEETS CONFIGURATION ============
-        const SPREADSHEET_ID = '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0';
-        const SHEET_NAME = 'KaryawanToko';
-        const API_KEY = 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0'; // GANTI DENGAN API KEY ANDA
+        const CONFIG = {
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
+            SHEET_NAME: 'KaryawanToko'
+        };
         
         let allEmployees = [];
         let filteredEmployees = [];
         let employeeData = { stores: [] };
+
+        // ============ AUTH SYSTEM ============
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+        function getAuthData() {
+            try {
+                const authString = getCookie('userAuth');
+                if (!authString) return null;
+                return JSON.parse(atob(authString));
+            } catch (e) {
+                console.error('Auth parse error:', e);
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const authData = getAuthData();
+            if (!authData) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            
+            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+                deleteCookie('userAuth');
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired. Silakan login kembali.');
+                return false;
+            }
+            return true;
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            deleteCookie('userAuth');
+            showToast('Logout berhasil!', 'success');
+            setTimeout(() => {
+                window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+            }, 1000);
+        }
+
+        // Initialize auth on load
+        if (!checkAuth()) {
+            // Will redirect to login
+        } else {
+            const authData = getAuthData();
+            if (authData?.fullName) {
+                document.getElementById('displayUsername').textContent = authData.fullName;
+            } else if (authData?.username) {
+                document.getElementById('displayUsername').textContent = authData.username;
+            }
+        }
 
         // ============ GOOGLE SHEETS API ============
         async function fetchDataFromGoogleSheets() {
@@ -675,12 +739,7 @@
                 showLoading();
                 updateSyncStatus('connecting', 'Menghubungkan ke Google Sheets...');
 
-                // Validate API Key
-                if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-                    throw new Error('API Key belum diisi! Silakan masukkan API Key Google Sheets Anda di kode.');
-                }
-
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
                 
                 const response = await fetch(url);
                 
@@ -849,6 +908,11 @@
 
         // ============ UTILITY FUNCTIONS ============
         function showToast(message, type = 'success') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -883,15 +947,6 @@
                     <p>Memuat data dari Google Sheets...</p>
                 </div>
             `;
-        }
-
-        function logout() {
-            if (confirm('Yakin ingin logout?')) {
-                showToast('Logout berhasil!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1000);
-            }
         }
 
         // ============ DATA INITIALIZATION ============
