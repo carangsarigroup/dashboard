@@ -621,7 +621,7 @@
         <div class="controls-bar">
             <div class="search-filter-row">
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
+                    <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan..." oninput="filterEmployees()">
                 </div>
                 <select class="filter-select" id="filterStore" onchange="filterEmployees()">
                     <option value="">Semua Toko</option>
@@ -955,14 +955,14 @@
                                     <div class="subtitle">${emp.store}</div>
                                 </div>
                                 <span class="badge ${badgeClass}">
-                                    ${isCoordinator ? 'Koordinator' : 'Karyawan'}
+                                    ${isCoordinator ? 'Kepala Toko' : 'Karyawan'}
                                 </span>
                             </div>
                             <div class="card-body">
                                 ${!isCoordinator ? `
                                     <div class="info-row">
                                         <span class="icon">👔</span>
-                                        <span class="label">Koordinator:</span>
+                                        <span class="label">Kepala Toko:</span>
                                         <span class="value">${emp.coordinator || '-'}</span>
                                     </div>
                                 ` : ''}
@@ -1051,7 +1051,7 @@
                 const excelData = [];
                 
                 // Add header
-                excelData.push(['Toko', 'Posisi', 'Nama', 'Koordinator', 'WhatsApp']);
+                excelData.push(['Toko', 'Posisi', 'Nama', 'Kepala Toko', 'WhatsApp']);
                 
                 // Add data
                 employeeData.stores.forEach(store => {
@@ -1059,7 +1059,7 @@
                     if (store.coordinator.name) {
                         excelData.push([
                             store.name,
-                            'Koordinator',
+                            'Kepala Toko',
                             store.coordinator.name,
                             '-',
                             store.coordinator.whatsapp || 'Belum ada data'
@@ -1087,7 +1087,7 @@
                     { wch: 10 },  // Toko
                     { wch: 12 },  // Posisi
                     { wch: 20 },  // Nama
-                    { wch: 20 },  // Koordinator
+                    { wch: 20 },  // Kepala Toko
                     { wch: 20 }   // WhatsApp
                 ];
                 
@@ -1185,7 +1185,7 @@
                                     <th>No</th>
                                     <th>Posisi</th>
                                     <th>Nama</th>
-                                    <th>Koordinator</th>
+                                    <th>Kepala Toko</th>
                                     <th>WhatsApp</th>
                                 </tr>
                             </thead>
@@ -1196,7 +1196,7 @@
                     printHTML += `
                         <tr class="coordinator">
                             <td>1</td>
-                            <td><strong>Koordinator</strong></td>
+                            <td><strong>Kepala Toko</strong></td>
                             <td><strong>${store.coordinator.name}</strong></td>
                             <td>-</td>
                             <td>${store.coordinator.whatsapp || 'Belum ada data'}</td>
@@ -1263,3 +1263,4 @@
     </script>
 </body>
 </html>
+
