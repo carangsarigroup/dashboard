@@ -13,25 +13,9 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            position: relative;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: -1;
         }
         
         .container {
@@ -46,7 +30,6 @@
             animation: fadeInDown 0.8s ease-out;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             padding: 30px 20px;
             border-radius: 20px;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -82,23 +65,21 @@
             border-radius: 30px;
             font-size: 0.95em;
             font-weight: 600;
-            color: #FF69B4;
+            color: #667eea;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .back-btn, .logout-btn {
+        .back-btn, .logout-btn, .sync-btn {
             background: rgba(255,255,255,0.95);
             border: none;
             padding: 12px 25px;
             border-radius: 30px;
             font-size: 0.95em;
             font-weight: 600;
-            color: #FF69B4;
+            color: #667eea;
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
@@ -106,14 +87,21 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .back-btn:hover, .logout-btn:hover {
+        .back-btn:hover, .logout-btn:hover, .sync-btn:hover {
             background: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .sync-btn.syncing {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .sync-btn.syncing .icon {
+            animation: spin 1s linear infinite;
         }
 
         @keyframes fadeInDown {
@@ -138,7 +126,6 @@
         .stat-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             padding: 25px;
             border-radius: 15px;
             text-align: center;
@@ -149,7 +136,7 @@
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
         .stat-card .icon {
@@ -160,7 +147,7 @@
         .stat-card .value {
             font-size: 2em;
             font-weight: 700;
-            color: #FF69B4;
+            color: #667eea;
             margin-bottom: 5px;
         }
 
@@ -180,10 +167,9 @@
             }
         }
 
-        .search-bar {
+        .controls-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 15px;
             margin-bottom: 30px;
@@ -192,10 +178,17 @@
             animation: fadeInUp 0.8s ease-out 0.3s both;
         }
 
+        .search-filter-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
         .search-bar input {
             width: 100%;
             padding: 15px 20px;
-            border: 2px solid #FF69B4;
+            border: 2px solid #667eea;
             border-radius: 10px;
             font-size: 1em;
             outline: none;
@@ -203,8 +196,60 @@
         }
 
         .search-bar input:focus {
-            border-color: #4A90E2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-select, .sort-select {
+            padding: 15px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 1em;
+            outline: none;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .filter-select:focus, .sort-select:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .data-grid {
@@ -218,7 +263,6 @@
         .employee-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -235,12 +279,12 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .employee-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
         }
 
         .card-header {
@@ -274,17 +318,17 @@
 
         .badge {
             display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.75em;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
         .badge.coordinator {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
         .card-body {
@@ -346,7 +390,6 @@
             padding: 20px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 15px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -361,7 +404,6 @@
             animation: fadeIn 1s ease-out 0.5s both;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             padding: 30px 20px;
             border-radius: 15px;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -388,6 +430,101 @@
             opacity: 0.5;
         }
 
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .loading .spinner {
+            font-size: 3em;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            animation: slideInRight 0.4s ease-out;
+            max-width: 400px;
+        }
+
+        .toast.success {
+            border-left: 5px solid #38ef7d;
+        }
+
+        .toast.error {
+            border-left: 5px solid #f5576c;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            background: rgba(245, 87, 108, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .sync-info {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .sync-info .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .sync-info .status.online {
+            color: #38ef7d;
+        }
+
+        .sync-info .status.offline {
+            color: #f5576c;
+        }
+
         @media (max-width: 768px) {
             .user-bar {
                 top: 10px;
@@ -408,6 +545,19 @@
             .stats-bar {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .search-filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                justify-content: stretch;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -415,8 +565,12 @@
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
-            <span class="user-name" id="displayUsername">Guest</span>
+            <span class="user-name" id="displayUsername">Admin</span>
         </div>
+        <button onclick="syncData()" class="sync-btn" id="syncBtn">
+            <span class="icon">🔄</span>
+            <span>Sync</span>
+        </button>
         <a href="dashboard.html" class="back-btn">
             <span>🏠</span>
             <span>Dashboard</span>
@@ -430,7 +584,15 @@
     <div class="container">
         <div class="header">
             <h1>👥 Data Karyawan Toko</h1>
-            <p>Informasi Lengkap Karyawan dan Manajemen SDM 2025</p>
+            <p>Informasi Lengkap Karyawan dan Manajemen SDM 2025 - Live dari Google Sheets</p>
+        </div>
+
+        <div class="sync-info">
+            <div class="status" id="syncStatus">
+                <span>🔴</span>
+                <span>Connecting to Google Sheets...</span>
+            </div>
+            <span id="lastSync" style="font-size: 0.85em; color: #999;">Belum sync</span>
         </div>
 
         <div class="stats-bar">
@@ -442,7 +604,7 @@
             <div class="stat-card">
                 <div class="icon">👔</div>
                 <div class="value" id="totalCoordinators">0</div>
-                <div class="label">Koordinator</div>
+                <div class="label">Kepala Toko</div>
             </div>
             <div class="stat-card">
                 <div class="icon">🏪</div>
@@ -456,8 +618,35 @@
             </div>
         </div>
 
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
+        <div class="controls-bar">
+            <div class="search-filter-row">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
+                </div>
+                <select class="filter-select" id="filterStore" onchange="filterEmployees()">
+                    <option value="">Semua Toko</option>
+                </select>
+                <select class="sort-select" id="sortBy" onchange="sortEmployees()">
+                    <option value="name-asc">Nama A-Z</option>
+                    <option value="name-desc">Nama Z-A</option>
+                    <option value="store-asc">Toko 1-8</option>
+                    <option value="store-desc">Toko 8-1</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="exportToExcel()">
+                    <span>📊</span>
+                    <span>Export ke Excel</span>
+                </button>
+                <button class="btn btn-primary" onclick="printData()">
+                    <span>🖨️</span>
+                    <span>Print</span>
+                </button>
+                <button class="btn btn-primary" onclick="resetFilters()">
+                    <span>🔄</span>
+                    <span>Reset Filter</span>
+                </button>
+            </div>
         </div>
 
         <div id="employeeData"></div>
@@ -465,158 +654,233 @@
         <div class="footer">
             <p>© 2025 Dashboard Manajemen Toko. All rights reserved.</p>
             <p>Dikembangkan dengan ❤️ untuk manajemen SDM yang lebih baik</p>
+            <p style="font-size: 0.85em; margin-top: 10px; opacity: 0.8;">Data real-time dari Google Sheets</p>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // ============ AUTH SYSTEM ============
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
-            }
-            return null;
-        }
-
-        function deleteCookie(name) {
-            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        }
-
-        function getAuthData() {
-            try {
-                const authString = getCookie('userAuth');
-                if (!authString) return null;
-                return JSON.parse(atob(authString));
-            } catch (e) {
-                console.error('Auth parse error:', e);
-                return null;
-            }
-        }
-
-        function checkAuth() {
-            const authData = getAuthData();
-            if (!authData) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-            
-            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
-                deleteCookie('userAuth');
-                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-                return false;
-            }
-            return true;
-        }
-
-        function logout(message = null) {
-            if (!message && !confirm('Yakin ingin logout?')) return;
-            deleteCookie('userAuth');
-            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
-        }
-
-        // Initialize auth
-        if (checkAuth()) {
-            const authData = getAuthData();
-            if (authData?.username) {
-                document.getElementById('displayUsername').textContent = authData.username;
-            }
-        }
-
-        // ============ DATA KARYAWAN ============
-        const employeeData = {
-            stores: [
-                {
-                    name: "Toko 1",
-                    coordinator: { name: "Sukma", whatsapp: "" },
-                    employees: [
-                        { name: "Faiz" },
-                        { name: "Nadila" },
-                        { name: "Kevin" }
-                    ]
-                },
-                {
-                    name: "Toko 2",
-                    coordinator: { name: "Gung Gandhi", whatsapp: "" },
-                    employees: [
-                        { name: "Mega" },
-                        { name: "Gung Hangga" }
-                    ]
-                },
-                {
-                    name: "Toko 3",
-                    coordinator: { name: "Rusmini", whatsapp: "" },
-                    employees: [
-                        { name: "Lukman" },
-                        { name: "Datrawan" },
-                        { name: "Alit" },
-                        { name: "Rayhan" }
-                    ]
-                },
-                {
-                    name: "Toko 4",
-                    coordinator: { name: "Mira", whatsapp: "" },
-                    employees: [
-                        { name: "Junie" }
-                    ]
-                },
-                {
-                    name: "Toko 5",
-                    coordinator: { name: "Yogi", whatsapp: "" },
-                    employees: [
-                        { name: "Ricky" },
-                        { name: "Fariz" },
-                        { name: "Nabil" },
-                        { name: "Adelia" }
-                    ]
-                },
-                {
-                    name: "Toko 6",
-                    coordinator: { name: "Heri", whatsapp: "" },
-                    employees: [
-                        { name: "Putri" },
-                        { name: "Dila" },
-                        { name: "Yulia" },
-                        { name: "Ryo" }
-                    ]
-                },
-                {
-                    name: "Toko 7",
-                    coordinator: { name: "Sujarman", whatsapp: "" },
-                    employees: [
-                        { name: "Farida" },
-                        { name: "Nely" },
-                        { name: "Paezal" },
-                        { name: "Adam" },
-                        { name: "Liza" }
-                    ]
-                },
-                {
-                    name: "Toko 8",
-                    coordinator: { name: "Novi", whatsapp: "" },
-                    employees: [
-                        { name: "Desak" },
-                        { name: "Ari" },
-                        { name: "Hendrikus" },
-                        { name: "Salim" }
-                    ]
-                }
-            ]
-        };
-
+        // ============ GOOGLE SHEETS CONFIGURATION ============
+        const SPREADSHEET_ID = '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0';
+        const SHEET_NAME = 'KaryawanToko';
+        const API_KEY = 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0'; // GANTI DENGAN API KEY ANDA
+        
         let allEmployees = [];
+        let filteredEmployees = [];
+        let employeeData = { stores: [] };
 
-        function initializeData() {
-            // Flatten all employees for easier searching
-            employeeData.stores.forEach(store => {
-                allEmployees.push({
-                    type: 'coordinator',
-                    name: store.coordinator.name,
-                    whatsapp: store.coordinator.whatsapp,
-                    store: store.name
-                });
+        // ============ GOOGLE SHEETS API ============
+        async function fetchDataFromGoogleSheets() {
+            try {
+                showLoading();
+                updateSyncStatus('connecting', 'Menghubungkan ke Google Sheets...');
+
+                // Validate API Key
+                if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+                    throw new Error('API Key belum diisi! Silakan masukkan API Key Google Sheets Anda di kode.');
+                }
+
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
                 
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error('API Key tidak valid atau Google Sheets API belum di-enable');
+                    } else if (response.status === 404) {
+                        throw new Error('Spreadsheet atau Sheet tidak ditemukan');
+                    } else {
+                        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                    }
+                }
+
+                const data = await response.json();
+                
+                if (!data.values || data.values.length === 0) {
+                    throw new Error('Tidak ada data di spreadsheet');
+                }
+
+                processGoogleSheetsData(data.values);
+                updateSyncStatus('online', 'Connected to Google Sheets');
+                updateLastSync();
+                showToast('Data berhasil dimuat dari Google Sheets!', 'success');
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                updateSyncStatus('offline', 'Connection failed');
+                showError(error.message);
+                showToast('Gagal memuat data: ' + error.message, 'error');
+            }
+        }
+
+        function processGoogleSheetsData(rows) {
+            employeeData.stores = [];
+            
+            // Parse data berdasarkan struktur sheet
+            // Toko 1 (A1:C6), Toko 2 (E1:G5), Toko 3 (I1:K6), Toko 4 (A9:C11)
+            // Toko 5 (E9:G14), Toko 6 (I9:K14), Toko 7 (A17:C24), Toko 8 (E17:G23)
+            
+            const storeRanges = [
+                { name: 'Toko 1', startRow: 1, startCol: 0, coordCol: true },
+                { name: 'Toko 2', startRow: 1, startCol: 4, coordCol: true },
+                { name: 'Toko 3', startRow: 1, startCol: 8, coordCol: true },
+                { name: 'Toko 4', startRow: 9, startCol: 0, coordCol: true },
+                { name: 'Toko 5', startRow: 9, startCol: 4, coordCol: true },
+                { name: 'Toko 6', startRow: 9, startCol: 8, coordCol: true },
+                { name: 'Toko 7', startRow: 17, startCol: 0, coordCol: true },
+                { name: 'Toko 8', startRow: 17, startCol: 4, coordCol: true }
+            ];
+
+            storeRanges.forEach(range => {
+                const store = {
+                    name: range.name,
+                    coordinator: { name: '', whatsapp: '' },
+                    employees: []
+                };
+
+                // Get coordinator (first data row)
+                if (rows[range.startRow] && rows[range.startRow][range.startCol + 1]) {
+                    const coordName = rows[range.startRow][range.startCol + 1];
+                    const coordWhatsApp = rows[range.startRow][range.startCol + 2] || '';
+                    
+                    // Check if it's coordinator by looking for (C) indicator
+                    if (coordName && coordName.includes('(C)')) {
+                        store.coordinator.name = coordName.replace('(C)', '').trim();
+                        store.coordinator.whatsapp = coordWhatsApp;
+                    }
+                }
+
+                // Get employees (remaining rows)
+                let rowIndex = range.startRow + 1;
+                while (rowIndex < rows.length && rows[rowIndex]) {
+                    const name = rows[rowIndex][range.startCol + 1];
+                    const whatsapp = rows[rowIndex][range.startCol + 2] || '';
+                    
+                    // Stop if we hit empty row or next header
+                    if (!name || name === 'Nama' || name.includes('Nomor')) break;
+                    
+                    // Skip if this is coordinator
+                    if (!name.includes('(C)')) {
+                        store.employees.push({
+                            name: name.trim(),
+                            whatsapp: whatsapp
+                        });
+                    }
+                    
+                    rowIndex++;
+                }
+
+                if (store.coordinator.name || store.employees.length > 0) {
+                    employeeData.stores.push(store);
+                }
+            });
+
+            // Populate filter dropdown
+            populateStoreFilter();
+            
+            // Initialize employee list
+            initializeData();
+        }
+
+        function populateStoreFilter() {
+            const filterSelect = document.getElementById('filterStore');
+            filterSelect.innerHTML = '<option value="">Semua Toko</option>';
+            
+            employeeData.stores.forEach(store => {
+                const option = document.createElement('option');
+                option.value = store.name;
+                option.textContent = store.name;
+                filterSelect.appendChild(option);
+            });
+        }
+
+        // ============ SYNC FUNCTIONS ============
+        function syncData() {
+            const btn = document.getElementById('syncBtn');
+            btn.classList.add('syncing');
+            
+            fetchDataFromGoogleSheets().finally(() => {
+                btn.classList.remove('syncing');
+            });
+        }
+
+        function updateSyncStatus(status, message) {
+            const statusEl = document.getElementById('syncStatus');
+            statusEl.className = `status ${status}`;
+            
+            const icon = status === 'online' ? '🟢' : status === 'connecting' ? '🟡' : '🔴';
+            statusEl.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+        }
+
+        function updateLastSync() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastSync').textContent = `Terakhir sync: ${timeStr}`;
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span style="font-size: 1.5em;">${type === 'success' ? '✓' : '⚠️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.4s ease-out reverse';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function showError(message) {
+            const container = document.getElementById('employeeData');
+            container.innerHTML = `
+                <div class="error-message">
+                    <h3>❌ Error</h3>
+                    <p style="margin-top: 10px;">${message}</p>
+                    <button onclick="syncData()" style="margin-top: 15px; padding: 10px 20px; background: white; color: #f5576c; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                        🔄 Coba Lagi
+                    </button>
+                </div>
+            `;
+        }
+
+        function showLoading() {
+            document.getElementById('employeeData').innerHTML = `
+                <div class="loading">
+                    <div class="spinner">⏳</div>
+                    <p>Memuat data dari Google Sheets...</p>
+                </div>
+            `;
+        }
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                showToast('Logout berhasil!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // ============ DATA INITIALIZATION ============
+        function initializeData() {
+            allEmployees = [];
+            
+            employeeData.stores.forEach(store => {
+                // Add coordinator
+                if (store.coordinator.name) {
+                    allEmployees.push({
+                        type: 'coordinator',
+                        name: store.coordinator.name,
+                        whatsapp: store.coordinator.whatsapp,
+                        store: store.name
+                    });
+                }
+                
+                // Add employees
                 store.employees.forEach(emp => {
                     allEmployees.push({
                         type: 'employee',
@@ -628,15 +892,16 @@
                 });
             });
 
+            filteredEmployees = [...allEmployees];
             updateStats();
-            renderEmployees(allEmployees);
+            renderEmployees(filteredEmployees);
         }
 
         function updateStats() {
             const totalEmployees = allEmployees.filter(e => e.type === 'employee').length;
             const totalCoordinators = allEmployees.filter(e => e.type === 'coordinator').length;
             const totalStores = employeeData.stores.length;
-            const totalWithPhone = allEmployees.filter(e => e.whatsapp).length;
+            const totalWithPhone = allEmployees.filter(e => e.whatsapp && e.whatsapp.trim() !== '').length;
 
             document.getElementById('totalEmployees').textContent = totalEmployees;
             document.getElementById('totalCoordinators').textContent = totalCoordinators;
@@ -644,6 +909,7 @@
             document.getElementById('totalWithPhone').textContent = totalWithPhone;
         }
 
+        // ============ RENDER FUNCTIONS ============
         function renderEmployees(employees) {
             const container = document.getElementById('employeeData');
             
@@ -653,7 +919,7 @@
                         <div class="no-results">
                             <div class="icon">🔍</div>
                             <h3>Tidak ada data ditemukan</h3>
-                            <p>Coba ubah kata kunci pencarian Anda</p>
+                            <p>Coba ubah kata kunci pencarian atau filter Anda</p>
                         </div>
                     </div>
                 `;
@@ -678,6 +944,7 @@
                     const isCoordinator = emp.type === 'coordinator';
                     const icon = isCoordinator ? '👔' : '👤';
                     const badgeClass = isCoordinator ? 'coordinator' : '';
+                    const hasWhatsApp = emp.whatsapp && emp.whatsapp.trim() !== '';
                     
                     html += `
                         <div class="employee-card">
@@ -696,15 +963,15 @@
                                     <div class="info-row">
                                         <span class="icon">👔</span>
                                         <span class="label">Koordinator:</span>
-                                        <span class="value">${emp.coordinator}</span>
+                                        <span class="value">${emp.coordinator || '-'}</span>
                                     </div>
                                 ` : ''}
                                 <div class="info-row">
                                     <span class="icon">📱</span>
                                     <span class="label">WhatsApp:</span>
-                                    <span class="value">${emp.whatsapp || 'Belum ada data'}</span>
+                                    <span class="value">${hasWhatsApp ? emp.whatsapp : 'Belum ada data'}</span>
                                 </div>
-                                ${emp.whatsapp ? `
+                                ${hasWhatsApp ? `
                                     <a href="https://wa.me/${emp.whatsapp.replace(/\D/g, '')}" 
                                        class="whatsapp-btn" 
                                        target="_blank">
@@ -723,25 +990,276 @@
             container.innerHTML = html;
         }
 
+        // ============ FILTER & SORT ============
         function filterEmployees() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const storeFilter = document.getElementById('filterStore').value;
             
-            if (!searchTerm) {
-                renderEmployees(allEmployees);
+            filteredEmployees = allEmployees.filter(emp => {
+                const matchesSearch = !searchTerm || 
+                    emp.name.toLowerCase().includes(searchTerm) ||
+                    emp.store.toLowerCase().includes(searchTerm) ||
+                    (emp.coordinator && emp.coordinator.toLowerCase().includes(searchTerm));
+                
+                const matchesStore = !storeFilter || emp.store === storeFilter;
+                
+                return matchesSearch && matchesStore;
+            });
+
+            sortEmployees();
+        }
+
+        function sortEmployees() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            switch(sortBy) {
+                case 'name-asc':
+                    filteredEmployees.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    filteredEmployees.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+                case 'store-asc':
+                    filteredEmployees.sort((a, b) => a.store.localeCompare(b.store));
+                    break;
+                case 'store-desc':
+                    filteredEmployees.sort((a, b) => b.store.localeCompare(a.store));
+                    break;
+            }
+            
+            renderEmployees(filteredEmployees);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStore').value = '';
+            document.getElementById('sortBy').value = 'name-asc';
+            filteredEmployees = [...allEmployees];
+            sortEmployees();
+            showToast('Filter berhasil direset!', 'success');
+        }
+
+        // ============ EXPORT TO EXCEL ============
+        function exportToExcel() {
+            try {
+                if (allEmployees.length === 0) {
+                    showToast('Tidak ada data untuk diexport!', 'error');
+                    return;
+                }
+
+                // Prepare data for Excel
+                const excelData = [];
+                
+                // Add header
+                excelData.push(['Toko', 'Posisi', 'Nama', 'Koordinator', 'WhatsApp']);
+                
+                // Add data
+                employeeData.stores.forEach(store => {
+                    // Add coordinator
+                    if (store.coordinator.name) {
+                        excelData.push([
+                            store.name,
+                            'Koordinator',
+                            store.coordinator.name,
+                            '-',
+                            store.coordinator.whatsapp || 'Belum ada data'
+                        ]);
+                    }
+                    
+                    // Add employees
+                    store.employees.forEach(emp => {
+                        excelData.push([
+                            store.name,
+                            'Karyawan',
+                            emp.name,
+                            store.coordinator.name,
+                            emp.whatsapp || 'Belum ada data'
+                        ]);
+                    });
+                });
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                
+                // Set column widths
+                ws['!cols'] = [
+                    { wch: 10 },  // Toko
+                    { wch: 12 },  // Posisi
+                    { wch: 20 },  // Nama
+                    { wch: 20 },  // Koordinator
+                    { wch: 20 }   // WhatsApp
+                ];
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Data Karyawan");
+                
+                // Generate filename with date
+                const date = new Date();
+                const filename = `Data_Karyawan_${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}.xlsx`;
+                
+                // Download
+                XLSX.writeFile(wb, filename);
+                showToast('Data berhasil diexport ke Excel!', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Gagal export data. Silakan coba lagi.', 'error');
+            }
+        }
+
+        // ============ PRINT ============
+        function printData() {
+            if (allEmployees.length === 0) {
+                showToast('Tidak ada data untuk diprint!', 'error');
                 return;
             }
 
-            const filtered = allEmployees.filter(emp => 
-                emp.name.toLowerCase().includes(searchTerm) ||
-                emp.store.toLowerCase().includes(searchTerm) ||
-                (emp.coordinator && emp.coordinator.toLowerCase().includes(searchTerm))
-            );
-
-            renderEmployees(filtered);
+            const printWindow = window.open('', '_blank');
+            
+            let printHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Data Karyawan Toko</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                        }
+                        h1 {
+                            text-align: center;
+                            color: #667eea;
+                        }
+                        .store-section {
+                            margin: 30px 0;
+                            page-break-inside: avoid;
+                        }
+                        .store-title {
+                            background: #667eea;
+                            color: white;
+                            padding: 10px;
+                            font-weight: bold;
+                            margin-bottom: 10px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                        }
+                        th, td {
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                            text-align: left;
+                        }
+                        th {
+                            background: #f0f0f0;
+                            font-weight: bold;
+                        }
+                        .coordinator {
+                            background: #fff3cd;
+                        }
+                        @media print {
+                            .no-print {
+                                display: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>📊 Data Karyawan Toko 2025</h1>
+                    <p style="text-align: center;">Dicetak pada: ${new Date().toLocaleDateString('id-ID', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}</p>
+                    <p style="text-align: center; color: #666; font-size: 0.9em;">Data dari Google Sheets</p>
+            `;
+            
+            employeeData.stores.forEach(store => {
+                printHTML += `
+                    <div class="store-section">
+                        <div class="store-title">🏪 ${store.name}</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Posisi</th>
+                                    <th>Nama</th>
+                                    <th>Koordinator</th>
+                                    <th>WhatsApp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                if (store.coordinator.name) {
+                    printHTML += `
+                        <tr class="coordinator">
+                            <td>1</td>
+                            <td><strong>Koordinator</strong></td>
+                            <td><strong>${store.coordinator.name}</strong></td>
+                            <td>-</td>
+                            <td>${store.coordinator.whatsapp || 'Belum ada data'}</td>
+                        </tr>
+                    `;
+                }
+                
+                store.employees.forEach((emp, idx) => {
+                    printHTML += `
+                        <tr>
+                            <td>${idx + 2}</td>
+                            <td>Karyawan</td>
+                            <td>${emp.name}</td>
+                            <td>${store.coordinator.name}</td>
+                            <td>${emp.whatsapp || 'Belum ada data'}</td>
+                        </tr>
+                    `;
+                });
+                
+                printHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+            
+            printHTML += `
+                    <div style="text-align: center; margin-top: 40px; color: #666;">
+                        <p>© 2025 Dashboard Manajemen Toko</p>
+                    </div>
+                    <button class="no-print" onclick="window.print()" style="
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        padding: 15px 30px;
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    ">🖨️ Print</button>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            showToast('Halaman print siap!', 'success');
         }
 
-        // Initialize on load
-        window.addEventListener('DOMContentLoaded', initializeData);
+        // ============ INITIALIZE ON LOAD ============
+        window.addEventListener('DOMContentLoaded', () => {
+            // Auto sync on load
+            syncData();
+            
+            // Auto sync every 5 minutes
+            setInterval(() => {
+                console.log('Auto-syncing data...');
+                syncData();
+            }, 5 * 60 * 1000);
+        });
     </script>
 </body>
 </html>
