@@ -648,7 +648,7 @@
                 <span>Kembali ke Dashboard</span>
             </a>
             <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="Cari nama karyawan, toko, atau alamat..." oninput="filterStores()">
+                <input type="text" id="searchInput" placeholder="Cari nama toko, karyawan, atau kepala toko..." oninput="filterStores()">
             </div>
             <div class="select-wrapper">
                 <select id="sortBy" onchange="sortStores()">
@@ -687,7 +687,7 @@
                 </div>
                 <div class="stat-card">
                     <h3 id="totalWithPhone">0</h3>
-                    <p>Memiliki WhatsApp</p>
+                    <p>Total Personel</p>
                 </div>
             </div>
 
@@ -891,101 +891,52 @@
         function processGoogleSheetsData(rows) {
             allStores = [];
             
-            // Struktur data:
-            // - 3 grup horizontal (kolom A-B, D-E, G-H)
-            // - 3 grup vertikal (baris 1-7, 10-16, 19-25)
-            // Total 8 toko (grup 1: 3 toko, grup 2: 3 toko, grup 3: 2 toko)
+            // Skip header row
+            const dataRows = rows.slice(1);
             
-            const storeDefinitions = [
-                // Grup 1 (Row 1-7)
-                { startRow: 0, startCol: 0 },   // A-B: Toko 1
-                { startRow: 0, startCol: 3 },   // D-E: Toko 2
-                { startRow: 0, startCol: 6 },   // G-H: Toko 3
-                // Grup 2 (Row 10-16)
-                { startRow: 9, startCol: 0 },   // A-B: Toko 4
-                { startRow: 9, startCol: 3 },   // D-E: Toko 5
-                { startRow: 9, startCol: 6 },   // G-H: Toko 6
-                // Grup 3 (Row 19-25)
-                { startRow: 18, startCol: 0 },  // A-B: Toko 7
-                { startRow: 18, startCol: 3 },  // D-E: Toko 8
-            ];
-
-            storeDefinitions.forEach(storeDef => {
-                const startRow = storeDef.startRow;
-                const startCol = storeDef.startCol;
+            // Group data by store (Toko)
+            const storeMap = {};
+            
+            dataRows.forEach(row => {
+                if (!row || row.length < 3) return;
                 
-                // Skip if out of bounds
-                if (startRow >= rows.length) return;
+                const storeName = row[0];  // Kolom A: Toko
+                const position = row[1];    // Kolom B: Posisi
+                const name = row[2];        // Kolom C: Nama
                 
-                const headerRow = rows[startRow];
-                if (!headerRow || !headerRow[startCol]) return;
+                if (!storeName || !name) return;
                 
-                const fullHeader = headerRow[startCol];
-                
-                // Skip empty headers
-                if (!fullHeader || fullHeader.trim() === '') return;
-                
-                // Extract store name and code
-                let storeName = fullHeader;
-                let storeCode = '';
-                
-                const match = fullHeader.match(/^(.+?)\s*\(([^)]+)\)$/);
-                if (match) {
-                    storeName = match[1].trim();
-                    storeCode = match[2].trim();
-                }
-                
-                const store = {
-                    name: storeName,
-                    code: storeCode,
-                    coordinator: { name: '', whatsapp: '' },
-                    employees: []
-                };
-                
-                // Row structure:
-                // startRow + 0: Store name header
-                // startRow + 1: Column headers (Nomor, Nama)
-                // startRow + 2: First employee (coordinator with (C))
-                // startRow + 3+: Other employees
-                
-                // Start reading from row 2 (first data row)
-                for (let i = 2; i <= 7; i++) {
-                    const currentRow = startRow + i;
-                    
-                    // Break if out of bounds
-                    if (currentRow >= rows.length) break;
-                    
-                    const row = rows[currentRow];
-                    if (!row) continue;
-                    
-                    const nomor = row[startCol];
-                    const nama = row[startCol + 1];
-                    
-                    // Skip if no name
-                    if (!nama || nama.trim() === '') continue;
-                    
-                    // Skip if this is a header row
-                    if (nama === 'Nama') continue;
-                    
-                    // Check if coordinator
-                    if (nama.includes('(C)')) {
-                        store.coordinator.name = nama.replace('(C)', '').trim();
-                        store.coordinator.whatsapp = ''; // No WhatsApp in current structure
-                    } else if (nomor && nomor.toString().trim() !== '') {
-                        // This is an employee (has a number)
-                        store.employees.push({
-                            name: nama.trim(),
-                            whatsapp: ''
-                        });
+                // Initialize store if not exists
+                if (!storeMap[storeName]) {
+                    // Extract store code if exists in name
+                    let code = '';
+                    const codeMatch = storeName.match(/\(([^)]+)\)$/);
+                    if (codeMatch) {
+                        code = codeMatch[1];
                     }
+                    
+                    storeMap[storeName] = {
+                        name: storeName.replace(/\s*\([^)]*\)$/, '').trim(),
+                        code: code,
+                        coordinator: { name: '', whatsapp: '' },
+                        employees: []
+                    };
                 }
                 
-                // Only add store if it has data
-                if (store.coordinator.name || store.employees.length > 0) {
-                    allStores.push(store);
+                // Add person to store
+                if (position && position.toLowerCase().includes('koordinator')) {
+                    storeMap[storeName].coordinator.name = name.trim();
+                } else {
+                    storeMap[storeName].employees.push({
+                        name: name.trim(),
+                        whatsapp: ''
+                    });
                 }
             });
-
+            
+            // Convert map to array
+            allStores = Object.values(storeMap);
+            
             console.log('Processed stores:', allStores);
             filteredStores = [...allStores];
             updateStats();
@@ -1086,13 +1037,12 @@
                 const matchesName = store.name.toLowerCase().includes(searchTerm);
                 const matchesCode = store.code.toLowerCase().includes(searchTerm);
                 const matchesCoordinator = store.coordinator.name.toLowerCase().includes(searchTerm);
-                const matchesAddress = store.coordinator.address.toLowerCase().includes(searchTerm);
                 
                 const matchesEmployee = store.employees.some(emp => 
                     emp.name.toLowerCase().includes(searchTerm)
                 );
                 
-                return matchesName || matchesCode || matchesCoordinator || matchesAddress || matchesEmployee;
+                return matchesName || matchesCode || matchesCoordinator || matchesEmployee;
             });
 
             sortStores();
