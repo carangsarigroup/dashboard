@@ -369,24 +369,6 @@
             flex: 1;
         }
 
-        .whatsapp-link {
-            color: white;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            background: rgba(37, 211, 102, 0.9);
-            border-radius: 5px;
-            font-size: 0.9em;
-            transition: all 0.2s ease;
-        }
-
-        .whatsapp-link:hover {
-            background: #25D366;
-            transform: translateX(2px);
-        }
-
         .store-body {
             padding: 20px;
         }
@@ -430,26 +412,6 @@
             flex: 1;
             font-weight: 500;
             color: #333;
-        }
-
-        .employee-badge {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 600;
-        }
-
-        .section-title {
-            color: #667eea;
-            font-size: 1.6em;
-            margin: 30px 0 20px 0;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            font-weight: 600;
         }
 
         .user-bar {
@@ -1005,7 +967,7 @@
                         
                         ${store.employees.length > 0 ? `
                             <div class="store-body">
-                                <div class="employee-list">
+                                <div class="employee-list">`;
                 
                 store.employees.forEach((emp, idx) => {
                     html += `
@@ -1061,7 +1023,7 @@
                 default:
                     // Restore original order
                     filteredStores = allStores.filter(store => 
-                        filteredStores.some(fs => fs.code === store.code)
+                        filteredStores.some(fs => fs.code === store.code || fs.name === store.name)
                     );
                     break;
             }
@@ -1082,4 +1044,3 @@
     </script>
 </body>
 </html>
-
