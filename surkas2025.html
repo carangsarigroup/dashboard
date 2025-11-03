@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SURKAS 2025 - Data Management</title>
     <style>
-        <style>
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -269,6 +268,19 @@
             font-size: 24px;
             font-weight: bold;
         }
+        
+        .sheet-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .sheet-selector select {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 300px;
+        }
     </style>
 </head>
 <body>
@@ -279,13 +291,16 @@
         </div>
 
         <div class="content">
-            <div class="stats" id="stats"></div>
+            <div class="stats" id="stats">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
 
-            <div class="stats" id="stats"></div>
-
-            <div style="text-align: center; margin-bottom: 20px;">
-                <select id="sheetDropdown" style="padding: 12px 20px; border: 2px solid #667eea; border-radius: 8px; font-size: 16px; min-width: 300px;" onchange="handleSheetChange()">
+            <div class="sheet-selector">
+                <select id="sheetDropdown" onchange="handleSheetChange()">
                     <option value="">Pilih Toko...</option>
+                    <option value="toko_a">Toko A</option>
+                    <option value="toko_b">Toko B</option>
+                    <option value="toko_c">Toko C</option>
                 </select>
             </div>
 
@@ -314,6 +329,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
+                        <!-- Data will be populated by JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -382,116 +398,73 @@
     <script>
         // ============ CONFIG ============
         const CONFIG = {
-            // REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyNNl7FwAuuzj4CD7LGofBPdTBIYSb5drfw6MQyggvan8RBwBpI926s-UBmLwKWoOQ/exec'
+            // Using localStorage for demo purposes
+            // In a real app, you would use Google Apps Script or Sheets API
+            STORAGE_KEY: 'surkas2025_data'
         };
 
         let data = [];
         let currentSheet = null;
-        let sheets = [];
 
-        // ============ GOOGLE SHEETS API ============
-        async function loadSheetsList() {
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-                
-                sheets = result.sheets.map(sheet => sheet.properties.title);
-                
-                const dropdown = document.getElementById('sheetDropdown');
-                dropdown.innerHTML = '<option value="">Pilih Toko...</option>' + 
-                    sheets.map(name => `<option value="${name}">${name}</option>`).join('');
-                
-            } catch (error) {
-                console.error('Error loading sheets:', error);
-                alert('Gagal memuat daftar toko: ' + error.message);
-            }
-        }
-
-        async function loadSheetData(sheetName) {
-            if (!sheetName) return;
-            
-            try {
-                document.getElementById('loading').style.display = 'block';
-                currentSheet = sheetName;
-                
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-                
-                const values = result.values || [];
-                if (values.length > 1) {
-                    data = values.slice(1).filter(row => row[1]).map(row => ({
-                        triwulan: row[0] || '',
-                        bulan: row[1] || '',
-                        ebitLr: formatCurrency(row[2] || '0'),
-                        penggunaanLaba: formatCurrency(row[3] || '0'),
-                        labaNet: formatCurrency(row[4] || '0'),
-                        bayarListrik: formatCurrency(row[5] || '0'),
-                        sisaSurkas: formatCurrency(row[6] || '0')
-                    }));
-                } else {
+        // ============ DATA MANAGEMENT ============
+        function loadData() {
+            const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (stored) {
+                try {
+                    const allData = JSON.parse(stored);
+                    const sheetData = allData[currentSheet];
+                    data = sheetData ? sheetData : [];
+                } catch (e) {
+                    console.error('Error loading data:', e);
                     data = [];
                 }
-                
-                renderTable();
-                document.getElementById('loading').style.display = 'none';
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('loading').style.display = 'none';
-                alert('Gagal memuat data: ' + error.message);
+            } else {
+                data = [];
+            }
+            renderTable();
+        }
+
+        function saveDataToStorage() {
+            try {
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+                const allData = stored ? JSON.parse(stored) : {};
+                allData[currentSheet] = data;
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(allData));
+                return true;
+            } catch (e) {
+                console.error('Error saving data:', e);
+                alert('Gagal menyimpan data: ' + e.message);
+                return false;
             }
         }
 
-        async function saveToSheet() {
-            if (!currentSheet) {
-                alert('Pilih toko terlebih dahulu');
-                return false;
-            }
-            
-            try {
-                // Note: Writing to Google Sheets requires OAuth authentication
-                // This is a read-only implementation with API key
-                alert('⚠️ Penting: Google Sheets API dengan API Key hanya mendukung READ (baca data).\n\n' +
-                      'Untuk WRITE (simpan/edit/hapus), diperlukan OAuth 2.0 authentication.\n\n' +
-                      'Alternatif:\n' +
-                      '1. Gunakan Google Apps Script sebagai backend\n' +
-                      '2. Setup OAuth 2.0 client\n' +
-                      '3. Manual update di Google Sheets\n\n' +
-                      'Data saat ini disimpan di memory browser saja.');
-                return false;
-            } catch (error) {
-                console.error('Error saving:', error);
-                alert('Gagal menyimpan: ' + error.message);
-                return false;
-            }
-        }
-            if (!num || num === 'Rp0' || num === '') return 'Rp0';
-            const numStr = num.toString().replace(/[^\d-]/g, '');
-            const isNegative = numStr.startsWith('-');
-            const absNum = Math.abs(parseInt(numStr) || 0);
+        // ============ UTILITY FUNCTIONS ============
+        function formatCurrency(num) {
+            if (!num && num !== 0) return 'Rp0';
+            const numValue = typeof num === 'string' ? parseCurrency(num) : num;
+            const isNegative = numValue < 0;
+            const absNum = Math.abs(numValue);
             const formatted = absNum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             return (isNegative ? '-' : '') + 'Rp' + formatted;
         }
 
-        function formatCurrency(num) {
+        function parseCurrency(str) {
             if (!str || str === 'Rp0') return 0;
             return parseInt(str.replace(/[^\d-]/g, '')) || 0;
         }
 
+        // ============ UI FUNCTIONS ============
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="8" style="text-align: center; padding: 20px; color: #666;">Tidak ada data untuk ditampilkan. Klik "Tambah Data Baru" untuk menambahkan data.</td>`;
+                tbody.appendChild(tr);
+                updateStats();
+                return;
+            }
 
             data.forEach((row, index) => {
                 const tr = document.createElement('tr');
@@ -572,7 +545,7 @@
             e.preventDefault();
             
             const newData = {
-                triwulan: parseInt(document.getElementById('triwulan').value),
+                triwulan: document.getElementById('triwulan').value,
                 bulan: document.getElementById('bulan').value,
                 ebitLr: formatCurrency(document.getElementById('ebitLr').value),
                 penggunaanLaba: formatCurrency(document.getElementById('penggunaanLaba').value),
@@ -589,7 +562,7 @@
                 data.push(newData);
             }
 
-            saveToSheet();
+            saveDataToStorage();
             renderTable();
             closeModal();
         }
@@ -601,7 +574,7 @@
         function deleteData(index) {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                 data.splice(index, 1);
-                saveToSheet();
+                saveDataToStorage();
                 renderTable();
             }
         }
@@ -609,9 +582,18 @@
         function handleSheetChange() {
             const select = document.getElementById('sheetDropdown');
             const sheetName = select.value;
+            
             if (sheetName) {
-                loadSheetData(sheetName);
+                currentSheet = sheetName;
+                document.getElementById('loading').style.display = 'block';
+                
+                // Simulate API loading delay
+                setTimeout(() => {
+                    loadData();
+                    document.getElementById('loading').style.display = 'none';
+                }, 800);
             } else {
+                currentSheet = null;
                 data = [];
                 renderTable();
             }
@@ -627,6 +609,48 @@
             });
         }
 
+        // Initialize with sample data if empty
+        function initializeSampleData() {
+            const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (!stored) {
+                const sampleData = {
+                    'toko_a': [
+                        {
+                            triwulan: '1',
+                            bulan: 'Januari (2025)',
+                            ebitLr: 'Rp5.000.000',
+                            penggunaanLaba: 'Rp1.200.000',
+                            labaNet: 'Rp3.800.000',
+                            bayarListrik: 'Rp800.000',
+                            sisaSurkas: 'Rp3.000.000'
+                        },
+                        {
+                            triwulan: '1',
+                            bulan: 'Februari (2025)',
+                            ebitLr: 'Rp5.500.000',
+                            penggunaanLaba: 'Rp1.500.000',
+                            labaNet: 'Rp4.000.000',
+                            bayarListrik: 'Rp850.000',
+                            sisaSurkas: 'Rp3.150.000'
+                        }
+                    ],
+                    'toko_b': [
+                        {
+                            triwulan: '1',
+                            bulan: 'Januari (2025)',
+                            ebitLr: 'Rp4.200.000',
+                            penggunaanLaba: 'Rp1.000.000',
+                            labaNet: 'Rp3.200.000',
+                            bayarListrik: 'Rp700.000',
+                            sisaSurkas: 'Rp2.500.000'
+                        }
+                    ]
+                };
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(sampleData));
+            }
+        }
+
+        // Event Listeners
         window.onclick = function(event) {
             const modal = document.getElementById('modal');
             if (event.target === modal) {
@@ -636,7 +660,10 @@
 
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
-            loadSheetsList();
+            initializeSampleData();
+            // Load first sheet by default
+            document.getElementById('sheetDropdown').value = 'toko_a';
+            handleSheetChange();
         });
     </script>
 </body>
