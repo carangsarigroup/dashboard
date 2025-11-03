@@ -621,7 +621,7 @@
         <div class="controls-bar">
             <div class="search-filter-row">
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan..." oninput="filterEmployees()">
+                    <input type="text" id="searchInput" placeholder="🔍 Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
                 </div>
                 <select class="filter-select" id="filterStore" onchange="filterEmployees()">
                     <option value="">Semua Toko</option>
@@ -716,32 +716,50 @@
         function processGoogleSheetsData(rows) {
             employeeData.stores = [];
             
-            // Parse data berdasarkan struktur sheet
-            // Toko 1 (A1:C6), Toko 2 (E1:G5), Toko 3 (I1:K6), Toko 4 (A9:C11)
-            // Toko 5 (E9:G14), Toko 6 (I9:K14), Toko 7 (A17:C24), Toko 8 (E17:G23)
+            // Parse data berdasarkan struktur sheet baru
+            // Layout: 3 kolom per toko (Nomor, Nama, Nomor WhatsApp)
+            // Row 0: Header dengan nama tim lengkap
+            // Row 1: Sub-header (Nomor, Nama, Nomor WhatsApp)
+            // Row 2+: Data karyawan
             
             const storeRanges = [
-                { name: 'Toko 1', startRow: 1, startCol: 0, coordCol: true },
-                { name: 'Toko 2', startRow: 1, startCol: 4, coordCol: true },
-                { name: 'Toko 3', startRow: 1, startCol: 8, coordCol: true },
-                { name: 'Toko 4', startRow: 9, startCol: 0, coordCol: true },
-                { name: 'Toko 5', startRow: 9, startCol: 4, coordCol: true },
-                { name: 'Toko 6', startRow: 9, startCol: 8, coordCol: true },
-                { name: 'Toko 7', startRow: 17, startCol: 0, coordCol: true },
-                { name: 'Toko 8', startRow: 17, startCol: 4, coordCol: true }
+                { startRow: 0, startCol: 0, code: 'F4SD' },  // Tim Indomaret SPBU Gatsu Timur
+                { startRow: 0, startCol: 4, code: 'FKOM' },  // Tim Indomaret Wanagiri SRA
+                { startRow: 0, startCol: 8, code: 'FHEN' },  // Tim Indomaret SPBU Cempage
+                { startRow: 8, startCol: 0, code: 'FEHU' },  // Tim Indomaret Latusari 2 Mambal
+                { startRow: 8, startCol: 4, code: 'FIVI' },  // Tim Indomaret Toko Anugrah Ketapang
+                { startRow: 8, startCol: 8, code: 'FZYY' },  // Tim Indomaret Pemuda 28 Mataram
+                { startRow: 16, startCol: 0, code: '1SFY' }, // Tim Alfamart SPBU Mantang
+                { startRow: 16, startCol: 4, code: 'Q789' }  // Tim Alfamart SPBU Dewi Anom Rendang
             ];
 
             storeRanges.forEach(range => {
+                // Get store name from header (row 0)
+                const headerCell = rows[range.startRow] ? rows[range.startRow][range.startCol] : '';
+                let storeName = headerCell;
+                
+                // Extract store name (remove code in parentheses)
+                if (storeName && storeName.includes('(')) {
+                    storeName = storeName.replace(/\s*\([^)]*\)/, '').trim();
+                }
+                
+                // Fallback to code if name not found
+                if (!storeName) {
+                    storeName = `Toko ${range.code}`;
+                }
+
                 const store = {
-                    name: range.name,
+                    name: storeName,
+                    code: range.code,
                     coordinator: { name: '', whatsapp: '' },
                     employees: []
                 };
 
-                // Get coordinator (first data row)
-                if (rows[range.startRow] && rows[range.startRow][range.startCol + 1]) {
-                    const coordName = rows[range.startRow][range.startCol + 1];
-                    const coordWhatsApp = rows[range.startRow][range.startCol + 2] || '';
+                // Get coordinator (first data row after sub-header)
+                const dataStartRow = range.startRow + 2; // Skip header and sub-header
+                if (rows[dataStartRow] && rows[dataStartRow][range.startCol + 1]) {
+                    const coordName = rows[dataStartRow][range.startCol + 1];
+                    const coordWhatsApp = rows[dataStartRow][range.startCol + 2] || '';
                     
                     // Check if it's coordinator by looking for (C) indicator
                     if (coordName && coordName.includes('(C)')) {
@@ -751,23 +769,34 @@
                 }
 
                 // Get employees (remaining rows)
-                let rowIndex = range.startRow + 1;
-                while (rowIndex < rows.length && rows[rowIndex]) {
-                    const name = rows[rowIndex][range.startCol + 1];
-                    const whatsapp = rows[rowIndex][range.startCol + 2] || '';
+                let rowIndex = dataStartRow + 1;
+                const maxRows = 10; // Safety limit
+                let emptyRowCount = 0;
+                
+                for (let i = 0; i < maxRows && rowIndex < rows.length; i++, rowIndex++) {
+                    const row = rows[rowIndex];
+                    if (!row) break;
                     
-                    // Stop if we hit empty row or next header
-                    if (!name || name === 'Nama' || name.includes('Nomor')) break;
+                    const name = row[range.startCol + 1];
+                    const whatsapp = row[range.startCol + 2] || '';
+                    
+                    // Stop if we hit header of next section or too many empty rows
+                    if (name && (name === 'Nama' || name.includes('Tim '))) break;
+                    if (!name || name.trim() === '') {
+                        emptyRowCount++;
+                        if (emptyRowCount >= 2) break;
+                        continue;
+                    }
+                    
+                    emptyRowCount = 0;
                     
                     // Skip if this is coordinator
-                    if (!name.includes('(C)')) {
+                    if (!name.includes('(C)') && name.trim() !== '') {
                         store.employees.push({
                             name: name.trim(),
                             whatsapp: whatsapp
                         });
                     }
-                    
-                    rowIndex++;
                 }
 
                 if (store.coordinator.name || store.employees.length > 0) {
@@ -955,14 +984,14 @@
                                     <div class="subtitle">${emp.store}</div>
                                 </div>
                                 <span class="badge ${badgeClass}">
-                                    ${isCoordinator ? 'Kepala Toko' : 'Karyawan'}
+                                    ${isCoordinator ? 'Koordinator' : 'Karyawan'}
                                 </span>
                             </div>
                             <div class="card-body">
                                 ${!isCoordinator ? `
                                     <div class="info-row">
                                         <span class="icon">👔</span>
-                                        <span class="label">Kepala Toko:</span>
+                                        <span class="label">Koordinator:</span>
                                         <span class="value">${emp.coordinator || '-'}</span>
                                     </div>
                                 ` : ''}
@@ -1051,7 +1080,7 @@
                 const excelData = [];
                 
                 // Add header
-                excelData.push(['Toko', 'Posisi', 'Nama', 'Kepala Toko', 'WhatsApp']);
+                excelData.push(['Toko', 'Posisi', 'Nama', 'Koordinator', 'WhatsApp']);
                 
                 // Add data
                 employeeData.stores.forEach(store => {
@@ -1059,7 +1088,7 @@
                     if (store.coordinator.name) {
                         excelData.push([
                             store.name,
-                            'Kepala Toko',
+                            'Koordinator',
                             store.coordinator.name,
                             '-',
                             store.coordinator.whatsapp || 'Belum ada data'
@@ -1087,7 +1116,7 @@
                     { wch: 10 },  // Toko
                     { wch: 12 },  // Posisi
                     { wch: 20 },  // Nama
-                    { wch: 20 },  // Kepala Toko
+                    { wch: 20 },  // Koordinator
                     { wch: 20 }   // WhatsApp
                 ];
                 
@@ -1185,7 +1214,7 @@
                                     <th>No</th>
                                     <th>Posisi</th>
                                     <th>Nama</th>
-                                    <th>Kepala Toko</th>
+                                    <th>Koordinator</th>
                                     <th>WhatsApp</th>
                                 </tr>
                             </thead>
@@ -1196,7 +1225,7 @@
                     printHTML += `
                         <tr class="coordinator">
                             <td>1</td>
-                            <td><strong>Kepala Toko</strong></td>
+                            <td><strong>Koordinator</strong></td>
                             <td><strong>${store.coordinator.name}</strong></td>
                             <td>-</td>
                             <td>${store.coordinator.whatsapp || 'Belum ada data'}</td>
@@ -1263,4 +1292,3 @@
     </script>
 </body>
 </html>
-
