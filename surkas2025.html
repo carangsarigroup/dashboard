@@ -3,1048 +3,638 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Surplus Kas Toko</title>
+    <title>SURKAS 2025 - Data Management</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: -1;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
-        }
-        
-        .controls {
-            padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .select-wrapper {
-            position: relative;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .select-wrapper select {
-            width: 100%;
-            padding: 12px 40px 12px 15px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-            cursor: pointer;
-            appearance: none;
-            transition: all 0.3s ease;
-        }
-
-        .select-wrapper select:hover {
-            border-color: #FF69B4;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
-        }
-
-        .select-wrapper select:focus {
-            outline: none;
-            border-color: #FF69B4;
-            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
-        }
-
-        .select-wrapper::after {
-            content: '▼';
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            color: #FF69B4;
-            font-size: 12px;
-        }
-
-        .back-btn {
-            background: rgba(255, 105, 180, 0.1);
-            color: #FF69B4;
-            padding: 12px 30px;
-            border: 2px solid #FF69B4;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .back-btn:hover {
-            background: #FF69B4;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #FF69B4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
+        <style>
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            color: #FF69B4;
-            font-size: 18px;
-            font-weight: 500;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px;
-            border-left: 5px solid #f5c6cb;
         }
 
-        .error strong {
-            display: block;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
             margin-bottom: 10px;
-            font-size: 1.1em;
         }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+
+        .content {
+            padding: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
-            transition: transform 0.3s ease;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
-        }
-        
-        .stat-card h3 {
-            font-size: 1.8em;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        
-        .stat-card p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
-
-        .stat-card-finale {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card-finale:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-        }
-        
-        .stat-card-finale h3 {
-            font-size: 1.8em;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        
-        .stat-card-finale p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
-        
-        .refresh-btn {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 12px 30px;
+        .btn {
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
+            cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .table-container {
-            overflow-x: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
-        
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 300px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
-        th {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 16px;
-            text-align: center;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
             font-weight: 600;
-            font-size: 0.9em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            white-space: nowrap;
-            border-right: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
         }
 
-        th:last-child {
-            border-right: none;
-        }
-        
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #e9ecef;
-            border-right: 1px solid #e9ecef;
-            color: #495057;
-        }
-
-        td:last-child {
-            border-right: none;
-        }
-
-        td.triwulan {
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.1em;
-            background: #f8f9fa;
-            color: #FF69B4;
-        }
-
-        td.month {
-            font-weight: 500;
-            padding-left: 30px;
-        }
-
-        td.currency {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-        }
-
-        td.currency.positive {
-            color: #28a745;
-        }
-
-        td.currency.negative {
-            color: #dc3545;
-        }
-
-        td.currency.zero {
-            color: #6c757d;
-        }
-        
         tbody tr {
-            transition: background 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: #f8f9ff;
+            transform: scale(1.01);
         }
 
-        .year-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
-        }
-
-        .summary-section {
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #FF69B4;
-        }
-
-        .summary-section h3 {
-            color: #FF69B4;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .summary-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .summary-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .summary-item .label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-
-        .summary-item .value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #FF69B4;
-        }
-
-        .summary-item-finale {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
-            transition: transform 0.2s ease;
-        }
-
-        .summary-item-finale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
-        }
-
-        .summary-item-finale .label {
-            font-size: 0.9em;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .summary-item-finale .value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .user-bar {
+        .modal {
+            display: none;
             position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
             z-index: 1000;
-            animation: fadeInDown 0.8s ease-out;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
         }
 
-        @keyframes fadeInDown {
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
             from {
+                transform: translateY(-50px);
                 opacity: 0;
-                transform: translateY(-30px);
             }
             to {
-                opacity: 1;
                 transform: translateY(0);
+                opacity: 1;
             }
         }
 
-        .user-info {
-            background: rgba(255,255,255,0.95);
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 0.95em;
-            font-weight: 600;
-            color: #FF69B4;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .modal-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
         }
 
-        .logout-btn {
-            background: rgba(255,255,255,0.95);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 0.95em;
-            font-weight: 600;
-            color: #FF69B4;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 24px;
         }
 
-        .logout-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .last-update {
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .empty-state-icon {
-            font-size: 4em;
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .empty-state h2 {
-            color: #FF69B4;
-            margin-bottom: 10px;
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
 
-            .user-bar {
-                top: 10px;
-                right: 10px;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-            }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
 
-            .header h1 {
-                font-size: 1.8em;
-            }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
 
-            .controls {
-                padding: 20px;
-                flex-direction: column;
-            }
+        .close:hover {
+            color: #000;
+        }
 
-            .select-wrapper {
-                min-width: 100%;
-            }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
-            .back-btn, .refresh-btn {
-                width: 100%;
-                justify-content: center;
-            }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
 
-            .content {
-                padding: 20px;
-            }
+        .currency {
+            text-align: right;
+            font-family: monospace;
+        }
 
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
         }
     </style>
 </head>
-
 <body>
-    <div class="user-bar">
-        <div class="user-info">
-            <span>👤</span>
-            <span id="displayUsername">Guest</span>
-        </div>
-        <button onclick="logout()" class="logout-btn">
-            <span>🚪</span>
-            <span>Logout</span>
-        </button>
-    </div>
-
     <div class="container">
         <div class="header">
-            <h1>💰 Laporan Surplus Kas Toko</h1>
-            <p>Monitoring Pembagian Laba & Kas Triwulanan</p>
+            <h1>📊 SURKAS 2025</h1>
+            <p>Sistem Manajemen Data Triwulan</p>
         </div>
-        
-        <div class="controls">
-            <a href="index.html" class="back-btn">
-                <span>🏠</span>
-                <span>Kembali ke Dashboard</span>
-            </a>
-            <div class="select-wrapper">
-                <select id="sheetSelect" onchange="handleSheetChange()">
+
+        <div class="content">
+            <div class="stats" id="stats"></div>
+
+            <div class="stats" id="stats"></div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <select id="sheetDropdown" style="padding: 12px 20px; border: 2px solid #667eea; border-radius: 8px; font-size: 16px; min-width: 300px;" onchange="handleSheetChange()">
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
-            <button class="refresh-btn" onclick="handleRefresh()">
-                <span>🔄</span>
-                <span>Refresh</span>
-            </button>
-        </div>
-        
-        <div class="content" id="content">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">Memuat data...</div>
+
+            <div id="loading" style="display: none; text-align: center; padding: 20px;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 10px; color: #667eea;">Memuat data...</p>
             </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="openModal()">➕ Tambah Data Baru</button>
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Cari data..." onkeyup="filterTable()">
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Triwulan</th>
+                            <th>Bulan</th>
+                            <th>Ebit LR</th>
+                            <th>Penggunaan Laba Kas Dari FRCSOR</th>
+                            <th>Laba Net ditransfer</th>
+                            <th>Bayar Listrik</th>
+                            <th>Sisa Surkas</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+            </div>
+            <form id="dataForm" onsubmit="saveData(event)">
+                <input type="hidden" id="editIndex">
+                
+                <div class="form-group">
+                    <label>Triwulan:</label>
+                    <select id="triwulan" required>
+                        <option value="">Pilih Triwulan</option>
+                        <option value="1">Triwulan 1</option>
+                        <option value="2">Triwulan 2</option>
+                        <option value="3">Triwulan 3</option>
+                        <option value="4">Triwulan 4</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Bulan:</label>
+                    <input type="text" id="bulan" placeholder="contoh: November (2024)" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ebit LR:</label>
+                    <input type="text" id="ebitLr" placeholder="Rp0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Penggunaan Laba Kas Dari FRCSOR:</label>
+                    <input type="text" id="penggunaanLaba" placeholder="Rp0">
+                </div>
+
+                <div class="form-group">
+                    <label>Laba Net ditransfer:</label>
+                    <input type="text" id="labaNet" placeholder="Rp0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Bayar Listrik:</label>
+                    <input type="text" id="bayarListrik" placeholder="Rp0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Sisa Surkas:</label>
+                    <input type="text" id="sisaSurkas" placeholder="Rp0" required>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success">💾 Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">❌ Batal</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // ============ AUTH SYSTEM ============
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
-            }
-            return null;
-        }
-
-        function deleteCookie(name) {
-            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        }
-
-        function getAuthData() {
-            try {
-                const authString = getCookie('userAuth');
-                if (!authString) return null;
-                return JSON.parse(atob(authString));
-            } catch (e) {
-                console.error('Auth parse error:', e);
-                return null;
-            }
-        }
-
-        function checkAuth() {
-            const authData = getAuthData();
-            if (!authData) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-            
-            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
-                deleteCookie('userAuth');
-                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-                return false;
-            }
-            return true;
-        }
-
-        function logout(message = null) {
-            if (!message && !confirm('Yakin ingin logout?')) return;
-            deleteCookie('userAuth');
-            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
-        }
-
-        // Initialize auth
-        if (checkAuth()) {
-            const authData = getAuthData();
-            if (authData?.username) {
-                document.getElementById('displayUsername').textContent = authData.username;
-            }
-        }
-
         // ============ CONFIG ============
         const CONFIG = {
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
-            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
+            // REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyNNl7FwAuuzj4CD7LGofBPdTBIYSb5drfw6MQyggvan8RBwBpI926s-UBmLwKWoOQ/exec'
         };
 
-        // ============ STATE MANAGEMENT ============
-        let appState = {
-            sheets: [],
-            currentSheet: null,
-            cache: {},
-            lastUpdate: null
-        };
+        let data = [];
+        let currentSheet = null;
+        let sheets = [];
 
-        // ============ UTILITY FUNCTIONS ============
-        function formatRupiah(value) {
-            if (!value && value !== 0) return 'Rp0';
-            
-            const num = typeof value === 'string' 
-                ? parseFloat(value.replace(/[^\d.-]/g, ''))
-                : value;
-            
-            if (isNaN(num)) return 'Rp0';
-            
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(num);
-        }
-
-        function parseNumber(value) {
-            if (!value) return 0;
-            const str = value.toString().replace(/[^\d.-]/g, '');
-            const num = parseFloat(str);
-            return isNaN(num) ? 0 : num;
-        }
-
-        function showLoading(message = 'Memuat data...') {
-            document.getElementById('content').innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">${message}</div>
-                </div>
-            `;
-        }
-
-        function showError(title, message) {
-            document.getElementById('content').innerHTML = `
-                <div class="error">
-                    <strong>❌ ${title}</strong>
-                    ${message}
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            document.getElementById('content').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📊</div>
-                    <h2>Pilih Toko untuk Melihat Data</h2>
-                    <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
-                </div>
-            `;
-        }
-
-        // ============ CACHE MANAGEMENT ============
-        function getCachedData(sheetName) {
-            const cached = appState.cache[sheetName];
-            if (!cached) return null;
-            
-            const now = Date.now();
-            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
-                delete appState.cache[sheetName];
-                return null;
-            }
-            
-            return cached.data;
-        }
-
-        function setCachedData(sheetName, data) {
-            appState.cache[sheetName] = {
-                data: data,
-                timestamp: Date.now()
-            };
-        }
-
-        // ============ LOCAL STORAGE ============
-        function saveLastSheet(sheetName) {
-            try {
-                const data = { sheet: sheetName, timestamp: Date.now() };
-                sessionStorage.setItem('lastSheet', JSON.stringify(data));
-            } catch (e) {
-                console.warn('Could not save to sessionStorage:', e);
-            }
-        }
-
-        function getLastSheet() {
-            try {
-                const stored = sessionStorage.getItem('lastSheet');
-                if (!stored) return null;
-                const data = JSON.parse(stored);
-                if (Date.now() - data.timestamp > 3600000) return null;
-                return data.sheet;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // ============ API FUNCTIONS ============
+        // ============ GOOGLE SHEETS API ============
         async function loadSheetsList() {
             try {
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
-                const data = await response.json();
+                const result = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error.message);
+                if (result.error) {
+                    throw new Error(result.error.message);
                 }
                 
-                appState.sheets = data.sheets.map(sheet => sheet.properties.title);
+                sheets = result.sheets.map(sheet => sheet.properties.title);
                 
-                const sheetSelect = document.getElementById('sheetSelect');
-                sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
-                    appState.sheets.map(name => 
-                        `<option value="${name}">${name}</option>`
-                    ).join('');
-                
-                const lastSheet = getLastSheet();
-                if (lastSheet && appState.sheets.includes(lastSheet)) {
-                    sheetSelect.value = lastSheet;
-                    loadSheetData(lastSheet);
-                } else {
-                    showEmptyState();
-                }
+                const dropdown = document.getElementById('sheetDropdown');
+                dropdown.innerHTML = '<option value="">Pilih Toko...</option>' + 
+                    sheets.map(name => `<option value="${name}">${name}</option>`).join('');
                 
             } catch (error) {
                 console.error('Error loading sheets:', error);
-                showError('Gagal Memuat Daftar Sheet', `
-                    ${error.message}
-                    <br><br>
-                    <strong>Pastikan:</strong>
-                    <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Spreadsheet ID benar</li>
-                        <li>API Key valid</li>
-                        <li>Google Sheets API sudah enabled</li>
-                        <li>Sheet sudah public</li>
-                    </ul>
-                `);
+                alert('Gagal memuat daftar toko: ' + error.message);
             }
         }
 
-        async function loadSheetData(sheetName, forceRefresh = false) {
-            if (!sheetName) {
-                showEmptyState();
-                return;
-            }
-
-            if (!forceRefresh) {
-                const cached = getCachedData(sheetName);
-                if (cached) {
-                    console.log('Using cached data for:', sheetName);
-                    displayData(cached, sheetName);
-                    return;
-                }
-            }
-            
-            showLoading(`Memuat data: ${sheetName}`);
-            appState.currentSheet = sheetName;
+        async function loadSheetData(sheetName) {
+            if (!sheetName) return;
             
             try {
+                document.getElementById('loading').style.display = 'block';
+                currentSheet = sheetName;
+                
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
-                const data = await response.json();
+                const result = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error.message);
+                if (result.error) {
+                    throw new Error(result.error.message);
                 }
                 
-                if (!data.values || data.values.length === 0) {
-                    showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
-                    return;
+                const values = result.values || [];
+                if (values.length > 1) {
+                    data = values.slice(1).filter(row => row[1]).map(row => ({
+                        triwulan: row[0] || '',
+                        bulan: row[1] || '',
+                        ebitLr: formatCurrency(row[2] || '0'),
+                        penggunaanLaba: formatCurrency(row[3] || '0'),
+                        labaNet: formatCurrency(row[4] || '0'),
+                        bayarListrik: formatCurrency(row[5] || '0'),
+                        sisaSurkas: formatCurrency(row[6] || '0')
+                    }));
+                } else {
+                    data = [];
                 }
                 
-                setCachedData(sheetName, data.values);
-                appState.lastUpdate = new Date();
-                
-                displayData(data.values, sheetName);
+                renderTable();
+                document.getElementById('loading').style.display = 'none';
                 
             } catch (error) {
                 console.error('Error loading data:', error);
-                showError('Gagal Memuat Data', `
-                    ${error.message}
-                    <br><br>
-                    <strong>Sheet:</strong> "${sheetName}"
-                `);
+                document.getElementById('loading').style.display = 'none';
+                alert('Gagal memuat data: ' + error.message);
             }
         }
 
-        // ============ DATA PROCESSING ============
-        function processRowData(row) {
-            const triwulan = row[0] || '';
-            const bulan = row[1] || '';
-            const ebitdaLR = parseNumber(row[2]);
-            const penggunaanLabaKas = parseNumber(row[3]);
-            const labaNetDitransfer = parseNumber(row[4]);
-            const bayarListrik = parseNumber(row[5]);
-            
-            let sisaSurkas = parseNumber(row[6]);
-            if (!sisaSurkas && labaNetDitransfer && bayarListrik) {
-                sisaSurkas = labaNetDitransfer - bayarListrik;
-            }
-            
-            return {
-                triwulan,
-                bulan,
-                ebitdaLR,
-                penggunaanLabaKas,
-                labaNetDitransfer,
-                bayarListrik,
-                sisaSurkas
-            };
-        }
-
-        function calculateTotals(rows) {
-            return rows.reduce((totals, row) => {
-                const data = processRowData(row);
-                return {
-                    ebitdaLR: totals.ebitdaLR + data.ebitdaLR,
-                    penggunaanLabaKas: totals.penggunaanLabaKas + data.penggunaanLabaKas,
-                    labaNetDitransfer: totals.labaNetDitransfer + data.labaNetDitransfer,
-                    bayarListrik: totals.bayarListrik + data.bayarListrik,
-                    sisaSurkas: totals.sisaSurkas + data.sisaSurkas
-                };
-            }, {
-                ebitdaLR: 0,
-                penggunaanLabaKas: 0,
-                labaNetDitransfer: 0,
-                bayarListrik: 0,
-                sisaSurkas: 0
-            });
-        }
-
-        // ============ DISPLAY FUNCTIONS ============
-        function displayData(values, sheetName) {
-            const headers = values[0];
-            const dataRows = values.slice(1).filter(row => row[1]);
-            
-            if (dataRows.length === 0) {
-                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"`);
-                return;
-            }
-
-            const totals = calculateTotals(dataRows);
-            const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            let html = `
-                <div class="year-badge">📊 ${sheetName}</div>
-                
-                <div class="stats">
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.ebitdaLR)}</h3>
-                        <p>Total EBITDA LR</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
-                        <p>Total Laba Net Ditransfer</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.bayarListrik)}</h3>
-                        <p>Total Bayar Listrik</p>
-                    </div>
-                    <div class="stat-card-finale">
-                        <h3>${formatRupiah(totals.sisaSurkas)}</h3>
-                        <p>Total Sisa Surplus Kas</p>
-                    </div>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TRIWULAN</th>
-                                <th>BULAN</th>
-                                <th>EBITDA LR</th>
-                                <th>PENGGUNAAN LABA KAS</th>
-                                <th>LABA NET DITRANSFER</th>
-                                <th>BAYAR LISTRIK</th>
-                                <th>SISA SURKAS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            dataRows.forEach(row => {
-                const data = processRowData(row);
-                let colorClass = 'zero';
-                if (data.sisaSurkas > 0) colorClass = 'positive';
-                else if (data.sisaSurkas < 0) colorClass = 'negative';
-
-                html += `
-                    <tr>
-                        <td class="triwulan">${data.triwulan}</td>
-                        <td class="month">${data.bulan}</td>
-                        <td class="currency">${formatRupiah(data.ebitdaLR)}</td>
-                        <td class="currency">${formatRupiah(data.penggunaanLabaKas)}</td>
-                        <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
-                        <td class="currency">${formatRupiah(data.bayarListrik)}</td>
-                        <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="summary-section">
-                    <h3>📊 Ringkasan ${sheetName}</h3>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="label">Total EBITDA LR</div>
-                            <div class="value">${formatRupiah(totals.ebitdaLR)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Penggunaan Laba Kas</div>
-                            <div class="value">${formatRupiah(totals.penggunaanLabaKas)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Laba Net Ditransfer</div>
-                            <div class="value">${formatRupiah(totals.labaNetDitransfer)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Bayar Listrik</div>
-                            <div class="value">${formatRupiah(totals.bayarListrik)}</div>
-                        </div>
-                        <div class="summary-item-finale">
-                            <div class="label">Total Sisa Surplus Kas</div>
-                            <div class="value">${formatRupiah(totals.sisaSurkas)}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="last-update">
-                    ⏱️ Terakhir diperbarui: ${updateTime}
-                </div>
-            `;
-            
-            document.getElementById('content').innerHTML = html;
-        }
-
-        // ============ EVENT HANDLERS ============
-        function handleSheetChange() {
-            const sheetSelect = document.getElementById('sheetSelect');
-            const selectedSheet = sheetSelect.value;
-            
-            if (selectedSheet) {
-                saveLastSheet(selectedSheet);
-                loadSheetData(selectedSheet);
-            } else {
-                showEmptyState();
-            }
-        }
-
-        function handleRefresh() {
-            const sheetSelect = document.getElementById('sheetSelect');
-            const selectedSheet = sheetSelect.value;
-            
-            if (!selectedSheet) {
+        async function saveToSheet() {
+            if (!currentSheet) {
                 alert('Pilih toko terlebih dahulu');
-                return;
+                return false;
             }
             
-            loadSheetData(selectedSheet, true);
+            try {
+                // Note: Writing to Google Sheets requires OAuth authentication
+                // This is a read-only implementation with API key
+                alert('⚠️ Penting: Google Sheets API dengan API Key hanya mendukung READ (baca data).\n\n' +
+                      'Untuk WRITE (simpan/edit/hapus), diperlukan OAuth 2.0 authentication.\n\n' +
+                      'Alternatif:\n' +
+                      '1. Gunakan Google Apps Script sebagai backend\n' +
+                      '2. Setup OAuth 2.0 client\n' +
+                      '3. Manual update di Google Sheets\n\n' +
+                      'Data saat ini disimpan di memory browser saja.');
+                return false;
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Gagal menyimpan: ' + error.message);
+                return false;
+            }
+        }
+            if (!num || num === 'Rp0' || num === '') return 'Rp0';
+            const numStr = num.toString().replace(/[^\d-]/g, '');
+            const isNegative = numStr.startsWith('-');
+            const absNum = Math.abs(parseInt(numStr) || 0);
+            const formatted = absNum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return (isNegative ? '-' : '') + 'Rp' + formatted;
         }
 
-        // ============ INITIALIZATION ============
+        function formatCurrency(num) {
+            if (!str || str === 'Rp0') return 0;
+            return parseInt(str.replace(/[^\d-]/g, '')) || 0;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.triwulan}</td>
+                    <td>${row.bulan}</td>
+                    <td class="currency">${row.ebitLr}</td>
+                    <td class="currency">${row.penggunaanLaba || '-'}</td>
+                    <td class="currency">${row.labaNet}</td>
+                    <td class="currency">${row.bayarListrik}</td>
+                    <td class="currency">${row.sisaSurkas}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-warning btn-sm" onclick="editData(${index})">✏️ Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteData(${index})">🗑️ Hapus</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalEbit = data.reduce((sum, row) => sum + parseCurrency(row.ebitLr), 0);
+            const totalBayar = data.reduce((sum, row) => sum + parseCurrency(row.bayarListrik), 0);
+            const lastSisa = parseCurrency(data[data.length - 1]?.sisaSurkas || 0);
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <h3>Total Ebit LR</h3>
+                    <div class="value">${formatCurrency(totalEbit)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Bayar Listrik</h3>
+                    <div class="value">${formatCurrency(totalBayar)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Sisa Surkas Terakhir</h3>
+                    <div class="value">${formatCurrency(lastSisa)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Entri Data</h3>
+                    <div class="value">${data.length}</div>
+                </div>
+            `;
+        }
+
+        function openModal(index = null) {
+            document.getElementById('modal').style.display = 'block';
+            
+            if (index !== null) {
+                document.getElementById('modalTitle').textContent = 'Edit Data';
+                document.getElementById('editIndex').value = index;
+                const row = data[index];
+                
+                document.getElementById('triwulan').value = row.triwulan;
+                document.getElementById('bulan').value = row.bulan;
+                document.getElementById('ebitLr').value = row.ebitLr;
+                document.getElementById('penggunaanLaba').value = row.penggunaanLaba;
+                document.getElementById('labaNet').value = row.labaNet;
+                document.getElementById('bayarListrik').value = row.bayarListrik;
+                document.getElementById('sisaSurkas').value = row.sisaSurkas;
+            } else {
+                document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+                document.getElementById('dataForm').reset();
+                document.getElementById('editIndex').value = '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('dataForm').reset();
+        }
+
+        function saveData(e) {
+            e.preventDefault();
+            
+            const newData = {
+                triwulan: parseInt(document.getElementById('triwulan').value),
+                bulan: document.getElementById('bulan').value,
+                ebitLr: formatCurrency(document.getElementById('ebitLr').value),
+                penggunaanLaba: formatCurrency(document.getElementById('penggunaanLaba').value),
+                labaNet: formatCurrency(document.getElementById('labaNet').value),
+                bayarListrik: formatCurrency(document.getElementById('bayarListrik').value),
+                sisaSurkas: formatCurrency(document.getElementById('sisaSurkas').value)
+            };
+
+            const editIndex = document.getElementById('editIndex').value;
+            
+            if (editIndex !== '') {
+                data[parseInt(editIndex)] = newData;
+            } else {
+                data.push(newData);
+            }
+
+            saveToSheet();
+            renderTable();
+            closeModal();
+        }
+
+        function editData(index) {
+            openModal(index);
+        }
+
+        function deleteData(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                data.splice(index, 1);
+                saveToSheet();
+                renderTable();
+            }
+        }
+
+        function handleSheetChange() {
+            const select = document.getElementById('sheetDropdown');
+            const sheetName = select.value;
+            if (sheetName) {
+                loadSheetData(sheetName);
+            } else {
+                data = [];
+                renderTable();
+            }
+        }
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadSheetsList();
         });
