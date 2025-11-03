@@ -673,7 +673,7 @@
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
             SHEET_NAME: 'KaryawanToko',
-            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
+            CACHE_DURATION: 5 * 60 * 1000
         };
         
         let allStores = [];
@@ -730,7 +730,6 @@
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
-        // Initialize auth on load
         if (checkAuth()) {
             const authData = getAuthData();
             if (authData?.fullName) {
@@ -790,7 +789,6 @@
 
         // ============ GOOGLE SHEETS API ============
         async function fetchDataFromGoogleSheets(forceRefresh = false) {
-            // Check cache first
             if (!forceRefresh && appState.cache) {
                 const cacheAge = Date.now() - appState.lastUpdate;
                 if (cacheAge < CONFIG.CACHE_DURATION) {
@@ -824,7 +822,6 @@
                     throw new Error('Tidak ada data di spreadsheet');
                 }
 
-                // Cache the data
                 appState.cache = data.values;
                 appState.lastUpdate = Date.now();
 
@@ -852,25 +849,19 @@
 
         function processGoogleSheetsData(rows) {
             allStores = [];
-            
-            // Skip header row
             const dataRows = rows.slice(1);
-            
-            // Group data by store (Toko)
             const storeMap = {};
             
             dataRows.forEach(row => {
                 if (!row || row.length < 3) return;
                 
-                const storeName = row[0];  // Kolom A: Toko
-                const position = row[1];    // Kolom B: Posisi
-                const name = row[2];        // Kolom C: Nama
+                const storeName = row[0];
+                const position = row[1];
+                const name = row[2];
                 
                 if (!storeName || !name) return;
                 
-                // Initialize store if not exists
                 if (!storeMap[storeName]) {
-                    // Extract store code if exists in name
                     let code = '';
                     const codeMatch = storeName.match(/\(([^)]+)\)$/);
                     if (codeMatch) {
@@ -885,7 +876,6 @@
                     };
                 }
                 
-                // Add person to store
                 if (position && position.toLowerCase().includes('koordinator')) {
                     storeMap[storeName].coordinator.name = name.trim();
                 } else {
@@ -896,16 +886,13 @@
                 }
             });
             
-            // Convert map to array
             allStores = Object.values(storeMap);
-            
             console.log('Processed stores:', allStores);
             filteredStores = [...allStores];
             updateStats();
             renderStores(filteredStores);
         }
 
-        // ============ SYNC FUNCTIONS ============
         function syncData() {
             const btn = document.getElementById('refreshBtn');
             btn.classList.add('syncing');
@@ -915,7 +902,6 @@
             });
         }
 
-        // ============ STATS UPDATE ============
         function updateStats() {
             const totalStores = allStores.length;
             const totalCoordinators = allStores.filter(s => s.coordinator.name).length;
@@ -928,7 +914,6 @@
             document.getElementById('totalWithPhone').textContent = totalPeople;
         }
 
-        // ============ RENDER FUNCTIONS ============
         function renderStores(stores) {
             const container = document.getElementById('storeData');
             
@@ -943,17 +928,21 @@
                 return;
             }
 
-            let html = '<div class="data-grid">';
-            
-            stores.forEach(store => {
-                html += `
+            const storeCards = stores.map(store => {
+                const employeeItems = store.employees.map((emp, idx) => `
+                    <div class="employee-item">
+                        <span class="employee-number">${idx + 1}</span>
+                        <span class="employee-name">${emp.name}</span>
+                    </div>
+                `).join('');
+
+                return `
                     <div class="store-card">
                         <div class="store-header">
                             <div class="store-title">
                                 <h3>🏪 ${store.name}</h3>
                                 ${store.code ? `<span class="store-code">${store.code}</span>` : ''}
                             </div>
-                            
                             ${store.coordinator.name ? `
                                 <div class="store-info">
                                     <div class="store-info-row">
@@ -964,33 +953,20 @@
                                 </div>
                             ` : ''}
                         </div>
-                        
                         ${store.employees.length > 0 ? `
                             <div class="store-body">
-                                <div class="employee-list">`;
-                
-                store.employees.forEach((emp, idx) => {
-                    html += `
-                        <div class="employee-item">
-                            <span class="employee-number">${idx + 1}</span>
-                            <span class="employee-name">${emp.name}</span>
-                        </div>
-                    `;
-                });
-                
-                html += `
+                                <div class="employee-list">
+                                    ${employeeItems}
                                 </div>
                             </div>
                         ` : ''}
                     </div>
                 `;
-            });
-            
-            html += '</div>';
-            container.innerHTML = html;
+            }).join('');
+
+            container.innerHTML = `<div class="data-grid">${storeCards}</div>`;
         }
 
-        // ============ FILTER & SORT ============
         function filterStores() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
@@ -998,7 +974,6 @@
                 const matchesName = store.name.toLowerCase().includes(searchTerm);
                 const matchesCode = store.code.toLowerCase().includes(searchTerm);
                 const matchesCoordinator = store.coordinator.name.toLowerCase().includes(searchTerm);
-                
                 const matchesEmployee = store.employees.some(emp => 
                     emp.name.toLowerCase().includes(searchTerm)
                 );
@@ -1021,7 +996,6 @@
                     break;
                 case 'default':
                 default:
-                    // Restore original order
                     filteredStores = allStores.filter(store => 
                         filteredStores.some(fs => fs.code === store.code || fs.name === store.name)
                     );
@@ -1031,11 +1005,9 @@
             renderStores(filteredStores);
         }
 
-        // ============ INITIALIZE ON LOAD ============
         window.addEventListener('DOMContentLoaded', () => {
             fetchDataFromGoogleSheets();
             
-            // Auto sync every 5 minutes
             setInterval(() => {
                 console.log('Auto-syncing data...');
                 fetchDataFromGoogleSheets(true);
