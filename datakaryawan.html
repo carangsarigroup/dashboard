@@ -293,120 +293,152 @@
 
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
 
-        .employee-card {
+        .store-card {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             border-left: 4px solid #667eea;
             transition: all 0.3s ease;
-            position: relative;
             overflow: hidden;
         }
 
-        .employee-card:hover {
+        .store-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
-        .card-header {
+        .store-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .store-title {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
-        .card-icon {
-            font-size: 3em;
-        }
-
-        .card-title {
+        .store-title h3 {
+            font-size: 1.3em;
             flex: 1;
         }
 
-        .card-title h3 {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .card-title .subtitle {
+        .store-code {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
             font-size: 0.85em;
-            color: #666;
-        }
-
-        .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.75em;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
-        .badge.coordinator {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        .store-info {
+            font-size: 0.9em;
+            opacity: 0.95;
+            line-height: 1.6;
         }
 
-        .card-body {
+        .store-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .store-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .store-info-row .icon {
+            margin-top: 2px;
+        }
+
+        .store-info-row .label {
+            font-weight: 600;
+            min-width: 90px;
+        }
+
+        .store-info-row .value {
+            flex: 1;
+        }
+
+        .whatsapp-link {
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: rgba(37, 211, 102, 0.9);
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .whatsapp-link:hover {
+            background: #25D366;
+            transform: translateX(2px);
+        }
+
+        .store-body {
+            padding: 20px;
+        }
+
+        .employee-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .info-row {
+        .employee-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.95em;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
-        .info-row .icon {
-            font-size: 1.2em;
-            width: 25px;
-            text-align: center;
+        .employee-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
         }
 
-        .info-row .label {
-            font-weight: 600;
-            color: #666;
-            min-width: 100px;
-        }
-
-        .info-row .value {
-            color: #333;
-            flex: 1;
-        }
-
-        .whatsapp-btn {
+        .employee-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            background: #25D366;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            text-decoration: none;
             font-weight: 600;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(37, 211, 102, 0.3);
+            font-size: 0.9em;
+            flex-shrink: 0;
         }
 
-        .whatsapp-btn:hover {
-            background: #1fb855;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        .employee-name {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .employee-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
         }
 
         .section-title {
@@ -616,19 +648,13 @@
                 <span>Kembali ke Dashboard</span>
             </a>
             <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="Cari nama karyawan atau koordinator..." oninput="filterEmployees()">
+                <input type="text" id="searchInput" placeholder="Cari nama karyawan, toko, atau alamat..." oninput="filterStores()">
             </div>
             <div class="select-wrapper">
-                <select id="filterStore" onchange="filterEmployees()">
-                    <option value="">Semua Toko</option>
-                </select>
-            </div>
-            <div class="select-wrapper">
-                <select id="sortBy" onchange="sortEmployees()">
-                    <option value="name-asc">Nama A-Z</option>
-                    <option value="name-desc">Nama Z-A</option>
-                    <option value="store-asc">Toko 1-8</option>
-                    <option value="store-desc">Toko 8-1</option>
+                <select id="sortBy" onchange="sortStores()">
+                    <option value="default">Urutan Default</option>
+                    <option value="name-asc">Nama Toko A-Z</option>
+                    <option value="name-desc">Nama Toko Z-A</option>
                 </select>
             </div>
             <button class="refresh-btn" id="refreshBtn" onclick="syncData()">
@@ -648,16 +674,16 @@
 
             <div class="stats">
                 <div class="stat-card">
-                    <h3 id="totalEmployees">0</h3>
-                    <p>Total Karyawan</p>
+                    <h3 id="totalStores">0</h3>
+                    <p>Total Toko</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="totalCoordinators">0</h3>
                     <p>Kepala Toko</p>
                 </div>
                 <div class="stat-card">
-                    <h3 id="totalStores">0</h3>
-                    <p>Total Toko</p>
+                    <h3 id="totalEmployees">0</h3>
+                    <p>Total Karyawan</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="totalWithPhone">0</h3>
@@ -665,7 +691,7 @@
                 </div>
             </div>
 
-            <div id="employeeData">
+            <div id="storeData">
                 <div class="empty-state">
                     <div class="empty-state-icon">👥</div>
                     <h2>Memuat Data...</h2>
@@ -688,9 +714,8 @@
             CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
         };
         
-        let allEmployees = [];
-        let filteredEmployees = [];
-        let employeeData = { stores: [] };
+        let allStores = [];
+        let filteredStores = [];
         let appState = {
             cache: null,
             lastUpdate: null
@@ -755,7 +780,7 @@
 
         // ============ UTILITY FUNCTIONS ============
         function showLoading(message = 'Memuat data dari Google Sheets...') {
-            document.getElementById('employeeData').innerHTML = `
+            document.getElementById('storeData').innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
                     <div class="loading-text">${message}</div>
@@ -764,7 +789,7 @@
         }
 
         function showError(title, message) {
-            document.getElementById('employeeData').innerHTML = `
+            document.getElementById('storeData').innerHTML = `
                 <div class="error">
                     <strong>❌ ${title}</strong>
                     ${message}
@@ -864,96 +889,135 @@
         }
 
         function processGoogleSheetsData(rows) {
-            employeeData.stores = [];
+            allStores = [];
             
-            const storeRanges = [
-                { startRow: 0, startCol: 0, code: 'F4SD' },
-                { startRow: 0, startCol: 4, code: 'FKOM' },
-                { startRow: 0, startCol: 8, code: 'FHEN' },
-                { startRow: 8, startCol: 0, code: 'FEHU' },
-                { startRow: 8, startCol: 4, code: 'FIVI' },
-                { startRow: 8, startCol: 8, code: 'FZYY' },
-                { startRow: 16, startCol: 0, code: '1SFY' },
-                { startRow: 16, startCol: 4, code: 'Q789' }
+            // Struktur: 3 kolom per toko
+            // Row 0: Nama Toko dengan kode
+            // Row 1: Headers (Nomor, Nama, Nomor WhatsApp)
+            // Row 2+: Data (Koordinator dengan (C), kemudian karyawan)
+            
+            const storeColumns = [
+                { col: 0 },  // Kolom A-B (Tim 1)
+                { col: 3 },  // Kolom D-E (Tim 2)
+                { col: 6 },  // Kolom G-H (Tim 3)
             ];
 
-            storeRanges.forEach(range => {
-                const headerCell = rows[range.startRow] ? rows[range.startRow][range.startCol] : '';
-                let storeName = headerCell;
-                
-                if (storeName && storeName.includes('(')) {
-                    storeName = storeName.replace(/\s*\([^)]*\)/, '').trim();
-                }
-                
-                if (!storeName) {
-                    storeName = `Toko ${range.code}`;
-                }
+            const storeRows = [
+                { row: 0 },   // Baris 1-7 (Toko 1-3)
+                { row: 9 },   // Baris 10-16 (Toko 4-6)
+                { row: 18 },  // Baris 19-25 (Toko 7-8)
+            ];
 
-                const store = {
-                    name: storeName,
-                    code: range.code,
-                    coordinator: { name: '', whatsapp: '' },
-                    employees: []
-                };
-
-                const dataStartRow = range.startRow + 2;
-                if (rows[dataStartRow] && rows[dataStartRow][range.startCol + 1]) {
-                    const coordName = rows[dataStartRow][range.startCol + 1];
-                    const coordWhatsApp = rows[dataStartRow][range.startCol + 2] || '';
+            storeRows.forEach(storeRow => {
+                storeColumns.forEach(storeCol => {
+                    const startRow = storeRow.row;
+                    const startCol = storeCol.col;
                     
-                    if (coordName && coordName.includes('(C)')) {
-                        store.coordinator.name = coordName.replace('(C)', '').trim();
-                        store.coordinator.whatsapp = coordWhatsApp;
-                    }
-                }
-
-                let rowIndex = dataStartRow + 1;
-                const maxRows = 10;
-                let emptyRowCount = 0;
-                
-                for (let i = 0; i < maxRows && rowIndex < rows.length; i++, rowIndex++) {
-                    const row = rows[rowIndex];
-                    if (!row) break;
+                    // Skip if out of bounds
+                    if (startRow >= rows.length) return;
                     
-                    const name = row[range.startCol + 1];
-                    const whatsapp = row[range.startCol + 2] || '';
+                    const headerRow = rows[startRow];
+                    if (!headerRow || !headerRow[startCol]) return;
                     
-                    if (name && (name === 'Nama' || name.includes('Tim '))) break;
-                    if (!name || name.trim() === '') {
-                        emptyRowCount++;
-                        if (emptyRowCount >= 2) break;
-                        continue;
+                    const fullHeader = headerRow[startCol];
+                    
+                    // Extract store name and code
+                    let storeName = fullHeader;
+                    let storeCode = '';
+                    
+                    const match = fullHeader.match(/^(.+?)\s*\(([^)]+)\)$/);
+                    if (match) {
+                        storeName = match[1].trim();
+                        storeCode = match[2].trim();
                     }
                     
-                    emptyRowCount = 0;
+                    const store = {
+                        name: storeName,
+                        code: storeCode,
+                        coordinator: { name: '', whatsapp: '', address: '' },
+                        employees: []
+                    };
                     
-                    if (!name.includes('(C)') && name.trim() !== '') {
-                        store.employees.push({
-                            name: name.trim(),
-                            whatsapp: whatsapp
-                        });
+                    // Get coordinator (first data row after header)
+                    const dataStartRow = startRow + 2;
+                    if (dataStartRow < rows.length) {
+                        const coordRow = rows[dataStartRow];
+                        if (coordRow && coordRow[startCol + 1]) {
+                            const coordName = coordRow[startCol + 1];
+                            const coordWhatsApp = coordRow[startCol + 2] || '';
+                            
+                            // Check if it's coordinator
+                            if (coordName.includes('(C)')) {
+                                store.coordinator.name = coordName.replace('(C)', '').trim();
+                                store.coordinator.whatsapp = coordWhatsApp;
+                                
+                                // Get address from next row if available
+                                const addressRow = dataStartRow + 1;
+                                if (addressRow < rows.length && rows[addressRow]) {
+                                    const addressData = rows[addressRow][startCol + 1];
+                                    if (addressData && !addressData.includes('(C)') && addressData.trim() !== '') {
+                                        // Check if this is an address (not a name)
+                                        if (!rows[addressRow][startCol] || rows[addressRow][startCol] === '') {
+                                            store.coordinator.address = addressData.trim();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Get employees
+                        let currentRow = dataStartRow + 1;
+                        let emptyCount = 0;
+                        
+                        while (currentRow < rows.length && emptyCount < 2) {
+                            const row = rows[currentRow];
+                            
+                            // Stop if we hit next section
+                            if (row && row[startCol] && (row[startCol].includes('Tim ') || currentRow >= startRow + 7)) {
+                                break;
+                            }
+                            
+                            if (row && row[startCol + 1]) {
+                                const name = row[startCol + 1];
+                                const whatsapp = row[startCol + 2] || '';
+                                
+                                // Skip coordinator name
+                                if (name.includes('(C)')) {
+                                    currentRow++;
+                                    continue;
+                                }
+                                
+                                // Skip if this looks like an address (no number in col A)
+                                if (!row[startCol] || row[startCol] === '') {
+                                    currentRow++;
+                                    continue;
+                                }
+                                
+                                if (name.trim() !== '') {
+                                    store.employees.push({
+                                        name: name.trim(),
+                                        whatsapp: whatsapp
+                                    });
+                                    emptyCount = 0;
+                                }
+                            } else {
+                                emptyCount++;
+                            }
+                            
+                            currentRow++;
+                        }
                     }
-                }
-
-                if (store.coordinator.name || store.employees.length > 0) {
-                    employeeData.stores.push(store);
-                }
+                    
+                    // Only add store if it has data
+                    if (store.coordinator.name || store.employees.length > 0) {
+                        allStores.push(store);
+                    }
+                });
             });
 
-            populateStoreFilter();
-            initializeData();
-        }
-
-        function populateStoreFilter() {
-            const filterSelect = document.getElementById('filterStore');
-            filterSelect.innerHTML = '<option value="">Semua Toko</option>';
-            
-            employeeData.stores.forEach(store => {
-                const option = document.createElement('option');
-                option.value = store.name;
-                option.textContent = store.name;
-                filterSelect.appendChild(option);
-            });
+            filteredStores = [...allStores];
+            updateStats();
+            renderStores(filteredStores);
         }
 
         // ============ SYNC FUNCTIONS ============
@@ -966,164 +1030,155 @@
             });
         }
 
-        // ============ DATA INITIALIZATION ============
-        function initializeData() {
-            allEmployees = [];
+        // ============ STATS UPDATE ============
+        function updateStats() {
+            const totalStores = allStores.length;
+            const totalCoordinators = allStores.filter(s => s.coordinator.name).length;
+            const totalEmployees = allStores.reduce((sum, s) => sum + s.employees.length, 0);
             
-            employeeData.stores.forEach(store => {
-                if (store.coordinator.name) {
-                    allEmployees.push({
-                        type: 'coordinator',
-                        name: store.coordinator.name,
-                        whatsapp: store.coordinator.whatsapp,
-                        store: store.name
-                    });
+            let totalWithPhone = 0;
+            allStores.forEach(store => {
+                if (store.coordinator.whatsapp && store.coordinator.whatsapp.trim() !== '') {
+                    totalWithPhone++;
                 }
-                
                 store.employees.forEach(emp => {
-                    allEmployees.push({
-                        type: 'employee',
-                        name: emp.name,
-                        whatsapp: emp.whatsapp || '',
-                        store: store.name,
-                        coordinator: store.coordinator.name
-                    });
+                    if (emp.whatsapp && emp.whatsapp.trim() !== '') {
+                        totalWithPhone++;
+                    }
                 });
             });
 
-            filteredEmployees = [...allEmployees];
-            updateStats();
-            renderEmployees(filteredEmployees);
-        }
-
-        function updateStats() {
-            const totalEmployees = allEmployees.filter(e => e.type === 'employee').length;
-            const totalCoordinators = allEmployees.filter(e => e.type === 'coordinator').length;
-            const totalStores = employeeData.stores.length;
-            const totalWithPhone = allEmployees.filter(e => e.whatsapp && e.whatsapp.trim() !== '').length;
-
-            document.getElementById('totalEmployees').textContent = totalEmployees;
-            document.getElementById('totalCoordinators').textContent = totalCoordinators;
             document.getElementById('totalStores').textContent = totalStores;
+            document.getElementById('totalCoordinators').textContent = totalCoordinators;
+            document.getElementById('totalEmployees').textContent = totalEmployees;
             document.getElementById('totalWithPhone').textContent = totalWithPhone;
         }
 
         // ============ RENDER FUNCTIONS ============
-        function renderEmployees(employees) {
-            const container = document.getElementById('employeeData');
+        function renderStores(stores) {
+            const container = document.getElementById('storeData');
             
-            if (employees.length === 0) {
+            if (stores.length === 0) {
                 container.innerHTML = `
                     <div class="no-results">
                         <div class="icon">🔍</div>
                         <h3>Tidak ada data ditemukan</h3>
-                        <p>Coba ubah kata kunci pencarian atau filter Anda</p>
+                        <p>Coba ubah kata kunci pencarian Anda</p>
                     </div>
                 `;
                 return;
             }
 
-            const groupedByStore = {};
-            employees.forEach(emp => {
-                if (!groupedByStore[emp.store]) {
-                    groupedByStore[emp.store] = [];
-                }
-                groupedByStore[emp.store].push(emp);
-            });
-
-            let html = '';
-            Object.keys(groupedByStore).sort().forEach(storeName => {
-                html += `<h2 class="section-title">🏪 ${storeName}</h2>`;
-                html += '<div class="data-grid">';
+            let html = '<div class="data-grid">';
+            
+            stores.forEach(store => {
+                const hasWhatsApp = store.coordinator.whatsapp && store.coordinator.whatsapp.trim() !== '';
                 
-                groupedByStore[storeName].forEach(emp => {
-                    const isCoordinator = emp.type === 'coordinator';
-                    const icon = isCoordinator ? '👔' : '👤';
-                    const badgeClass = isCoordinator ? 'coordinator' : '';
-                    const hasWhatsApp = emp.whatsapp && emp.whatsapp.trim() !== '';
-                    
-                    html += `
-                        <div class="employee-card">
-                            <div class="card-header">
-                                <span class="card-icon">${icon}</span>
-                                <div class="card-title">
-                                    <h3>${emp.name}</h3>
-                                    <div class="subtitle">${emp.store}</div>
-                                </div>
-                                <span class="badge ${badgeClass}">
-                                    ${isCoordinator ? 'Koordinator' : 'Karyawan'}
-                                </span>
+                html += `
+                    <div class="store-card">
+                        <div class="store-header">
+                            <div class="store-title">
+                                <h3>🏪 ${store.name}</h3>
+                                ${store.code ? `<span class="store-code">${store.code}</span>` : ''}
                             </div>
-                            <div class="card-body">
-                                ${!isCoordinator ? `
-                                    <div class="info-row">
+                            
+                            ${store.coordinator.name ? `
+                                <div class="store-info">
+                                    <div class="store-info-row">
                                         <span class="icon">👔</span>
-                                        <span class="label">Koordinator:</span>
-                                        <span class="value">${emp.coordinator || '-'}</span>
+                                        <span class="label">Kepala Toko:</span>
+                                        <span class="value">${store.coordinator.name}</span>
                                     </div>
-                                ` : ''}
-                                <div class="info-row">
-                                    <span class="icon">📱</span>
-                                    <span class="label">WhatsApp:</span>
-                                    <span class="value">${hasWhatsApp ? emp.whatsapp : 'Belum ada data'}</span>
+                                    ${store.coordinator.address ? `
+                                        <div class="store-info-row">
+                                            <span class="icon">📍</span>
+                                            <span class="label">Alamat:</span>
+                                            <span class="value">${store.coordinator.address}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${hasWhatsApp ? `
+                                        <div class="store-info-row">
+                                            <span class="icon">📱</span>
+                                            <span class="label">WhatsApp:</span>
+                                            <span class="value">
+                                                <a href="https://wa.me/${store.coordinator.whatsapp.replace(/\D/g, '')}" 
+                                                   class="whatsapp-link" 
+                                                   target="_blank">
+                                                    💬 ${store.coordinator.whatsapp}
+                                                </a>
+                                            </span>
+                                        </div>
+                                    ` : ''}
                                 </div>
-                                ${hasWhatsApp ? `
-                                    <a href="https://wa.me/${emp.whatsapp.replace(/\D/g, '')}" 
-                                       class="whatsapp-btn" 
-                                       target="_blank">
-                                        <span>💬</span>
-                                        <span>Hubungi via WhatsApp</span>
-                                    </a>
-                                ` : ''}
-                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${store.employees.length > 0 ? `
+                            <div class="store-body">
+                                <div class="employee-list">
+                `;
+                
+                store.employees.forEach((emp, idx) => {
+                    html += `
+                        <div class="employee-item">
+                            <span class="employee-number">${idx + 1}</span>
+                            <span class="employee-name">${emp.name}</span>
                         </div>
                     `;
                 });
                 
-                html += '</div>';
+                html += `
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             });
-
+            
+            html += '</div>';
             container.innerHTML = html;
         }
 
         // ============ FILTER & SORT ============
-        function filterEmployees() {
+        function filterStores() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const storeFilter = document.getElementById('filterStore').value;
             
-            filteredEmployees = allEmployees.filter(emp => {
-                const matchesSearch = !searchTerm || 
-                    emp.name.toLowerCase().includes(searchTerm) ||
-                    emp.store.toLowerCase().includes(searchTerm) ||
-                    (emp.coordinator && emp.coordinator.toLowerCase().includes(searchTerm));
+            filteredStores = allStores.filter(store => {
+                const matchesName = store.name.toLowerCase().includes(searchTerm);
+                const matchesCode = store.code.toLowerCase().includes(searchTerm);
+                const matchesCoordinator = store.coordinator.name.toLowerCase().includes(searchTerm);
+                const matchesAddress = store.coordinator.address.toLowerCase().includes(searchTerm);
                 
-                const matchesStore = !storeFilter || emp.store === storeFilter;
+                const matchesEmployee = store.employees.some(emp => 
+                    emp.name.toLowerCase().includes(searchTerm)
+                );
                 
-                return matchesSearch && matchesStore;
+                return matchesName || matchesCode || matchesCoordinator || matchesAddress || matchesEmployee;
             });
 
-            sortEmployees();
+            sortStores();
         }
 
-        function sortEmployees() {
+        function sortStores() {
             const sortBy = document.getElementById('sortBy').value;
             
             switch(sortBy) {
                 case 'name-asc':
-                    filteredEmployees.sort((a, b) => a.name.localeCompare(b.name));
+                    filteredStores.sort((a, b) => a.name.localeCompare(b.name));
                     break;
                 case 'name-desc':
-                    filteredEmployees.sort((a, b) => b.name.localeCompare(a.name));
+                    filteredStores.sort((a, b) => b.name.localeCompare(a.name));
                     break;
-                case 'store-asc':
-                    filteredEmployees.sort((a, b) => a.store.localeCompare(b.store));
-                    break;
-                case 'store-desc':
-                    filteredEmployees.sort((a, b) => b.store.localeCompare(a.store));
+                case 'default':
+                default:
+                    // Restore original order
+                    filteredStores = allStores.filter(store => 
+                        filteredStores.some(fs => fs.code === store.code)
+                    );
                     break;
             }
             
-            renderEmployees(filteredEmployees);
+            renderStores(filteredStores);
         }
 
         // ============ INITIALIZE ON LOAD ============
