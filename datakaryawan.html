@@ -891,130 +891,102 @@
         function processGoogleSheetsData(rows) {
             allStores = [];
             
-            // Struktur: 3 kolom per toko
-            // Row 0: Nama Toko dengan kode
-            // Row 1: Headers (Nomor, Nama, Nomor WhatsApp)
-            // Row 2+: Data (Koordinator dengan (C), kemudian karyawan)
+            // Struktur data:
+            // - 3 grup horizontal (kolom A-B, D-E, G-H)
+            // - 3 grup vertikal (baris 1-7, 10-16, 19-25)
+            // Total 8 toko (grup 1: 3 toko, grup 2: 3 toko, grup 3: 2 toko)
             
-            const storeColumns = [
-                { col: 0 },  // Kolom A-B (Tim 1)
-                { col: 3 },  // Kolom D-E (Tim 2)
-                { col: 6 },  // Kolom G-H (Tim 3)
+            const storeDefinitions = [
+                // Grup 1 (Row 1-7)
+                { startRow: 0, startCol: 0 },   // A-B: Toko 1
+                { startRow: 0, startCol: 3 },   // D-E: Toko 2
+                { startRow: 0, startCol: 6 },   // G-H: Toko 3
+                // Grup 2 (Row 10-16)
+                { startRow: 9, startCol: 0 },   // A-B: Toko 4
+                { startRow: 9, startCol: 3 },   // D-E: Toko 5
+                { startRow: 9, startCol: 6 },   // G-H: Toko 6
+                // Grup 3 (Row 19-25)
+                { startRow: 18, startCol: 0 },  // A-B: Toko 7
+                { startRow: 18, startCol: 3 },  // D-E: Toko 8
             ];
 
-            const storeRows = [
-                { row: 0 },   // Baris 1-7 (Toko 1-3)
-                { row: 9 },   // Baris 10-16 (Toko 4-6)
-                { row: 18 },  // Baris 19-25 (Toko 7-8)
-            ];
-
-            storeRows.forEach(storeRow => {
-                storeColumns.forEach(storeCol => {
-                    const startRow = storeRow.row;
-                    const startCol = storeCol.col;
+            storeDefinitions.forEach(storeDef => {
+                const startRow = storeDef.startRow;
+                const startCol = storeDef.startCol;
+                
+                // Skip if out of bounds
+                if (startRow >= rows.length) return;
+                
+                const headerRow = rows[startRow];
+                if (!headerRow || !headerRow[startCol]) return;
+                
+                const fullHeader = headerRow[startCol];
+                
+                // Skip empty headers
+                if (!fullHeader || fullHeader.trim() === '') return;
+                
+                // Extract store name and code
+                let storeName = fullHeader;
+                let storeCode = '';
+                
+                const match = fullHeader.match(/^(.+?)\s*\(([^)]+)\)$/);
+                if (match) {
+                    storeName = match[1].trim();
+                    storeCode = match[2].trim();
+                }
+                
+                const store = {
+                    name: storeName,
+                    code: storeCode,
+                    coordinator: { name: '', whatsapp: '' },
+                    employees: []
+                };
+                
+                // Row structure:
+                // startRow + 0: Store name header
+                // startRow + 1: Column headers (Nomor, Nama)
+                // startRow + 2: First employee (coordinator with (C))
+                // startRow + 3+: Other employees
+                
+                // Start reading from row 2 (first data row)
+                for (let i = 2; i <= 7; i++) {
+                    const currentRow = startRow + i;
                     
-                    // Skip if out of bounds
-                    if (startRow >= rows.length) return;
+                    // Break if out of bounds
+                    if (currentRow >= rows.length) break;
                     
-                    const headerRow = rows[startRow];
-                    if (!headerRow || !headerRow[startCol]) return;
+                    const row = rows[currentRow];
+                    if (!row) continue;
                     
-                    const fullHeader = headerRow[startCol];
+                    const nomor = row[startCol];
+                    const nama = row[startCol + 1];
                     
-                    // Extract store name and code
-                    let storeName = fullHeader;
-                    let storeCode = '';
+                    // Skip if no name
+                    if (!nama || nama.trim() === '') continue;
                     
-                    const match = fullHeader.match(/^(.+?)\s*\(([^)]+)\)$/);
-                    if (match) {
-                        storeName = match[1].trim();
-                        storeCode = match[2].trim();
+                    // Skip if this is a header row
+                    if (nama === 'Nama') continue;
+                    
+                    // Check if coordinator
+                    if (nama.includes('(C)')) {
+                        store.coordinator.name = nama.replace('(C)', '').trim();
+                        store.coordinator.whatsapp = ''; // No WhatsApp in current structure
+                    } else if (nomor && nomor.toString().trim() !== '') {
+                        // This is an employee (has a number)
+                        store.employees.push({
+                            name: nama.trim(),
+                            whatsapp: ''
+                        });
                     }
-                    
-                    const store = {
-                        name: storeName,
-                        code: storeCode,
-                        coordinator: { name: '', whatsapp: '', address: '' },
-                        employees: []
-                    };
-                    
-                    // Get coordinator (first data row after header)
-                    const dataStartRow = startRow + 2;
-                    if (dataStartRow < rows.length) {
-                        const coordRow = rows[dataStartRow];
-                        if (coordRow && coordRow[startCol + 1]) {
-                            const coordName = coordRow[startCol + 1];
-                            const coordWhatsApp = coordRow[startCol + 2] || '';
-                            
-                            // Check if it's coordinator
-                            if (coordName.includes('(C)')) {
-                                store.coordinator.name = coordName.replace('(C)', '').trim();
-                                store.coordinator.whatsapp = coordWhatsApp;
-                                
-                                // Get address from next row if available
-                                const addressRow = dataStartRow + 1;
-                                if (addressRow < rows.length && rows[addressRow]) {
-                                    const addressData = rows[addressRow][startCol + 1];
-                                    if (addressData && !addressData.includes('(C)') && addressData.trim() !== '') {
-                                        // Check if this is an address (not a name)
-                                        if (!rows[addressRow][startCol] || rows[addressRow][startCol] === '') {
-                                            store.coordinator.address = addressData.trim();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Get employees
-                        let currentRow = dataStartRow + 1;
-                        let emptyCount = 0;
-                        
-                        while (currentRow < rows.length && emptyCount < 2) {
-                            const row = rows[currentRow];
-                            
-                            // Stop if we hit next section
-                            if (row && row[startCol] && (row[startCol].includes('Tim ') || currentRow >= startRow + 7)) {
-                                break;
-                            }
-                            
-                            if (row && row[startCol + 1]) {
-                                const name = row[startCol + 1];
-                                const whatsapp = row[startCol + 2] || '';
-                                
-                                // Skip coordinator name
-                                if (name.includes('(C)')) {
-                                    currentRow++;
-                                    continue;
-                                }
-                                
-                                // Skip if this looks like an address (no number in col A)
-                                if (!row[startCol] || row[startCol] === '') {
-                                    currentRow++;
-                                    continue;
-                                }
-                                
-                                if (name.trim() !== '') {
-                                    store.employees.push({
-                                        name: name.trim(),
-                                        whatsapp: whatsapp
-                                    });
-                                    emptyCount = 0;
-                                }
-                            } else {
-                                emptyCount++;
-                            }
-                            
-                            currentRow++;
-                        }
-                    }
-                    
-                    // Only add store if it has data
-                    if (store.coordinator.name || store.employees.length > 0) {
-                        allStores.push(store);
-                    }
-                });
+                }
+                
+                // Only add store if it has data
+                if (store.coordinator.name || store.employees.length > 0) {
+                    allStores.push(store);
+                }
             });
 
+            console.log('Processed stores:', allStores);
             filteredStores = [...allStores];
             updateStats();
             renderStores(filteredStores);
@@ -1035,23 +1007,12 @@
             const totalStores = allStores.length;
             const totalCoordinators = allStores.filter(s => s.coordinator.name).length;
             const totalEmployees = allStores.reduce((sum, s) => sum + s.employees.length, 0);
-            
-            let totalWithPhone = 0;
-            allStores.forEach(store => {
-                if (store.coordinator.whatsapp && store.coordinator.whatsapp.trim() !== '') {
-                    totalWithPhone++;
-                }
-                store.employees.forEach(emp => {
-                    if (emp.whatsapp && emp.whatsapp.trim() !== '') {
-                        totalWithPhone++;
-                    }
-                });
-            });
+            const totalPeople = totalCoordinators + totalEmployees;
 
             document.getElementById('totalStores').textContent = totalStores;
             document.getElementById('totalCoordinators').textContent = totalCoordinators;
             document.getElementById('totalEmployees').textContent = totalEmployees;
-            document.getElementById('totalWithPhone').textContent = totalWithPhone;
+            document.getElementById('totalWithPhone').textContent = totalPeople;
         }
 
         // ============ RENDER FUNCTIONS ============
@@ -1072,8 +1033,6 @@
             let html = '<div class="data-grid">';
             
             stores.forEach(store => {
-                const hasWhatsApp = store.coordinator.whatsapp && store.coordinator.whatsapp.trim() !== '';
-                
                 html += `
                     <div class="store-card">
                         <div class="store-header">
@@ -1089,26 +1048,6 @@
                                         <span class="label">Kepala Toko:</span>
                                         <span class="value">${store.coordinator.name}</span>
                                     </div>
-                                    ${store.coordinator.address ? `
-                                        <div class="store-info-row">
-                                            <span class="icon">📍</span>
-                                            <span class="label">Alamat:</span>
-                                            <span class="value">${store.coordinator.address}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${hasWhatsApp ? `
-                                        <div class="store-info-row">
-                                            <span class="icon">📱</span>
-                                            <span class="label">WhatsApp:</span>
-                                            <span class="value">
-                                                <a href="https://wa.me/${store.coordinator.whatsapp.replace(/\D/g, '')}" 
-                                                   class="whatsapp-link" 
-                                                   target="_blank">
-                                                    💬 ${store.coordinator.whatsapp}
-                                                </a>
-                                            </span>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             ` : ''}
                         </div>
