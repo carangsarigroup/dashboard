@@ -937,7 +937,15 @@
             }
 
             const storeCards = stores.map(store => {
-                const employeeItems = store.employees.map((emp, idx) => `
+                // Filter employees based on search term
+                let employeesToShow = store.employees;
+                if (searchTerm) {
+                    employeesToShow = store.employees.filter(emp => 
+                        emp.name.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                const employeeItems = employeesToShow.map((emp, idx) => `
                     <div class="employee-item">
                         <span class="employee-number">${idx + 1}</span>
                         <span class="employee-name">${highlightText(emp.name, searchTerm)}</span>
@@ -961,7 +969,7 @@
                                 </div>
                             ` : ''}
                         </div>
-                        ${store.employees.length > 0 ? `
+                        ${employeesToShow.length > 0 ? `
                             <div class="store-body">
                                 <div class="employee-list">
                                     ${employeeItems}
@@ -974,7 +982,6 @@
 
             container.innerHTML = `<div class="data-grid">${storeCards}</div>`;
         }
-
         function filterStores() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
@@ -1024,6 +1031,7 @@
     </script>
 </body>
 </html>
+
 
 
 
