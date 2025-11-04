@@ -834,7 +834,18 @@
 
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
+            
+            // Clear OAuth token
+            accessToken = null;
+            clearStoredToken();
+            if (typeof gapi !== 'undefined' && gapi.client) {
+                gapi.client.setToken(null);
+            }
+            updateAuthButton(false);
+            
+            // Clear user auth
             deleteCookie('userAuth');
+            
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
@@ -893,6 +904,7 @@
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.CLIENT_ID,
                 scope: CONFIG.SCOPES,
+                prompt: '', // Allow silent refresh
                 callback: ''
             });
             gisInited = true;
@@ -902,7 +914,63 @@
 
         function maybeEnableButtons() {
             if (gapiInited && gisInited) {
+                // Try to restore token first
+                if (restoreStoredToken()) {
+                    console.log('Restored OAuth token from storage');
+                }
                 loadSheetsList();
+            }
+        }
+
+        // ============ TOKEN STORAGE ============
+        function storeOAuthToken(token, expiresIn = 3600) {
+            try {
+                const expiryTime = Date.now() + (expiresIn * 1000);
+                sessionStorage.setItem('oauth_token', token);
+                sessionStorage.setItem('oauth_expiry', expiryTime.toString());
+                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
+            } catch (e) {
+                console.warn('Could not store OAuth token:', e);
+            }
+        }
+
+        function restoreStoredToken() {
+            try {
+                const storedToken = sessionStorage.getItem('oauth_token');
+                const expiry = sessionStorage.getItem('oauth_expiry');
+                
+                if (!storedToken || !expiry) {
+                    return false;
+                }
+                
+                const expiryTime = parseInt(expiry);
+                const now = Date.now();
+                
+                // Check if token is still valid (with 5 min buffer)
+                if (now < expiryTime - 300000) {
+                    accessToken = storedToken;
+                    gapi.client.setToken({ access_token: storedToken });
+                    updateAuthButton(true);
+                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
+                    return true;
+                } else {
+                    // Token expired, clear storage
+                    clearStoredToken();
+                    console.log('Stored token expired');
+                    return false;
+                }
+            } catch (e) {
+                console.warn('Error restoring token:', e);
+                return false;
+            }
+        }
+
+        function clearStoredToken() {
+            try {
+                sessionStorage.removeItem('oauth_token');
+                sessionStorage.removeItem('oauth_expiry');
+            } catch (e) {
+                console.warn('Error clearing token:', e);
             }
         }
 
@@ -916,12 +984,22 @@
                 if (response.error !== undefined) {
                     console.error('Auth error:', response);
                     alert('Gagal authenticate: ' + response.error);
+                    clearStoredToken();
                     return;
                 }
+                
                 accessToken = response.access_token;
+                
+                // Store token with expiry (default 3600 seconds = 1 hour)
+                const expiresIn = response.expires_in || 3600;
+                storeOAuthToken(accessToken, expiresIn);
+                
+                // Set token in gapi client
+                gapi.client.setToken({ access_token: accessToken });
+                
                 updateAuthButton(true);
-                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.');
-                console.log('Authenticated successfully');
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
             };
 
             if (gapi.client.getToken() === null) {
@@ -1196,8 +1274,6 @@
             });
             
             let html = `
-                <div class="year-badge">📊 ${sheetName}</div>
-                
                 <div class="stats">
                     <div class="stat-card">
                         <h3>${formatRupiah(totals.ebitdaLR)}</h3>
@@ -1240,7 +1316,7 @@
                 if (data.sisaSurkas > 0) colorClass = 'positive';
                 else if (data.sisaSurkas < 0) colorClass = 'negative';
                 
-                const rowIndex = index + 2; // +2 because row 1 is header
+                const rowIndex = index + 2;
 
                 html += `
                     <tr>
@@ -1262,10 +1338,6 @@
             html += `
                         </tbody>
                     </table>
-                </div>
-
-                <div class="last-update">
-                    ⏱️ Terakhir diperbarui: ${updateTime}
                 </div>
             `;
             
