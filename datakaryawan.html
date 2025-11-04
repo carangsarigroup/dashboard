@@ -916,6 +916,7 @@
 
         function renderStores(stores) {
             const container = document.getElementById('storeData');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
             if (stores.length === 0) {
                 container.innerHTML = `
@@ -932,7 +933,7 @@
                 const employeeItems = store.employees.map((emp, idx) => `
                     <div class="employee-item">
                         <span class="employee-number">${idx + 1}</span>
-                        <span class="employee-name">${emp.name}</span>
+                        <span class="employee-name">${highlightText(emp.name, searchTerm)}</span>
                     </div>
                 `).join('');
 
@@ -940,15 +941,15 @@
                     <div class="store-card">
                         <div class="store-header">
                             <div class="store-title">
-                                <h3>🏪 ${store.name}</h3>
-                                ${store.code ? `<span class="store-code">${store.code}</span>` : ''}
+                                <h3>🏪 ${highlightText(store.name, searchTerm)}</h3>
+                                ${store.code ? `<span class="store-code">${highlightText(store.code, searchTerm)}</span>` : ''}
                             </div>
                             ${store.coordinator.name ? `
                                 <div class="store-info">
                                     <div class="store-info-row">
                                         <span class="icon">👔</span>
                                         <span class="label">Kepala Toko:</span>
-                                        <span class="value">${store.coordinator.name}</span>
+                                        <span class="value">${highlightText(store.coordinator.name, searchTerm)}</span>
                                     </div>
                                 </div>
                             ` : ''}
@@ -1016,5 +1017,6 @@
     </script>
 </body>
 </html>
+
 
 
