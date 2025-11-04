@@ -896,14 +896,10 @@
 
         function updateStats() {
             const totalStores = allStores.length;
-            const totalCoordinators = allStores.filter(s => s.coordinator.name).length;
             const totalEmployees = allStores.reduce((sum, s) => sum + s.employees.length, 0);
-            const totalPeople = totalCoordinators + totalEmployees;
-
+           
             document.getElementById('totalStores').textContent = totalStores;
-            document.getElementById('totalCoordinators').textContent = totalCoordinators;
             document.getElementById('totalEmployees').textContent = totalEmployees;
-            document.getElementById('totalWithPhone').textContent = totalPeople;
         }
 
         function highlightText(text, searchTerm) {
@@ -1023,6 +1019,7 @@
     </script>
 </body>
 </html>
+
 
 
 
