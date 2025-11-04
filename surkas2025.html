@@ -683,7 +683,7 @@
         </div>
         <button id="authBtn" onclick="handleAuth()" class="auth-btn">
             <span>🔐</span>
-            <span id="authBtnText">Authenticate</span>
+            <span id="authBtnText">Otentikasi</span>
         </button>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
@@ -1015,7 +1015,7 @@
             
             if (isAuthenticated) {
                 authBtn.classList.add('authenticated');
-                authBtnText.textContent = '✓ Authenticated';
+                authBtnText.textContent = '✓ Terotentikasi';
             } else {
                 authBtn.classList.remove('authenticated');
                 authBtnText.textContent = 'Authenticate';
@@ -1602,3 +1602,4 @@
     </script>
 </body>
 </html>
+
