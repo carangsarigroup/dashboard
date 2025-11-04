@@ -998,6 +998,10 @@
                 gapi.client.setToken({ access_token: accessToken });
                 
                 updateAuthButton(true);
+                // Refresh the current sheet data to show action buttons
+                if (appState.currentSheet) {
+                    loadSheetData(appState.currentSheet, true);
+                }
                 alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
                 console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
             };
@@ -1607,6 +1611,7 @@
     </script>
 </body>
 </html>
+
 
 
 
