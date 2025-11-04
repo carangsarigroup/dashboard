@@ -753,27 +753,27 @@
 
                 <div class="form-group">
                     <label for="ebitdaLR">EBITDA LR *</label>
-                    <input type="number" id="ebitdaLR" placeholder="0" required>
+                    <input type="number" id="ebitdaLR" placeholder="0" required oninput="calculateValues()">
                 </div>
 
                 <div class="form-group">
                     <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
-                    <input type="number" id="penggunaanLabaKas" placeholder="0" required>
+                    <input type="number" id="penggunaanLabaKas" placeholder="0" required oninput="calculateValues()">
                 </div>
 
                 <div class="form-group">
-                    <label for="labaNetDitransfer">Laba Net Ditransfer *</label>
-                    <input type="number" id="labaNetDitransfer" placeholder="0" required>
+                    <label for="labaNetDitransfer">Laba Net Ditransfer (Auto)</label>
+                    <input type="number" id="labaNetDitransfer" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
                 </div>
 
                 <div class="form-group">
                     <label for="bayarListrik">Bayar Listrik *</label>
-                    <input type="number" id="bayarListrik" placeholder="0" required>
+                    <input type="number" id="bayarListrik" placeholder="0" required oninput="calculateValues()">
                 </div>
 
                 <div class="form-group">
-                    <label for="sisaSurkas">Sisa Surplus Kas</label>
-                    <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung">
+                    <label for="sisaSurkas">Sisa Surplus Kas (Auto)</label>
+                    <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
                 </div>
 
                 <div class="form-actions">
@@ -1375,9 +1375,10 @@
             document.getElementById('bulan').value = data.bulan;
             document.getElementById('ebitdaLR').value = data.ebitdaLR;
             document.getElementById('penggunaanLabaKas').value = data.penggunaanLabaKas;
-            document.getElementById('labaNetDitransfer').value = data.labaNetDitransfer;
             document.getElementById('bayarListrik').value = data.bayarListrik;
-            document.getElementById('sisaSurkas').value = data.sisaSurkas || '';
+            
+            // Trigger calculation to populate auto fields
+            calculateValues();
 
             document.getElementById('dataModal').classList.add('active');
         }
@@ -1385,6 +1386,23 @@
         function closeModal() {
             document.getElementById('dataModal').classList.remove('active');
             document.getElementById('dataForm').reset();
+        }
+
+        // ============ AUTO CALCULATION ============
+        function calculateValues() {
+            const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value) || 0;
+            const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value) || 0;
+            const bayarListrik = parseNumber(document.getElementById('bayarListrik').value) || 0;
+            
+            // Calculate Laba Net Ditransfer = EBITDA LR - Penggunaan Laba Kas
+            const labaNetDitransfer = ebitdaLR - penggunaanLabaKas;
+            
+            // Calculate Sisa Surkas = Laba Net Ditransfer - Bayar Listrik
+            const sisaSurkas = labaNetDitransfer - bayarListrik;
+            
+            // Update the readonly fields
+            document.getElementById('labaNetDitransfer').value = labaNetDitransfer;
+            document.getElementById('sisaSurkas').value = sisaSurkas;
         }
 
         // ============ CRUD FUNCTIONS ============
@@ -1455,20 +1473,40 @@
             }
             
             try {
-                const response = await gapi.client.sheets.spreadsheets.values.clear({
+                // Get current row data to preserve Triwulan and Bulan
+                const currentRow = appState.currentData[rowIndex - 1];
+                const triwulan = currentRow[0] || '';
+                const bulan = currentRow[1] || '';
+                
+                // Create row with only Triwulan and Bulan, rest are empty/zero
+                const clearedRowData = [
+                    triwulan,
+                    bulan,
+                    0, // EBITDA LR
+                    0, // Penggunaan Laba Kas
+                    0, // Laba Net Ditransfer
+                    0, // Bayar Listrik
+                    0  // Sisa Surkas
+                ];
+                
+                const response = await gapi.client.sheets.spreadsheets.values.update({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [clearedRowData]
+                    }
                 });
                 
-                console.log('Row deleted:', response);
+                console.log('Row data cleared:', response);
                 
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                alert('✅ Data berhasil dihapus!');
+                alert('✅ Data berhasil dihapus! (Triwulan dan Bulan tetap dipertahankan)');
                 return response;
             } catch (error) {
-                console.error('Error deleting row:', error);
+                console.error('Error clearing row:', error);
                 alert('❌ Gagal menghapus data: ' + error.message);
                 throw error;
             }
@@ -1514,15 +1552,11 @@
             const bulan = document.getElementById('bulan').value;
             const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
             const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value);
-            const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
             const bayarListrik = parseNumber(document.getElementById('bayarListrik').value);
             
-            let sisaSurkas = document.getElementById('sisaSurkas').value;
-            if (!sisaSurkas) {
-                sisaSurkas = labaNetDitransfer - bayarListrik;
-            } else {
-                sisaSurkas = parseNumber(sisaSurkas);
-            }
+            // Get calculated values
+            const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
+            const sisaSurkas = parseNumber(document.getElementById('sisaSurkas').value);
 
             const rowData = [
                 triwulan,
