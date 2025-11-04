@@ -914,6 +914,13 @@
             document.getElementById('totalWithPhone').textContent = totalPeople;
         }
 
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<mark style="background: #ffeb3b; padding: 2px 4px; border-radius: 3px; font-weight: 600;">$1</mark>');
+        }
+        
         function renderStores(stores) {
             const container = document.getElementById('storeData');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1017,6 +1024,7 @@
     </script>
 </body>
 </html>
+
 
 
 
