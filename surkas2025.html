@@ -1482,41 +1482,48 @@
             }
             
             try {
-                // Get current row data to preserve Triwulan and Bulan
-                const currentRow = appState.currentData[rowIndex - 1];
-                const triwulan = currentRow[0] || '';
-                const bulan = currentRow[1] || '';
+                // Get the sheet ID first
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                });
                 
-                // Create row with only Triwulan and Bulan, rest are empty/zero
-                const clearedRowData = [
-                    triwulan,
-                    bulan,
-                    0, // EBITDA LR
-                    0, // Penggunaan Laba Kas
-                    0, // Laba Net Ditransfer
-                    0, // Bayar Listrik
-                    0  // Sisa Surkas
-                ];
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === sheetName
+                );
                 
-                const response = await gapi.client.sheets.spreadsheets.values.update({
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                
+                // Delete the entire row using batchUpdate
+                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
-                    valueInputOption: 'USER_ENTERED',
                     resource: {
-                        values: [clearedRowData]
+                        requests: [{
+                            deleteDimension: {
+                                range: {
+                                    sheetId: sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: rowIndex - 1, // 0-based index
+                                    endIndex: rowIndex // exclusive
+                                }
+                            }
+                        }]
                     }
                 });
                 
-                console.log('Row data cleared:', response);
+                console.log('Row deleted:', response);
                 
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                alert('✅ Data berhasil dihapus! (Triwulan dan Bulan tetap dipertahankan)');
+                alert('✅ Baris berhasil dihapus sepenuhnya!');
                 return response;
             } catch (error) {
-                console.error('Error clearing row:', error);
-                alert('❌ Gagal menghapus data: ' + error.message);
+                console.error('Error deleting row:', error);
+                alert('❌ Gagal menghapus baris: ' + error.message);
                 throw error;
             }
         }
@@ -1611,6 +1618,7 @@
     </script>
 </body>
 </html>
+
 
 
 
