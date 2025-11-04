@@ -707,7 +707,7 @@
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
-            <button class="add-btn" onclick="openAddModal()">
+            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
                 <span>➕</span>
                 <span>Tambah Data</span>
             </button>
@@ -1012,13 +1012,16 @@
         function updateAuthButton(isAuthenticated) {
             const authBtn = document.getElementById('authBtn');
             const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
             
             if (isAuthenticated) {
                 authBtn.classList.add('authenticated');
                 authBtnText.textContent = '✓ Terotentikasi';
+                if (addBtn) addBtn.style.display = 'inline-flex';
             } else {
                 authBtn.classList.remove('authenticated');
                 authBtnText.textContent = 'Authenticate';
+                if (addBtn) addBtn.style.display = 'none';
             }
         }
 
@@ -1303,14 +1306,14 @@
                                 <th>PENGGUNAAN LABA KAS</th>
                                 <th>LABA NET DITRANSFER</th>
                                 <th>BAYAR LISTRIK</th>
-                                <th>SISA SURKAS</th>
-                                <th>AKSI</th>
+                               <th>SISA SURKAS</th>
+                                ${accessToken ? '<th>AKSI</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
-            `;
+            `    ;
             
-            dataRows.forEach((row, index) => {
+                dataRows.forEach((row, index) => {
                 const data = processRowData(row);
                 let colorClass = 'zero';
                 if (data.sisaSurkas > 0) colorClass = 'positive';
@@ -1327,10 +1330,12 @@
                         <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
                         <td class="currency">${formatRupiah(data.bayarListrik)}</td>
                         <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
+                        ${accessToken ? `
                         <td class="actions">
                             <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
                             <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
                         </td>
+                        ` : ''}
                     </tr>
                 `;
             });
@@ -1602,6 +1607,7 @@
     </script>
 </body>
 </html>
+
 
 
 
