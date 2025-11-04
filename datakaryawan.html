@@ -629,7 +629,7 @@
             <div class="sync-info">
                 <div class="status" id="syncStatus">
                     <span>🔴</span>
-                    <span>Connecting to Google Sheets...</span>
+                    <span>Connecting to Database...</span>
                 </div>
                 <span id="lastSync" style="font-size: 0.85em; color: #999;">Belum sync</span>
             </div>
@@ -657,7 +657,7 @@
                 <div class="empty-state">
                     <div class="empty-state-icon">👥</div>
                     <h2>Memuat Data...</h2>
-                    <p>Sedang mengambil data dari Google Sheets</p>
+                    <p>Sedang mengambil data dari Database</p>
                 </div>
             </div>
 
@@ -740,7 +740,7 @@
         }
 
         // ============ UTILITY FUNCTIONS ============
-        function showLoading(message = 'Memuat data dari Google Sheets...') {
+        function showLoading(message = 'Memuat data dari Database...') {
             document.getElementById('storeData').innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
@@ -800,7 +800,7 @@
 
             try {
                 showLoading();
-                updateSyncStatus('connecting', 'Menghubungkan ke Google Sheets...');
+                updateSyncStatus('connecting', 'Menghubungkan ke Database...');
 
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
                 
@@ -826,7 +826,7 @@
                 appState.lastUpdate = Date.now();
 
                 processGoogleSheetsData(data.values);
-                updateSyncStatus('online', 'Connected to Google Sheets');
+                updateSyncStatus('online', 'Terhubung ke Database');
                 updateLastSync();
                 
             } catch (error) {
@@ -1016,4 +1016,5 @@
     </script>
 </body>
 </html>
+
 
