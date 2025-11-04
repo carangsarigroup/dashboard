@@ -252,7 +252,7 @@
             font-size: 0.95em;
         }
         
-        .refresh-btn {
+        .refresh-btn, .add-btn {
             background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
             padding: 12px 30px;
@@ -269,9 +269,13 @@
             gap: 8px;
         }
         
-        .refresh-btn:hover {
+        .refresh-btn:hover, .add-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         }
 
         .table-container {
@@ -345,6 +349,41 @@
         td.currency.zero {
             color: #6c757d;
         }
+
+        td.actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #4A90E2;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
         
         tbody tr {
             transition: background 0.2s ease;
@@ -352,87 +391,6 @@
 
         tbody tr:hover {
             background: #f8f9fa;
-        }
-
-        .year-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
-        }
-
-        .summary-section {
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #FF69B4;
-        }
-
-        .summary-section h3 {
-            color: #FF69B4;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .summary-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .summary-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .summary-item .label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-
-        .summary-item .value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #FF69B4;
-        }
-
-        .summary-item-finale {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
-            transition: transform 0.2s ease;
-        }
-
-        .summary-item-finale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
-        }
-
-        .summary-item-finale .label {
-            font-size: 0.9em;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .summary-item-finale .value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #ffffff;
         }
 
         .user-bar {
@@ -470,6 +428,31 @@
             gap: 8px;
         }
 
+        .auth-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .auth-btn.authenticated {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        }
+
         .logout-btn {
             background: rgba(255,255,255,0.95);
             border: none;
@@ -492,14 +475,142 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .last-update {
-            text-align: center;
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #FF69B4;
+            font-size: 1.5em;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
             color: #6c757d;
-            font-size: 0.9em;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #FF69B4;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
             border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-submit, .btn-cancel {
+            flex: 1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
 
         .empty-state {
@@ -544,7 +655,7 @@
                 min-width: 100%;
             }
 
-            .back-btn, .refresh-btn {
+            .back-btn, .refresh-btn, .add-btn {
                 width: 100%;
                 justify-content: center;
             }
@@ -553,8 +664,12 @@
                 padding: 20px;
             }
 
-            .summary-grid {
-                grid-template-columns: 1fr;
+            .modal-content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -566,6 +681,10 @@
             <span>👤</span>
             <span id="displayUsername">Guest</span>
         </div>
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+            <span>🔐</span>
+            <span id="authBtnText">Authenticate</span>
+        </button>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
             <span>Logout</span>
@@ -588,6 +707,10 @@
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
+            <button class="add-btn" onclick="openAddModal()">
+                <span>➕</span>
+                <span>Tambah Data</span>
+            </button>
             <button class="refresh-btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
@@ -601,7 +724,72 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+                
+                <div class="form-group">
+                    <label for="triwulan">Triwulan *</label>
+                    <select id="triwulan" required>
+                        <option value="">Pilih Triwulan</option>
+                        <option value="TW1">TW1 (Q1)</option>
+                        <option value="TW2">TW2 (Q2)</option>
+                        <option value="TW3">TW3 (Q3)</option>
+                        <option value="TW4">TW4 (Q4)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bulan">Bulan *</label>
+                    <input type="text" id="bulan" placeholder="Contoh: Januari" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ebitdaLR">EBITDA LR *</label>
+                    <input type="number" id="ebitdaLR" placeholder="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
+                    <input type="number" id="penggunaanLabaKas" placeholder="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="labaNetDitransfer">Laba Net Ditransfer *</label>
+                    <input type="number" id="labaNetDitransfer" placeholder="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bayarListrik">Bayar Listrik *</label>
+                    <input type="number" id="bayarListrik" placeholder="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sisaSurkas">Sisa Surplus Kas</label>
+                    <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="submitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
         // ============ AUTH SYSTEM ============
         function getCookie(name) {
@@ -660,14 +848,14 @@
 
         // ============ CONFIG ============
         const CONFIG = {
-        CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-        API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-        SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
-        SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
-        CACHE_DURATION: 5 * 60 * 1000
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+            CACHE_DURATION: 5 * 60 * 1000
         };
 
-        // ============ OAUTH STATE ============ 
+        // ============ OAUTH STATE ============
         let tokenClient;
         let accessToken = null;
         let gapiInited = false;
@@ -678,67 +866,84 @@
             sheets: [],
             currentSheet: null,
             cache: {},
-            lastUpdate: null
+            lastUpdate: null,
+            currentData: []
         };
 
-        // ============ OAUTH INITIALIZATION ============ ⭐ NEW
+        // ============ OAUTH INITIALIZATION ============
         function gapiLoaded() {
             gapi.load('client', initializeGapiClient);
         }
+
         async function initializeGapiClient() {
             try {
-        await gapi.client.init({
-            apiKey: CONFIG.API_KEY,
-            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-        });
-        gapiInited = true;
-        maybeEnableButtons();
-        console.log('GAPI client initialized');
-        } catch (error) {
-        console.error('Error initializing GAPI client:', error);
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+                console.log('GAPI client initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI client:', error);
+            }
         }
-        }
+
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.CLIENT_ID,
-        scope: CONFIG.SCOPES,
-        callback: '' // Will be set in requestAuth
-        });
-        gisInited = true;
-        maybeEnableButtons();
-        console.log('GIS initialized');
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                callback: ''
+            });
+            gisInited = true;
+            maybeEnableButtons();
+            console.log('GIS initialized');
         }
-        function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-        loadSheetsList();
-        }
-        }
-        function requestAuth(callback) {tokenClient.callback = async (response) => {
-        if (response.error !== undefined) {
-            throw (response);
-        }
-        accessToken = response.access_token;
-        console.log('Authenticated successfully');
-        if (callback) callback();
-        };
 
-        if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-        } else {
-        tokenClient.requestAccessToken({prompt: ''});
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                loadSheetsList();
+            }
         }
+
+        function handleAuth() {
+            if (accessToken) {
+                alert('Sudah terauthentikasi!');
+                return;
+            }
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    console.error('Auth error:', response);
+                    alert('Gagal authenticate: ' + response.error);
+                    return;
+                }
+                accessToken = response.access_token;
+                updateAuthButton(true);
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.');
+                console.log('Authenticated successfully');
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
         }
-        
-        function revokeAuth() {
-        const token = gapi.client.getToken();
-        if (token !== null) {
-        google.accounts.oauth2.revoke(token.access_token);
-        gapi.client.setToken('');
-        accessToken = null;
-        console.log('Token revoked');
+
+        function updateAuthButton(isAuthenticated) {
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            
+            if (isAuthenticated) {
+                authBtn.classList.add('authenticated');
+                authBtnText.textContent = '✓ Authenticated';
+            } else {
+                authBtn.classList.remove('authenticated');
+                authBtnText.textContent = 'Authenticate';
+            }
         }
-        }
-        
+
         // ============ UTILITY FUNCTIONS ============
         function formatRupiah(value) {
             if (!value && value !== 0) return 'Rp0';
@@ -912,6 +1117,7 @@
                 
                 setCachedData(sheetName, data.values);
                 appState.lastUpdate = new Date();
+                appState.currentData = data.values;
                 
                 displayData(data.values, sheetName);
                 
@@ -1022,16 +1228,19 @@
                                 <th>LABA NET DITRANSFER</th>
                                 <th>BAYAR LISTRIK</th>
                                 <th>SISA SURKAS</th>
+                                <th>AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
             
-            dataRows.forEach(row => {
+            dataRows.forEach((row, index) => {
                 const data = processRowData(row);
                 let colorClass = 'zero';
                 if (data.sisaSurkas > 0) colorClass = 'positive';
                 else if (data.sisaSurkas < 0) colorClass = 'negative';
+                
+                const rowIndex = index + 2; // +2 because row 1 is header
 
                 html += `
                     <tr>
@@ -1042,6 +1251,10 @@
                         <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
                         <td class="currency">${formatRupiah(data.bayarListrik)}</td>
                         <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
+                        <td class="actions">
+                            <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -1049,32 +1262,6 @@
             html += `
                         </tbody>
                     </table>
-                </div>
-
-                <div class="summary-section">
-                    <h3>📊 Ringkasan ${sheetName}</h3>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="label">Total EBITDA LR</div>
-                            <div class="value">${formatRupiah(totals.ebitdaLR)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Penggunaan Laba Kas</div>
-                            <div class="value">${formatRupiah(totals.penggunaanLabaKas)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Laba Net Ditransfer</div>
-                            <div class="value">${formatRupiah(totals.labaNetDitransfer)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Bayar Listrik</div>
-                            <div class="value">${formatRupiah(totals.bayarListrik)}</div>
-                        </div>
-                        <div class="summary-item-finale">
-                            <div class="label">Total Sisa Surplus Kas</div>
-                            <div class="value">${formatRupiah(totals.sisaSurkas)}</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="last-update">
@@ -1085,13 +1272,53 @@
             document.getElementById('content').innerHTML = html;
         }
 
-        // ============ CRUD FUNCTIONS ============ (ADD THIS ENTIRE SECTION)
-        
-        // CREATE - Add new row
+        // ============ MODAL FUNCTIONS ============
+        function openAddModal() {
+            if (!appState.currentSheet) {
+                alert('Pilih toko terlebih dahulu!');
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+            document.getElementById('submitBtnText').textContent = 'Simpan';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function openEditModal(rowIndex) {
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
+                alert('Data tidak ditemukan!');
+                return;
+            }
+
+            const row = appState.currentData[rowIndex - 1];
+            const data = processRowData(row);
+
+            document.getElementById('modalTitle').textContent = 'Edit Data';
+            document.getElementById('submitBtnText').textContent = 'Update';
+            document.getElementById('editRowIndex').value = rowIndex;
+            
+            document.getElementById('triwulan').value = data.triwulan;
+            document.getElementById('bulan').value = data.bulan;
+            document.getElementById('ebitdaLR').value = data.ebitdaLR;
+            document.getElementById('penggunaanLabaKas').value = data.penggunaanLabaKas;
+            document.getElementById('labaNetDitransfer').value = data.labaNetDitransfer;
+            document.getElementById('bayarListrik').value = data.bayarListrik;
+            document.getElementById('sisaSurkas').value = data.sisaSurkas || '';
+
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            document.getElementById('dataForm').reset();
+        }
+
+        // ============ CRUD FUNCTIONS ============
         async function addRow(sheetName, rowData) {
             if (!accessToken) {
-                alert('Please authenticate first');
-                requestAuth(() => addRow(sheetName, rowData));
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
             
@@ -1107,26 +1334,21 @@
                 
                 console.log('Row added:', response);
                 
-                // Clear cache and reload
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                alert('Data berhasil ditambahkan!');
+                alert('✅ Data berhasil ditambahkan!');
                 return response;
             } catch (error) {
                 console.error('Error adding row:', error);
-                alert('Gagal menambahkan data: ' + error.message);
+                alert('❌ Gagal menambahkan data: ' + error.message);
                 throw error;
             }
         }
 
-        // READ - Already handled by existing loadSheetData function
-
-        // UPDATE - Edit existing row
         async function updateRow(sheetName, rowIndex, rowData) {
             if (!accessToken) {
-                alert('Please authenticate first');
-                requestAuth(() => updateRow(sheetName, rowIndex, rowData));
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
             
@@ -1142,28 +1364,21 @@
                 
                 console.log('Row updated:', response);
                 
-                // Clear cache and reload
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                alert('Data berhasil diupdate!');
+                alert('✅ Data berhasil diupdate!');
                 return response;
             } catch (error) {
                 console.error('Error updating row:', error);
-                alert('Gagal mengupdate data: ' + error.message);
+                alert('❌ Gagal mengupdate data: ' + error.message);
                 throw error;
             }
         }
 
-        // DELETE - Remove row (clear values)
         async function deleteRow(sheetName, rowIndex) {
             if (!accessToken) {
-                alert('Please authenticate first');
-                requestAuth(() => deleteRow(sheetName, rowIndex));
-                return;
-            }
-            
-            if (!confirm('Yakin ingin menghapus data ini?')) {
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
             
@@ -1175,19 +1390,18 @@
                 
                 console.log('Row deleted:', response);
                 
-                // Clear cache and reload
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                alert('Data berhasil dihapus!');
+                alert('✅ Data berhasil dihapus!');
                 return response;
             } catch (error) {
                 console.error('Error deleting row:', error);
-                alert('Gagal menghapus data: ' + error.message);
+                alert('❌ Gagal menghapus data: ' + error.message);
                 throw error;
             }
         }
-        
+
         // ============ EVENT HANDLERS ============
         function handleSheetChange() {
             const sheetSelect = document.getElementById('sheetSelect');
@@ -1213,17 +1427,72 @@
             loadSheetData(selectedSheet, true);
         }
 
+        function handleDelete(rowIndex) {
+            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+                return;
+            }
+            
+            deleteRow(appState.currentSheet, rowIndex);
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const triwulan = document.getElementById('triwulan').value;
+            const bulan = document.getElementById('bulan').value;
+            const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
+            const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value);
+            const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
+            const bayarListrik = parseNumber(document.getElementById('bayarListrik').value);
+            
+            let sisaSurkas = document.getElementById('sisaSurkas').value;
+            if (!sisaSurkas) {
+                sisaSurkas = labaNetDitransfer - bayarListrik;
+            } else {
+                sisaSurkas = parseNumber(sisaSurkas);
+            }
+
+            const rowData = [
+                triwulan,
+                bulan,
+                ebitdaLR,
+                penggunaanLabaKas,
+                labaNetDitransfer,
+                bayarListrik,
+                sisaSurkas
+            ];
+
+            const editRowIndex = document.getElementById('editRowIndex').value;
+            
+            if (editRowIndex) {
+                await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData);
+            } else {
+                await addRow(appState.currentSheet, rowData);
+            }
+            
+            closeModal();
+        }
+
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
-            // Initialize OAuth
             console.log('Page loaded, waiting for Google APIs...');
+            
+            setTimeout(() => {
+                if (typeof gapi !== 'undefined') {
+                    gapiLoaded();
+                }
+                if (typeof google !== 'undefined') {
+                    gisLoaded();
+                }
+            }, 500);
         });
-    </script>
-        
-    <!-- New script -->
-    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
 
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
-
