@@ -707,15 +707,6 @@
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
-            <div class="select-wrapper">
-                <select id="triwulanFilter" onchange="handleTriwulanFilter()">
-                    <option value="">Semua Triwulan</option>
-                    <option value="TW1">TW1 (Q1)</option>
-                    <option value="TW2">TW2 (Q2)</option>
-                    <option value="TW3">TW3 (Q3)</option>
-                    <option value="TW4">TW4 (Q4)</option>
-                </select>
-            </div>
             <button class="add-btn" onclick="openAddModal()">
                 <span>➕</span>
                 <span>Tambah Data</span>
@@ -887,9 +878,7 @@
             currentSheet: null,
             cache: {},
             lastUpdate: null,
-            currentData: [],
-            allData: [], // Store all unfiltered data
-            selectedTriwulan: '' // Currently selected triwulan filter
+            currentData: []
         };
 
         // ============ OAUTH INITIALIZATION ============
@@ -1206,12 +1195,7 @@
                 
                 setCachedData(sheetName, data.values);
                 appState.lastUpdate = new Date();
-                appState.allData = data.values; // Store all data
                 appState.currentData = data.values;
-                
-                // Reset filter when loading new sheet
-                document.getElementById('triwulanFilter').value = '';
-                appState.selectedTriwulan = '';
                 
                 displayData(data.values, sheetName);
                 
@@ -1275,7 +1259,7 @@
             const dataRows = values.slice(1).filter(row => row[1]);
             
             if (dataRows.length === 0) {
-                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"${appState.selectedTriwulan ? ' untuk ' + appState.selectedTriwulan : ''}`);
+                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"`);
                 return;
             }
 
@@ -1289,13 +1273,7 @@
                 second: '2-digit'
             });
             
-            const filterInfo = appState.selectedTriwulan ? ` - ${appState.selectedTriwulan}` : ' - Semua Triwulan';
-            
             let html = `
-                <div style="text-align: center; margin-bottom: 20px; color: #FF69B4; font-size: 1.2em; font-weight: 600;">
-                    📊 ${sheetName}${filterInfo}
-                </div>
-                
                 <div class="stats">
                     <div class="stat-card">
                         <h3>${formatRupiah(totals.ebitdaLR)}</h3>
@@ -1338,11 +1316,7 @@
                 if (data.sisaSurkas > 0) colorClass = 'positive';
                 else if (data.sisaSurkas < 0) colorClass = 'negative';
                 
-                // Find the actual row index in the full dataset
-                const actualIndex = appState.allData.findIndex(r => 
-                    r[0] === row[0] && r[1] === row[1] && r[2] === row[2]
-                );
-                const rowIndex = actualIndex >= 0 ? actualIndex + 1 : index + 2;
+                const rowIndex = index + 2;
 
                 html += `
                     <tr>
@@ -1385,12 +1359,12 @@
         }
 
         function openEditModal(rowIndex) {
-            if (!appState.allData || appState.allData.length < rowIndex) {
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
                 alert('Data tidak ditemukan!');
                 return;
             }
 
-            const row = appState.allData[rowIndex - 1];
+            const row = appState.currentData[rowIndex - 1];
             const data = processRowData(row);
 
             document.getElementById('modalTitle').textContent = 'Edit Data';
@@ -1500,7 +1474,7 @@
             
             try {
                 // Get current row data to preserve Triwulan and Bulan
-                const currentRow = appState.allData[rowIndex - 1];
+                const currentRow = appState.currentData[rowIndex - 1];
                 const triwulan = currentRow[0] || '';
                 const bulan = currentRow[1] || '';
                 
@@ -1529,12 +1503,6 @@
                 delete appState.cache[sheetName];
                 await loadSheetData(sheetName, true);
                 
-                // Reapply filter after refresh
-                if (appState.selectedTriwulan) {
-                    document.getElementById('triwulanFilter').value = appState.selectedTriwulan;
-                    handleTriwulanFilter();
-                }
-                
                 alert('✅ Data berhasil dihapus! (Triwulan dan Bulan tetap dipertahankan)');
                 return response;
             } catch (error) {
@@ -1557,31 +1525,6 @@
             }
         }
 
-        function handleTriwulanFilter() {
-            const triwulanFilter = document.getElementById('triwulanFilter');
-            const selectedTriwulan = triwulanFilter.value;
-            
-            appState.selectedTriwulan = selectedTriwulan;
-            
-            if (!appState.currentSheet || !appState.allData || appState.allData.length === 0) {
-                return;
-            }
-            
-            if (!selectedTriwulan) {
-                // Show all data
-                appState.currentData = appState.allData;
-                displayData(appState.allData, appState.currentSheet);
-            } else {
-                // Filter by selected triwulan
-                const headers = appState.allData[0];
-                const filteredRows = appState.allData.slice(1).filter(row => row[0] === selectedTriwulan);
-                const filteredData = [headers, ...filteredRows];
-                
-                appState.currentData = filteredData;
-                displayData(filteredData, appState.currentSheet);
-            }
-        }
-
         function handleRefresh() {
             const sheetSelect = document.getElementById('sheetSelect');
             const selectedSheet = sheetSelect.value;
@@ -1595,7 +1538,7 @@
         }
 
         function handleDelete(rowIndex) {
-            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nTriwulan dan Bulan akan tetap dipertahankan, hanya data angka yang akan dihapus.')) {
+            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
                 return;
             }
             
