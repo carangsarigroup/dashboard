@@ -602,6 +602,11 @@
         </div>
     </div>
 
+    <!-- New script -->
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+
+    
     <script>
         // ============ AUTH SYSTEM ============
         function getCookie(name) {
@@ -660,11 +665,19 @@
 
         // ============ CONFIG ============
         const CONFIG = {
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
-            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
+        CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+        API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+        SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
+        SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+        CACHE_DURATION: 5 * 60 * 1000
         };
 
+        // ============ OAUTH STATE ============ 
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
+        
         // ============ STATE MANAGEMENT ============
         let appState = {
             sheets: [],
@@ -673,6 +686,64 @@
             lastUpdate: null
         };
 
+        // ============ OAUTH INITIALIZATION ============ ⭐ NEW
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+        async function initializeGapiClient() {
+            try {
+        await gapi.client.init({
+            apiKey: CONFIG.API_KEY,
+            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+        console.log('GAPI client initialized');
+        } catch (error) {
+        console.error('Error initializing GAPI client:', error);
+        }
+        }
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.CLIENT_ID,
+        scope: CONFIG.SCOPES,
+        callback: '' // Will be set in requestAuth
+        });
+        gisInited = true;
+        maybeEnableButtons();
+        console.log('GIS initialized');
+        }
+        function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+        loadSheetsList();
+        }
+        }
+        function requestAuth(callback) {tokenClient.callback = async (response) => {
+        if (response.error !== undefined) {
+            throw (response);
+        }
+        accessToken = response.access_token;
+        console.log('Authenticated successfully');
+        if (callback) callback();
+        };
+
+        if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+        tokenClient.requestAccessToken({prompt: ''});
+        }
+        }
+        
+        function revokeAuth() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+        accessToken = null;
+        console.log('Token revoked');
+        }
+        }
+        
         // ============ UTILITY FUNCTIONS ============
         function formatRupiah(value) {
             if (!value && value !== 0) return 'Rp0';
@@ -1019,6 +1090,109 @@
             document.getElementById('content').innerHTML = html;
         }
 
+        // ============ CRUD FUNCTIONS ============ (ADD THIS ENTIRE SECTION)
+        
+        // CREATE - Add new row
+        async function addRow(sheetName, rowData) {
+            if (!accessToken) {
+                alert('Please authenticate first');
+                requestAuth(() => addRow(sheetName, rowData));
+                return;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A:G`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row added:', response);
+                
+                // Clear cache and reload
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('Data berhasil ditambahkan!');
+                return response;
+            } catch (error) {
+                console.error('Error adding row:', error);
+                alert('Gagal menambahkan data: ' + error.message);
+                throw error;
+            }
+        }
+
+        // READ - Already handled by existing loadSheetData function
+
+        // UPDATE - Edit existing row
+        async function updateRow(sheetName, rowIndex, rowData) {
+            if (!accessToken) {
+                alert('Please authenticate first');
+                requestAuth(() => updateRow(sheetName, rowIndex, rowData));
+                return;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row updated:', response);
+                
+                // Clear cache and reload
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('Data berhasil diupdate!');
+                return response;
+            } catch (error) {
+                console.error('Error updating row:', error);
+                alert('Gagal mengupdate data: ' + error.message);
+                throw error;
+            }
+        }
+
+        // DELETE - Remove row (clear values)
+        async function deleteRow(sheetName, rowIndex) {
+            if (!accessToken) {
+                alert('Please authenticate first');
+                requestAuth(() => deleteRow(sheetName, rowIndex));
+                return;
+            }
+            
+            if (!confirm('Yakin ingin menghapus data ini?')) {
+                return;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.clear({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`
+                });
+                
+                console.log('Row deleted:', response);
+                
+                // Clear cache and reload
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('Data berhasil dihapus!');
+                return response;
+            } catch (error) {
+                console.error('Error deleting row:', error);
+                alert('Gagal menghapus data: ' + error.message);
+                throw error;
+            }
+        }
+        
         // ============ EVENT HANDLERS ============
         function handleSheetChange() {
             const sheetSelect = document.getElementById('sheetSelect');
@@ -1046,7 +1220,8 @@
 
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
-            loadSheetsList();
+            // Initialize OAuth
+            console.log('Page loaded, waiting for Google APIs...');
         });
     </script>
 </body>
