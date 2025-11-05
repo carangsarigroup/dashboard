@@ -181,7 +181,7 @@
             font-size: 12px;
         }
 
-        .refresh-btn {
+        .add-btn, .refresh-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 12px 30px;
@@ -197,8 +197,12 @@
             align-items: center;
             gap: 8px;
         }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
         
-        .refresh-btn:hover {
+        .refresh-btn:hover, .add-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
@@ -317,6 +321,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
+            position: relative;
         }
 
         .store-title {
@@ -337,6 +342,35 @@
             border-radius: 15px;
             font-size: 0.85em;
             font-weight: 600;
+        }
+
+        .store-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit-store, .btn-delete-store {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-store:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete-store:hover {
+            background: #dc3545;
+            transform: translateY(-2px);
         }
 
         .store-info {
@@ -387,11 +421,11 @@
             background: #f8f9fa;
             border-radius: 8px;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .employee-item:hover {
             background: #e9ecef;
-            transform: translateX(5px);
         }
 
         .employee-number {
@@ -412,6 +446,37 @@
             flex: 1;
             font-weight: 500;
             color: #333;
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-edit-emp, .btn-delete-emp {
+            background: transparent;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-emp {
+            color: #667eea;
+        }
+
+        .btn-edit-emp:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-delete-emp {
+            color: #dc3545;
+        }
+
+        .btn-delete-emp:hover {
+            background: rgba(220, 53, 69, 0.1);
         }
 
         .user-bar {
@@ -447,6 +512,31 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .auth-btn.authenticated {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .logout-btn {
@@ -539,6 +629,144 @@
             border-radius: 8px;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-submit, .btn-cancel {
+            flex: 1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -566,7 +794,7 @@
                 min-width: 100%;
             }
 
-            .back-btn, .refresh-btn {
+            .back-btn, .refresh-btn, .add-btn {
                 width: 100%;
                 justify-content: center;
             }
@@ -582,6 +810,14 @@
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -590,8 +826,12 @@
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
-            <span id="displayUsername">Admin</span>
+            <span id="displayUsername">Guest</span>
         </div>
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+            <span>🔐</span>
+            <span id="authBtnText">Otentikasi</span>
+        </button>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
             <span>Logout</span>
@@ -619,6 +859,10 @@
                     <option value="name-desc">Nama Toko Z-A</option>
                 </select>
             </div>
+            <button class="add-btn" onclick="openAddStoreModal()" id="addBtn" style="display: none;">
+                <span>➕</span>
+                <span>Tambah Toko</span>
+            </button>
             <button class="refresh-btn" id="refreshBtn" onclick="syncData()">
                 <span class="icon">🔄</span>
                 <span>Refresh</span>
@@ -640,8 +884,8 @@
                     <p>Total Toko</p>
                 </div>
                 <div class="stat-card">
-                <h3 id="totalEmployees">0</h3>
-                <p>Total Karyawan</p>
+                    <h3 id="totalEmployees">0</h3>
+                    <p>Total Karyawan</p>
                 </div>
             </div>
 
@@ -659,20 +903,94 @@
         </div>
     </div>
 
+    <!-- Add/Edit Store Modal -->
+    <div id="storeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="storeModalTitle">Tambah Toko Baru</h2>
+                <button class="close-modal" onclick="closeStoreModal()">&times;</button>
+            </div>
+            <form id="storeForm" onsubmit="handleStoreSubmit(event)">
+                <input type="hidden" id="editStoreIndex" value="">
+
+                <div class="form-group">
+                    <label for="storeName">Nama Toko *</label>
+                    <input type="text" id="storeName" placeholder="Nama toko" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="storeCode">Kode Toko</label>
+                    <input type="text" id="storeCode" placeholder="Contoh: TK001">
+                </div>
+
+                <div class="form-group">
+                    <label for="coordinatorName">Nama Kepala Toko</label>
+                    <input type="text" id="coordinatorName" placeholder="Nama kepala toko">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="storeSubmitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeStoreModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="employeeModalTitle">Tambah Karyawan</h2>
+                <button class="close-modal" onclick="closeEmployeeModal()">&times;</button>
+            </div>
+            <form id="employeeForm" onsubmit="handleEmployeeSubmit(event)">
+                <input type="hidden" id="employeeStoreIndex" value="">
+                <input type="hidden" id="editEmployeeIndex" value="">
+
+                <div class="form-group">
+                    <label for="employeeName">Nama Karyawan *</label>
+                    <input type="text" id="employeeName" placeholder="Nama lengkap karyawan" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="employeeSubmitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeEmployeeModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
-        // ============ GOOGLE SHEETS CONFIGURATION ============
+        // ============ CONFIG ============
         const CONFIG = {
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
             SHEET_NAME: 'KaryawanToko',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
             CACHE_DURATION: 5 * 60 * 1000
         };
+
+        // ============ OAUTH STATE ============
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
         
         let allStores = [];
         let filteredStores = [];
         let appState = {
             cache: null,
-            lastUpdate: null
+            lastUpdate: null,
+            currentData: []
         };
 
         // ============ AUTH SYSTEM ============
@@ -713,11 +1031,30 @@
                 window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
                 return false;
             }
+
+            updateUIBasedOnRole(authData.role);
             return true;
+        }
+
+        function updateUIBasedOnRole(role) {
+            const authBtn = document.getElementById('authBtn');
+            const isAdmin = role && role.toLowerCase() === 'admin';
+            
+            if (authBtn) {
+                authBtn.style.display = isAdmin ? 'flex' : 'none';
+            }
         }
 
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
+            
+            accessToken = null;
+            clearStoredToken();
+            if (typeof gapi !== 'undefined' && gapi.client) {
+                gapi.client.setToken(null);
+            }
+            updateAuthButton(false);
+            
             deleteCookie('userAuth');
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
@@ -728,6 +1065,146 @@
                 document.getElementById('displayUsername').textContent = authData.fullName;
             } else if (authData?.username) {
                 document.getElementById('displayUsername').textContent = authData.username;
+            }
+            if (authData?.role) {
+                updateUIBasedOnRole(authData.role);
+            }
+        }
+
+        // ============ OAUTH INITIALIZATION ============
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+                console.log('GAPI client initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI client:', error);
+            }
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                prompt: '',
+                callback: ''
+            });
+            gisInited = true;
+            maybeEnableButtons();
+            console.log('GIS initialized');
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                if (restoreStoredToken()) {
+                    console.log('Restored OAuth token from storage');
+                }
+            }
+        }
+
+        // ============ TOKEN STORAGE ============
+        function storeOAuthToken(token, expiresIn = 3600) {
+            try {
+                const expiryTime = Date.now() + (expiresIn * 1000);
+                sessionStorage.setItem('oauth_token', token);
+                sessionStorage.setItem('oauth_expiry', expiryTime.toString());
+                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
+            } catch (e) {
+                console.warn('Could not store OAuth token:', e);
+            }
+        }
+
+        function restoreStoredToken() {
+            try {
+                const storedToken = sessionStorage.getItem('oauth_token');
+                const expiry = sessionStorage.getItem('oauth_expiry');
+                
+                if (!storedToken || !expiry) {
+                    return false;
+                }
+                
+                const expiryTime = parseInt(expiry);
+                const now = Date.now();
+                
+                if (now < expiryTime - 300000) {
+                    accessToken = storedToken;
+                    gapi.client.setToken({ access_token: storedToken });
+                    updateAuthButton(true);
+                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
+                    return true;
+                } else {
+                    clearStoredToken();
+                    console.log('Stored token expired');
+                    return false;
+                }
+            } catch (e) {
+                console.warn('Error restoring token:', e);
+                return false;
+            }
+        }
+
+        function clearStoredToken() {
+            try {
+                sessionStorage.removeItem('oauth_token');
+                sessionStorage.removeItem('oauth_expiry');
+            } catch (e) {
+                console.warn('Error clearing token:', e);
+            }
+        }
+
+        function handleAuth() {
+            if (accessToken) {
+                alert('Sudah terauthentikasi!');
+                return;
+            }
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    console.error('Auth error:', response);
+                    alert('Gagal authenticate: ' + response.error);
+                    clearStoredToken();
+                    return;
+                }
+                
+                accessToken = response.access_token;
+                const expiresIn = response.expires_in || 3600;
+                storeOAuthToken(accessToken, expiresIn);
+                gapi.client.setToken({ access_token: accessToken });
+                
+                updateAuthButton(true);
+                syncData();
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        function updateAuthButton(isAuthenticated) {
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
+            
+            if (isAuthenticated) {
+                authBtn.classList.add('authenticated');
+                authBtnText.textContent = '✓ Terotentikasi';
+                if (addBtn) addBtn.style.display = 'inline-flex';
+            } else {
+                authBtn.classList.remove('authenticated');
+                authBtnText.textContent = 'Authenticate';
+                if (addBtn) addBtn.style.display = 'none';
             }
         }
 
@@ -816,6 +1293,7 @@
 
                 appState.cache = data.values;
                 appState.lastUpdate = Date.now();
+                appState.currentData = data.values;
 
                 processGoogleSheetsData(data.values);
                 updateSyncStatus('online', 'Terhubung ke Database');
@@ -924,8 +1402,7 @@
                 return;
             }
 
-            const storeCards = stores.map(store => {
-                // Filter employees based on search term
+            const storeCards = stores.map((store, storeIdx) => {
                 let employeesToShow = store.employees;
                 if (searchTerm) {
                     employeesToShow = store.employees.filter(emp => 
@@ -933,16 +1410,28 @@
                     );
                 }
 
-                const employeeItems = employeesToShow.map((emp, idx) => `
+                const employeeItems = employeesToShow.map((emp, empIdx) => `
                     <div class="employee-item">
-                        <span class="employee-number">${idx + 1}</span>
+                        <span class="employee-number">${empIdx + 1}</span>
                         <span class="employee-name">${highlightText(emp.name, searchTerm)}</span>
+                        ${accessToken ? `
+                        <div class="employee-actions">
+                            <button class="btn-edit-emp" onclick="openEditEmployeeModal(${storeIdx}, ${empIdx})" title="Edit">✏️</button>
+                            <button class="btn-delete-emp" onclick="handleDeleteEmployee(${storeIdx}, ${empIdx})" title="Hapus">🗑️</button>
+                        </div>
+                        ` : ''}
                     </div>
                 `).join('');
 
                 return `
                     <div class="store-card">
                         <div class="store-header">
+                            ${accessToken ? `
+                            <div class="store-actions">
+                                <button class="btn-edit-store" onclick="openEditStoreModal(${storeIdx})">✏️</button>
+                                <button class="btn-delete-store" onclick="handleDeleteStore(${storeIdx})">🗑️</button>
+                            </div>
+                            ` : ''}
                             <div class="store-title">
                                 <h3>🏪 ${highlightText(store.name, searchTerm)}</h3>
                                 ${store.code ? `<span class="store-code">${highlightText(store.code, searchTerm)}</span>` : ''}
@@ -957,19 +1446,26 @@
                                 </div>
                             ` : ''}
                         </div>
-                        ${employeesToShow.length > 0 ? `
-                            <div class="store-body">
+                        <div class="store-body">
+                            ${accessToken ? `
+                            <button class="add-btn" onclick="openAddEmployeeModal(${storeIdx})" style="width: 100%; margin-bottom: 15px;">
+                                <span>➕</span>
+                                <span>Tambah Karyawan</span>
+                            </button>
+                            ` : ''}
+                            ${employeesToShow.length > 0 ? `
                                 <div class="employee-list">
                                     ${employeeItems}
                                 </div>
-                            </div>
-                        ` : ''}
+                            ` : '<p style="text-align: center; color: #999;">Belum ada karyawan</p>'}
+                        </div>
                     </div>
                 `;
             }).join('');
 
             container.innerHTML = `<div class="data-grid">${storeCards}</div>`;
         }
+
         function filterStores() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
@@ -1008,21 +1504,365 @@
             renderStores(filteredStores);
         }
 
+        // ============ MODAL FUNCTIONS ============
+        function openAddStoreModal() {
+            document.getElementById('storeModalTitle').textContent = 'Tambah Toko Baru';
+            document.getElementById('storeSubmitBtnText').textContent = 'Simpan';
+            document.getElementById('storeForm').reset();
+            document.getElementById('editStoreIndex').value = '';
+            document.getElementById('storeModal').classList.add('active');
+        }
+
+        function openEditStoreModal(storeIdx) {
+            const store = filteredStores[storeIdx];
+            
+            document.getElementById('storeModalTitle').textContent = 'Edit Toko';
+            document.getElementById('storeSubmitBtnText').textContent = 'Update';
+            document.getElementById('editStoreIndex').value = storeIdx;
+            
+            document.getElementById('storeName').value = store.name;
+            document.getElementById('storeCode').value = store.code;
+            document.getElementById('coordinatorName').value = store.coordinator.name;
+            
+            document.getElementById('storeModal').classList.add('active');
+        }
+
+        function closeStoreModal() {
+            document.getElementById('storeModal').classList.remove('active');
+            document.getElementById('storeForm').reset();
+        }
+
+        function openAddEmployeeModal(storeIdx) {
+            document.getElementById('employeeModalTitle').textContent = 'Tambah Karyawan';
+            document.getElementById('employeeSubmitBtnText').textContent = 'Simpan';
+            document.getElementById('employeeForm').reset();
+            document.getElementById('employeeStoreIndex').value = storeIdx;
+            document.getElementById('editEmployeeIndex').value = '';
+            document.getElementById('employeeModal').classList.add('active');
+        }
+
+        function openEditEmployeeModal(storeIdx, empIdx) {
+            const store = filteredStores[storeIdx];
+            const employee = store.employees[empIdx];
+            
+            document.getElementById('employeeModalTitle').textContent = 'Edit Karyawan';
+            document.getElementById('employeeSubmitBtnText').textContent = 'Update';
+            document.getElementById('employeeStoreIndex').value = storeIdx;
+            document.getElementById('editEmployeeIndex').value = empIdx;
+            document.getElementById('employeeName').value = employee.name;
+            
+            document.getElementById('employeeModal').classList.add('active');
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('active');
+            document.getElementById('employeeForm').reset();
+        }
+
+        // ============ CRUD FUNCTIONS ============
+        async function handleStoreSubmit(event) {
+            event.preventDefault();
+            
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!');
+                return;
+            }
+
+            const storeName = document.getElementById('storeName').value;
+            const storeCode = document.getElementById('storeCode').value;
+            const coordinatorName = document.getElementById('coordinatorName').value;
+            const editStoreIndex = document.getElementById('editStoreIndex').value;
+
+            const fullStoreName = storeCode ? `${storeName} (${storeCode})` : storeName;
+
+            try {
+                if (editStoreIndex !== '') {
+                    // Update existing store
+                    const store = filteredStores[parseInt(editStoreIndex)];
+                    await updateStoreInSheet(store, fullStoreName, coordinatorName);
+                } else {
+                    // Add new store
+                    const rowData = [fullStoreName, 'Koordinator Toko', coordinatorName];
+                    await addRow(rowData);
+                }
+                
+                closeStoreModal();
+                syncData();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function handleEmployeeSubmit(event) {
+            event.preventDefault();
+            
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!');
+                return;
+            }
+
+            const storeIdx = parseInt(document.getElementById('employeeStoreIndex').value);
+            const empIdx = document.getElementById('editEmployeeIndex').value;
+            const employeeName = document.getElementById('employeeName').value;
+            const store = filteredStores[storeIdx];
+
+            const fullStoreName = store.code ? `${store.name} (${store.code})` : store.name;
+
+            try {
+                if (empIdx !== '') {
+                    // Update existing employee
+                    await updateEmployeeInSheet(store, parseInt(empIdx), employeeName);
+                } else {
+                    // Add new employee
+                    const rowData = [fullStoreName, 'Karyawan', employeeName];
+                    await addRow(rowData);
+                }
+                
+                closeEmployeeModal();
+                syncData();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function addRow(rowData) {
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEET_NAME}!A:C`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row added:', response);
+                alert('✅ Data berhasil ditambahkan!');
+                return response;
+            } catch (error) {
+                console.error('Error adding row:', error);
+                alert('❌ Gagal menambahkan data: ' + error.message);
+                throw error;
+            }
+        }
+
+        async function updateStoreInSheet(store, newStoreName, newCoordinatorName) {
+            // Find all rows for this store and update them
+            const rows = appState.currentData;
+            const updates = [];
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const oldStoreName = store.code ? `${store.name} (${store.code})` : store.name;
+                
+                if (row[0] === oldStoreName) {
+                    if (row[1] && row[1].toLowerCase().includes('koordinator')) {
+                        updates.push({
+                            range: `${CONFIG.SHEET_NAME}!A${i + 1}:C${i + 1}`,
+                            values: [[newStoreName, row[1], newCoordinatorName]]
+                        });
+                    } else {
+                        updates.push({
+                            range: `${CONFIG.SHEET_NAME}!A${i + 1}`,
+                            values: [[newStoreName]]
+                        });
+                    }
+                }
+            }
+
+            if (updates.length > 0) {
+                try {
+                    await gapi.client.sheets.spreadsheets.values.batchUpdate({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        resource: { data: updates, valueInputOption: 'USER_ENTERED' }
+                    });
+                    alert('✅ Toko berhasil diupdate!');
+                } catch (error) {
+                    console.error('Error updating store:', error);
+                    alert('❌ Gagal mengupdate toko: ' + error.message);
+                    throw error;
+                }
+            }
+        }
+
+        async function updateEmployeeInSheet(store, empIdx, newEmployeeName) {
+            const rows = appState.currentData;
+            const oldStoreName = store.code ? `${store.name} (${store.code})` : store.name;
+            let employeeCount = -1;
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row[0] === oldStoreName && row[1] && !row[1].toLowerCase().includes('koordinator')) {
+                    employeeCount++;
+                    if (employeeCount === empIdx) {
+                        try {
+                            await gapi.client.sheets.spreadsheets.values.update({
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                range: `${CONFIG.SHEET_NAME}!C${i + 1}`,
+                                valueInputOption: 'USER_ENTERED',
+                                resource: { values: [[newEmployeeName]] }
+                            });
+                            alert('✅ Karyawan berhasil diupdate!');
+                            return;
+                        } catch (error) {
+                            console.error('Error updating employee:', error);
+                            alert('❌ Gagal mengupdate karyawan: ' + error.message);
+                            throw error;
+                        }
+                    }
+                }
+            }
+        }
+
+        async function handleDeleteStore(storeIdx) {
+            if (!confirm('⚠️ Yakin ingin menghapus toko ini?\n\nSemua data karyawan di toko ini juga akan terhapus!')) {
+                return;
+            }
+
+            const store = filteredStores[storeIdx];
+            const oldStoreName = store.code ? `${store.name} (${store.code})` : store.name;
+
+            try {
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                });
+                
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === CONFIG.SHEET_NAME
+                );
+                
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                const rows = appState.currentData;
+                const deleteRequests = [];
+                
+                // Find all rows for this store (from bottom to top to avoid index shifts)
+                for (let i = rows.length - 1; i >= 1; i--) {
+                    if (rows[i][0] === oldStoreName) {
+                        deleteRequests.push({
+                            deleteDimension: {
+                                range: {
+                                    sheetId: sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: i,
+                                    endIndex: i + 1
+                                }
+                            }
+                        });
+                    }
+                }
+
+                if (deleteRequests.length > 0) {
+                    await gapi.client.sheets.spreadsheets.batchUpdate({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        resource: { requests: deleteRequests }
+                    });
+                    
+                    alert('✅ Toko dan semua karyawannya berhasil dihapus!');
+                    syncData();
+                }
+            } catch (error) {
+                console.error('Error deleting store:', error);
+                alert('❌ Gagal menghapus toko: ' + error.message);
+                throw error;
+            }
+        }
+
+        async function handleDeleteEmployee(storeIdx, empIdx) {
+            if (!confirm('⚠️ Yakin ingin menghapus karyawan ini?')) {
+                return;
+            }
+
+            const store = filteredStores[storeIdx];
+            const oldStoreName = store.code ? `${store.name} (${store.code})` : store.name;
+
+            try {
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                });
+                
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === CONFIG.SHEET_NAME
+                );
+                
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                const rows = appState.currentData;
+                let employeeCount = -1;
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row[0] === oldStoreName && row[1] && !row[1].toLowerCase().includes('koordinator')) {
+                        employeeCount++;
+                        if (employeeCount === empIdx) {
+                            await gapi.client.sheets.spreadsheets.batchUpdate({
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                resource: {
+                                    requests: [{
+                                        deleteDimension: {
+                                            range: {
+                                                sheetId: sheetId,
+                                                dimension: 'ROWS',
+                                                startIndex: i,
+                                                endIndex: i + 1
+                                            }
+                                        }
+                                    }]
+                                }
+                            });
+                            
+                            alert('✅ Karyawan berhasil dihapus!');
+                            syncData();
+                            return;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                alert('❌ Gagal menghapus karyawan: ' + error.message);
+                throw error;
+            }
+        }
+
+        // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, waiting for Google APIs...');
+            
+            setTimeout(() => {
+                if (typeof gapi !== 'undefined') {
+                    gapiLoaded();
+                }
+                if (typeof google !== 'undefined') {
+                    gisLoaded();
+                }
+            }, 500);
+
             fetchDataFromGoogleSheets();
             
+            // Auto-sync every 5 minutes
             setInterval(() => {
                 console.log('Auto-syncing data...');
                 fetchDataFromGoogleSheets(true);
             }, 5 * 60 * 1000);
         });
+
+        window.onclick = function(event) {
+            const storeModal = document.getElementById('storeModal');
+            const employeeModal = document.getElementById('employeeModal');
+            
+            if (event.target === storeModal) {
+                closeStoreModal();
+            }
+            if (event.target === employeeModal) {
+                closeEmployeeModal();
+            }
+        }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
