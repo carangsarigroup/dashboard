@@ -147,7 +147,7 @@
             font-size: 12px;
         }
 
-        .refresh-btn {
+        .add-btn, .refresh-btn {
             background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
             padding: 12px 30px;
@@ -163,8 +163,12 @@
             align-items: center;
             gap: 8px;
         }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
         
-        .refresh-btn:hover {
+        .refresh-btn:hover, .add-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
         }
@@ -311,6 +315,41 @@
             font-family: 'Courier New', monospace;
             color: #28a745;
         }
+
+        td.actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #4A90E2;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
         
         tbody tr {
             transition: background 0.2s ease;
@@ -398,6 +437,31 @@
             gap: 8px;
         }
 
+        .auth-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .auth-btn.authenticated {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        }
+
         .logout-btn {
             background: rgba(255,255,255,0.95);
             border: none;
@@ -480,6 +544,144 @@
             margin-bottom: 10px;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #FF69B4;
+            font-size: 1.5em;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #FF69B4;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-submit, .btn-cancel {
+            flex: 1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -506,7 +708,7 @@
                 min-width: 100%;
             }
 
-            .back-btn, .refresh-btn {
+            .back-btn, .refresh-btn, .add-btn {
                 width: 100%;
                 justify-content: center;
             }
@@ -522,6 +724,14 @@
             .table-container {
                 font-size: 0.85em;
             }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -532,6 +742,10 @@
             <span>👤</span>
             <span id="displayUsername">Guest</span>
         </div>
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+            <span>🔐</span>
+            <span id="authBtnText">Otentikasi</span>
+        </button>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
             <span>Logout</span>
@@ -566,6 +780,10 @@
                     <option value="Desember_2025">Desember 2025</option>
                 </select>
             </div>
+            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
+                <span>➕</span>
+                <span>Tambah Data</span>
+            </button>
             <button class="refresh-btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
@@ -580,6 +798,65 @@
             </div>
         </div>
     </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+
+                <div class="form-group">
+                    <label for="nomor">No *</label>
+                    <input type="number" id="nomor" placeholder="Nomor urut" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="namaToko">Nama Toko *</label>
+                    <input type="text" id="namaToko" placeholder="Nama toko" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idPelanggan">ID Pelanggan</label>
+                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan PLN">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAwal">Stand Awal *</label>
+                    <input type="number" id="standAwal" placeholder="0" required oninput="calculateUsage()">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAkhir">Stand Akhir *</label>
+                    <input type="number" id="standAkhir" placeholder="0" required oninput="calculateUsage()">
+                </div>
+
+                <div class="form-group">
+                    <label for="penggunaan">Penggunaan (kWh) - Auto</label>
+                    <input type="number" id="penggunaan" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="biaya">Biaya Listrik *</label>
+                    <input type="number" id="biaya" placeholder="0" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="submitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script>
         // ============ AUTH SYSTEM ============
@@ -620,11 +897,30 @@
                 window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
                 return false;
             }
+
+            updateUIBasedOnRole(authData.role);
             return true;
+        }
+
+        function updateUIBasedOnRole(role) {
+            const authBtn = document.getElementById('authBtn');
+            const isAdmin = role && role.toLowerCase() === 'admin';
+            
+            if (authBtn) {
+                authBtn.style.display = isAdmin ? 'flex' : 'none';
+            }
         }
 
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
+            
+            accessToken = null;
+            clearStoredToken();
+            if (typeof gapi !== 'undefined' && gapi.client) {
+                gapi.client.setToken(null);
+            }
+            updateAuthButton(false);
+            
             deleteCookie('userAuth');
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
@@ -635,21 +931,172 @@
             if (authData?.username) {
                 document.getElementById('displayUsername').textContent = authData.username;
             }
+            if (authData?.role) {
+                updateUIBasedOnRole(authData.role);
+            }
         }
 
         // ============ CONFIG ============
         const CONFIG = {
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            CACHE_DURATION: 5 * 60 * 1000 // 5 minutes
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+            CACHE_DURATION: 5 * 60 * 1000
         };
+
+        // ============ OAUTH STATE ============
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
 
         // ============ STATE MANAGEMENT ============
         let appState = {
             currentMonth: null,
             cache: {},
-            lastUpdate: null
+            lastUpdate: null,
+            currentData: []
         };
+
+        // ============ OAUTH INITIALIZATION ============
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+                console.log('GAPI client initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI client:', error);
+            }
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                prompt: '',
+                callback: ''
+            });
+            gisInited = true;
+            maybeEnableButtons();
+            console.log('GIS initialized');
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                if (restoreStoredToken()) {
+                    console.log('Restored OAuth token from storage');
+                }
+            }
+        }
+
+        // ============ TOKEN STORAGE ============
+        function storeOAuthToken(token, expiresIn = 3600) {
+            try {
+                const expiryTime = Date.now() + (expiresIn * 1000);
+                sessionStorage.setItem('oauth_token', token);
+                sessionStorage.setItem('oauth_expiry', expiryTime.toString());
+                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
+            } catch (e) {
+                console.warn('Could not store OAuth token:', e);
+            }
+        }
+
+        function restoreStoredToken() {
+            try {
+                const storedToken = sessionStorage.getItem('oauth_token');
+                const expiry = sessionStorage.getItem('oauth_expiry');
+                
+                if (!storedToken || !expiry) {
+                    return false;
+                }
+                
+                const expiryTime = parseInt(expiry);
+                const now = Date.now();
+                
+                if (now < expiryTime - 300000) {
+                    accessToken = storedToken;
+                    gapi.client.setToken({ access_token: storedToken });
+                    updateAuthButton(true);
+                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
+                    return true;
+                } else {
+                    clearStoredToken();
+                    console.log('Stored token expired');
+                    return false;
+                }
+            } catch (e) {
+                console.warn('Error restoring token:', e);
+                return false;
+            }
+        }
+
+        function clearStoredToken() {
+            try {
+                sessionStorage.removeItem('oauth_token');
+                sessionStorage.removeItem('oauth_expiry');
+            } catch (e) {
+                console.warn('Error clearing token:', e);
+            }
+        }
+
+        function handleAuth() {
+            if (accessToken) {
+                alert('Sudah terauthentikasi!');
+                return;
+            }
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    console.error('Auth error:', response);
+                    alert('Gagal authenticate: ' + response.error);
+                    clearStoredToken();
+                    return;
+                }
+                
+                accessToken = response.access_token;
+                const expiresIn = response.expires_in || 3600;
+                storeOAuthToken(accessToken, expiresIn);
+                gapi.client.setToken({ access_token: accessToken });
+                
+                updateAuthButton(true);
+                if (appState.currentMonth) {
+                    loadMonthData(appState.currentMonth, true);
+                }
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        function updateAuthButton(isAuthenticated) {
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
+            
+            if (isAuthenticated) {
+                authBtn.classList.add('authenticated');
+                authBtnText.textContent = '✓ Terotentikasi';
+                if (addBtn) addBtn.style.display = 'inline-flex';
+            } else {
+                authBtn.classList.remove('authenticated');
+                authBtnText.textContent = 'Authenticate';
+                if (addBtn) addBtn.style.display = 'none';
+            }
+        }
 
         // ============ UTILITY FUNCTIONS ============
         function formatRupiah(value) {
@@ -794,6 +1241,7 @@
                 
                 setCachedData(monthName, data.values);
                 appState.lastUpdate = new Date();
+                appState.currentData = data.values;
                 
                 displayData(data.values, monthName);
                 
@@ -803,15 +1251,6 @@
                     ${error.message}
                     <br><br>
                     <strong>Bulan:</strong> "${monthName.replace('_', ' ')}"
-                    <br><br>
-                    <strong>Pastikan:</strong>
-                    <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Spreadsheet ID benar</li>
-                        <li>API Key valid</li>
-                        <li>Google Sheets API sudah enabled</li>
-                        <li>Sheet sudah public</li>
-                        <li>Nama sheet sesuai format</li>
-                    </ul>
                 `);
             }
         }
@@ -819,20 +1258,19 @@
         // ============ DISPLAY FUNCTIONS ============
         function displayData(values, sheetName) {
             const headers = values[0];
-            const dataRows = values.slice(1).filter(row => row[1]); // Filter rows with nama toko
+            const dataRows = values.slice(1).filter(row => row[1]);
             
             if (dataRows.length === 0) {
                 showError('Data Kosong', `Tidak ada data valid di bulan "${sheetName.replace('_', ' ')}"`);
                 return;
             }
 
-            // Calculate totals
             let totalPenggunaan = 0;
             let totalTagihan = 0;
 
             dataRows.forEach(row => {
-                totalPenggunaan += parseNumber(row[5]); // Penggunaan (kolom F)
-                totalTagihan += parseNumber(row[6]); // Biaya (kolom G)
+                totalPenggunaan += parseNumber(row[5]);
+                totalTagihan += parseNumber(row[6]);
             });
 
             const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
@@ -874,6 +1312,7 @@
                                 <th>Stand Akhir</th>
                                 <th>Penggunaan (kWh)</th>
                                 <th>Biaya Listrik</th>
+                                ${accessToken ? '<th>AKSI</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
@@ -887,6 +1326,8 @@
                 const penggunaan = row[5] || '-';
                 const biaya = row[6] || '-';
 
+                const rowIndex = index + 2;
+
                 html += `
                     <tr>
                         <td>${nomor}</td>
@@ -895,15 +1336,22 @@
                         <td class="number">${formatNumber(standAkhir)}</td>
                         <td class="number">${formatNumber(penggunaan)}</td>
                         <td class="currency">${formatRupiah(biaya)}</td>
+                        ${accessToken ? `
+                        <td class="actions">
+                            <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                        </td>
+                        ` : ''}
                     </tr>
                 `;
             });
 
             html += `
                             <tr class="total-row">
-                                <td colspan="4" style="text-align: right; padding-right: 20px;">TOTAL</td>
+                                <td colspan="${accessToken ? '4' : '4'}" style="text-align: right; padding-right: 20px;">TOTAL</td>
                                 <td class="number" style="color: white;">${formatNumber(totalPenggunaan)}</td>
                                 <td class="currency" style="color: white;">${formatRupiah(totalTagihan)}</td>
+                                ${accessToken ? '<td></td>' : ''}
                             </tr>
                         </tbody>
                     </table>
@@ -943,6 +1391,171 @@
             document.getElementById('content').innerHTML = html;
         }
 
+        // ============ MODAL FUNCTIONS ============
+        function openAddModal() {
+            if (!appState.currentMonth) {
+                alert('Pilih bulan terlebih dahulu!');
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+            document.getElementById('submitBtnText').textContent = 'Simpan';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function openEditModal(rowIndex) {
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
+                alert('Data tidak ditemukan!');
+                return;
+            }
+
+            const row = appState.currentData[rowIndex - 1];
+
+            document.getElementById('modalTitle').textContent = 'Edit Data';
+            document.getElementById('submitBtnText').textContent = 'Update';
+            document.getElementById('editRowIndex').value = rowIndex;
+            
+            document.getElementById('nomor').value = row[0] || '';
+            document.getElementById('namaToko').value = row[1] || '';
+            document.getElementById('idPelanggan').value = row[2] || '';
+            document.getElementById('standAwal').value = parseNumber(row[3]);
+            document.getElementById('standAkhir').value = parseNumber(row[4]);
+            document.getElementById('biaya').value = parseNumber(row[6]);
+            
+            calculateUsage();
+
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            document.getElementById('dataForm').reset();
+        }
+
+        // ============ AUTO CALCULATION ============
+        function calculateUsage() {
+            const standAwal = parseNumber(document.getElementById('standAwal').value) || 0;
+            const standAkhir = parseNumber(document.getElementById('standAkhir').value) || 0;
+            
+            const penggunaan = standAkhir - standAwal;
+            
+            document.getElementById('penggunaan').value = penggunaan >= 0 ? penggunaan : 0;
+        }
+
+        // ============ CRUD FUNCTIONS ============
+        async function addRow(sheetName, rowData) {
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                return;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A:G`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row added:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Data berhasil ditambahkan!');
+                return response;
+            } catch (error) {
+                console.error('Error adding row:', error);
+                alert('❌ Gagal menambahkan data: ' + error.message);
+                throw error;
+            }
+        }
+
+        async function updateRow(sheetName, rowIndex, rowData) {
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                return;
+            }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row updated:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Data berhasil diupdate!');
+                return response;
+            } catch (error) {
+                console.error('Error updating row:', error);
+                alert('❌ Gagal mengupdate data: ' + error.message);
+                throw error;
+            }
+        }
+
+        async function deleteRow(sheetName, rowIndex) {
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                return;
+            }
+            
+            try {
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                });
+                
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === sheetName
+                );
+                
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                
+                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    resource: {
+                        requests: [{
+                            deleteDimension: {
+                                range: {
+                                    sheetId: sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: rowIndex - 1,
+                                    endIndex: rowIndex
+                                }
+                            }
+                        }]
+                    }
+                });
+                
+                console.log('Row deleted:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Baris berhasil dihapus sepenuhnya!');
+                return response;
+            } catch (error) {
+                console.error('Error deleting row:', error);
+                alert('❌ Gagal menghapus baris: ' + error.message);
+                throw error;
+            }
+        }
+
         // ============ EVENT HANDLERS ============
         function handleMonthChange() {
             const monthSelect = document.getElementById('monthSelect');
@@ -968,9 +1581,59 @@
             loadMonthData(selectedMonth, true);
         }
 
+        function handleDelete(rowIndex) {
+            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+                return;
+            }
+            
+            deleteRow(appState.currentMonth, rowIndex);
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const nomor = document.getElementById('nomor').value;
+            const namaToko = document.getElementById('namaToko').value;
+            const idPelanggan = document.getElementById('idPelanggan').value;
+            const standAwal = parseNumber(document.getElementById('standAwal').value);
+            const standAkhir = parseNumber(document.getElementById('standAkhir').value);
+            const penggunaan = parseNumber(document.getElementById('penggunaan').value);
+            const biaya = parseNumber(document.getElementById('biaya').value);
+
+            const rowData = [
+                nomor,
+                namaToko,
+                idPelanggan,
+                standAwal,
+                standAkhir,
+                penggunaan,
+                biaya
+            ];
+
+            const editRowIndex = document.getElementById('editRowIndex').value;
+            
+            if (editRowIndex) {
+                await updateRow(appState.currentMonth, parseInt(editRowIndex), rowData);
+            } else {
+                await addRow(appState.currentMonth, rowData);
+            }
+            
+            closeModal();
+        }
+
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
-            // Auto-select current month or last selected month
+            console.log('Page loaded, waiting for Google APIs...');
+            
+            setTimeout(() => {
+                if (typeof gapi !== 'undefined') {
+                    gapiLoaded();
+                }
+                if (typeof google !== 'undefined') {
+                    gisLoaded();
+                }
+            }, 500);
+
             const currentMonth = new Date().toLocaleString('id-ID', { month: 'long' });
             const currentYear = new Date().getFullYear();
             const monthKey = `${currentMonth}_${currentYear}`;
@@ -980,12 +1643,19 @@
             
             if (lastMonth) {
                 monthSelect.value = lastMonth;
-                loadMonthData(lastMonth);
+                setTimeout(() => loadMonthData(lastMonth), 1000);
             } else if (document.querySelector(`option[value="${monthKey}"]`)) {
                 monthSelect.value = monthKey;
-                loadMonthData(monthKey);
+                setTimeout(() => loadMonthData(monthKey), 1000);
             }
         });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
     </script>
 </body>
 </html>
