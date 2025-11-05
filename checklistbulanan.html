@@ -701,11 +701,7 @@
                     <option value="">Pilih Sheet...</option>
                 </select>
             </div>
-            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
-                <span>➕</span>
-                <span>Tambah Baris</span>
-            </button>
-            <button class="save-btn" onclick="handleSaveAll()" id="saveBtn" style="display: none;">
+           <button class="save-btn" onclick="handleSaveAll()" id="saveBtn" style="display: none;">
                 <span>💾</span>
                 <span>Simpan Semua</span>
             </button>
@@ -720,51 +716,6 @@
                 <div class="loading-spinner"></div>
                 <div class="loading-text">Memuat data...</div>
             </div>
-        </div>
-    </div>
-
-    <!-- Add Column Modal -->
-    <div id="dataModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Tambah Baris Baru</h2>
-                <button class="close-modal" onclick="closeModal()">&times;</button>
-            </div>
-            <form id="dataForm" onsubmit="handleFormSubmit(event)">
-                <div class="form-group">
-                    <label for="bagian">Bagian *</label>
-                    <input type="text" id="bagian" placeholder="Contoh: I. Barang Dagangan & Inventori" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="itemPemeriksaan">Item Pemeriksaan *</label>
-                    <textarea id="itemPemeriksaan" placeholder="Deskripsi item pemeriksaan..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="dasarPWR">Dasar PWR *</label>
-                    <input type="text" id="dasarPWR" placeholder="Contoh: Pasal 9.1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status">
-                        <option value="">Belum dipilih</option>
-                        <option value="Ya">Ya</option>
-                        <option value="Tidak">Tidak</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="keterangan">Keterangan</label>
-                    <textarea id="keterangan" placeholder="Keterangan tambahan (opsional)"></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">Tambah Baris</button>
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -1009,12 +960,10 @@
             if (isAuthenticated) {
                 authBtn.classList.add('authenticated');
                 authBtnText.textContent = '✓ Terotentikasi';
-                if (addBtn) addBtn.style.display = 'inline-flex';
                 if (saveBtn) saveBtn.style.display = 'inline-flex';
             } else {
                 authBtn.classList.remove('authenticated');
                 authBtnText.textContent = 'Authenticate';
-                if (addBtn) addBtn.style.display = 'none';
                 if (saveBtn) saveBtn.style.display = 'none';
             }
         }
@@ -1273,24 +1222,33 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
 
         // ============ EDIT FUNCTIONS ============
         function setStatus(rowIdx, colIdx, status) {
-            if (!appState.currentData[rowIdx]) {
-                appState.currentData[rowIdx] = [];
-            }
-            appState.currentData[rowIdx][colIdx] = status;
-            markAsChanged();
-            
-            // Update button states
-            const buttons = document.querySelectorAll(`[data-row="${rowIdx}"][data-col="${colIdx}"]`);
-            buttons.forEach(btn => {
-                if (btn.classList.contains('status-btn')) {
-                    btn.classList.remove('active');
-                    if ((status === 'Ya' && btn.classList.contains('ya')) || 
-                        (status === 'Tidak' && btn.classList.contains('tidak'))) {
-                        btn.classList.add('active');
-                    }
-                }
-            });
+        if (!appState.currentData[rowIdx]) {
+        appState.currentData[rowIdx] = [];
         }
+    
+        // If clicking the same button again, unselect it (set to empty)
+        const currentValue = appState.currentData[rowIdx][colIdx];
+        if (currentValue === status) {
+        appState.currentData[rowIdx][colIdx] = '';
+        status = ''; // Set to empty to remove active state
+        } else {
+        appState.currentData[rowIdx][colIdx] = status;
+        }
+    
+        markAsChanged();
+    
+        // Update button states
+        const buttons = document.querySelectorAll(`[data-row="${rowIdx}"][data-col="${colIdx}"]`);
+        buttons.forEach(btn => {
+        if (btn.classList.contains('status-btn')) {
+            btn.classList.remove('active');
+            if (status !== '' && ((status === 'Ya' && btn.classList.contains('ya')) || 
+                (status === 'Tidak' && btn.classList.contains('tidak')))) {
+                btn.classList.add('active');
+            }
+        }
+    });
+}
 
         function updateKeterangan(rowIdx, colIdx, value) {
             if (!appState.currentData[rowIdx]) {
@@ -1424,23 +1382,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
             }
         }
 
-        // ============ MODAL FUNCTIONS ============
-        function openAddModal() {
-            if (!appState.currentSheet) {
-                alert('Pilih sheet terlebih dahulu!');
-                return;
-            }
-
-            document.getElementById('dataForm').reset();
-            document.getElementById('dataModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('dataModal').classList.remove('active');
-            document.getElementById('dataForm').reset();
-        }
-
-        // ============ EVENT HANDLERS ============
+       // ============ EVENT HANDLERS ============
         function handleSheetChange() {
             const sheetSelect = document.getElementById('sheetSelect');
             const selectedSheet = sheetSelect.value;
@@ -1524,5 +1466,6 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
