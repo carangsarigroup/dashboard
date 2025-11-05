@@ -800,20 +800,20 @@
         }
 
         function checkAuth() {
-            const authData = getAuthData();
-            if (!authData) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-        
-            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
-                deleteCookie('userAuth');
-                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-                return false;
-            }
-        
-            updateUIBasedOnRole(authData.role);
-            return true;
+        const authData = getAuthData();
+        if (!authData) {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        return false;
+        }
+
+        if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+        deleteCookie('userAuth');
+        window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+        return false;
+        }
+
+        updateUIBasedOnRole(authData.role);
+        return authData;
         }
 
         function updateUIBasedOnRole(role) {
@@ -839,15 +839,18 @@
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
+        let currentUserRole = null;
+
         if (checkAuth()) {
-            const authData = getAuthData();
-            if (authData?.username) {
-                document.getElementById('displayUsername').textContent = authData.username;
-            }
-            if (authData?.role) {
-                updateUIBasedOnRole(authData.role);
-            }
+        const authData = getAuthData();
+        if (authData?.username) {
+        document.getElementById('displayUsername').textContent = authData.username;
         }
+        if (authData?.role) {
+        currentUserRole = authData.role;
+        updateUIBasedOnRole(authData.role);
+        }
+    }
 
         // ============ CONFIG ============
         const CONFIG = {
@@ -1189,59 +1192,75 @@
                         <tbody>
             `;
 
-          // Display data rows (starting from row 1)
-            for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
-            const row = values[rowIdx] || [];
-            html += `<tr>`;
+         // Display data rows (starting from row 1)
+for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
+    const row = values[rowIdx] || [];
+    html += `<tr>`;
     
-            // Check if this is a section header (starts with Roman numerals like I., II., III., etc.)
-            const firstCell = row[0] || '';
-            const isSectionHeader = /^[IVX]+\.\s/.test(firstCell.trim());
+    // Check if this is a section header (starts with Roman numerals like I., II., III., etc.)
+    const firstCell = (row[0] || '').trim();
+    const isSectionHeader = /^[IVX]+\.\s+[A-Z]/.test(firstCell);
     
-            for (let colIdx = 0; colIdx < headers.length; colIdx++) {
-            const cellValue = row[colIdx] || '';
-            const header = headers[colIdx] || '';
+    for (let colIdx = 0; colIdx < headers.length; colIdx++) {
+        const cellValue = row[colIdx] || '';
+        const header = headers[colIdx] || '';
         
-            // For section headers, show empty cells (for merged cells)
-            if (isSectionHeader && (header.toLowerCase().includes('status') || header.toLowerCase().includes('keterangan'))) {
-            html += `<td></td>`;
+        // For section headers, show empty cells (for merged cells)
+        if (isSectionHeader && (header.toLowerCase().includes('status') || header.toLowerCase().includes('keterangan'))) {
+            html += `<td style="background: #f8f9fa;"></td>`;
+        }
+        // Check if this is a Status column
+        else if (header.toLowerCase().includes('status')) {
+            const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+            
+            if (isAdmin) {
+                html += `<td class="editable status-cell">
+                    <div class="status-buttons">
+                        <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
+                                onclick="setStatus(${rowIdx}, ${colIdx}, 'Ya')" 
+                                data-row="${rowIdx}" data-col="${colIdx}">Ya</button>
+                        <button class="status-btn tidak ${cellValue === 'Tidak' ? 'active' : ''}" 
+                                onclick="setStatus(${rowIdx}, ${colIdx}, 'Tidak')" 
+                                data-row="${rowIdx}" data-col="${colIdx}">Tidak</button>
+                    </div>
+                </td>`;
+            } else {
+                // Read-only display for non-admin
+                html += `<td class="status-cell" style="text-align: center; font-weight: 600; color: ${cellValue === 'Ya' ? '#28a745' : cellValue === 'Tidak' ? '#dc3545' : '#6c757d'};">
+                    ${cellValue || '-'}
+                </td>`;
             }
-            // Check if this is a Status column
-            else if (header.toLowerCase().includes('status')) {
-                        html += `<td class="editable status-cell">
-                            <div class="status-buttons">
-                                <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
-                                        onclick="setStatus(${rowIdx}, ${colIdx}, 'Ya')" 
-                                        data-row="${rowIdx}" data-col="${colIdx}">Ya</button>
-                                <button class="status-btn tidak ${cellValue === 'Tidak' ? 'active' : ''}" 
-                                        onclick="setStatus(${rowIdx}, ${colIdx}, 'Tidak')" 
-                                        data-row="${rowIdx}" data-col="${colIdx}">Tidak</button>
-                            </div>
-                        </td>`;
-                    }
-                    // Check if this is a Keterangan column
-                    else if (header.toLowerCase().includes('keterangan')) {
-                        html += `<td class="editable">
-                            <input type="text" 
-                                   class="keterangan-input" 
-                                   value="${cellValue}" 
-                                   data-row="${rowIdx}" data-col="${colIdx}"
-                                   onchange="updateKeterangan(${rowIdx}, ${colIdx}, this.value)"
-                                   placeholder="Masukkan keterangan...">
-                        </td>`;
-                    }
-                    // Check if this is the first column (Bagian) - make it bold
-                    else if (colIdx === 0) {
-                        html += `<td class="row-label">${cellValue}</td>`;
-                    }
-                    // Regular data cell
-                    else {
-                        html += `<td>${cellValue}</td>`;
-                    }
-                }
-                
-                html += `</tr>`;
+        }
+        // Check if this is a Keterangan column
+        else if (header.toLowerCase().includes('keterangan')) {
+            const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+            
+            if (isAdmin) {
+                html += `<td class="editable">
+                    <input type="text" 
+                           class="keterangan-input" 
+                           value="${cellValue}" 
+                           data-row="${rowIdx}" data-col="${colIdx}"
+                           onchange="updateKeterangan(${rowIdx}, ${colIdx}, this.value)"
+                           placeholder="Masukkan keterangan...">
+                </td>`;
+            } else {
+                // Read-only display for non-admin
+                html += `<td>${cellValue || '-'}</td>`;
             }
+        }
+        // Check if this is the first column (Bagian) - make it bold
+        else if (colIdx === 0) {
+            html += `<td class="row-label">${cellValue}</td>`;
+        }
+        // Regular data cell
+        else {
+            html += `<td>${cellValue}</td>`;
+        }
+    }
+    
+    html += `</tr>`;
+}
 
             html += `
                         </tbody>
@@ -1505,4 +1524,5 @@
     </script>
 </body>
 </html>
+
 
