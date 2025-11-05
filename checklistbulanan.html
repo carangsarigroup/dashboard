@@ -328,27 +328,23 @@
             background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
             color: white;
             padding: 16px;
-            text-align: left;
+            text-align: center;
             font-weight: 600;
             font-size: 0.95em;
             position: sticky;
             top: 0;
             z-index: 10;
             border-right: 1px solid rgba(255,255,255,0.2);
+            min-width: 150px;
+        }
+
+        th:first-child {
+            text-align: left;
+            min-width: 200px;
         }
 
         th:last-child {
             border-right: none;
-        }
-
-        th.col-no {
-            width: 60px;
-            text-align: center;
-        }
-
-        th.col-actions {
-            width: 120px;
-            text-align: center;
         }
         
         td {
@@ -363,16 +359,11 @@
             border-right: none;
         }
 
-        td.no {
-            text-align: center;
-            font-weight: 500;
-            color: #6c757d;
-        }
-
         td.row-label {
             font-weight: 600;
             background: #f8f9fa;
             color: #2E7D32;
+            text-align: left;
         }
 
         td.editable {
@@ -441,13 +432,8 @@
             box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
         }
 
-        td.actions {
-            text-align: center;
-            white-space: nowrap;
-        }
-
         .btn-delete {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
             border-radius: 5px;
             font-size: 14px;
@@ -455,6 +441,9 @@
             background: #dc3545;
             color: white;
             transition: all 0.2s ease;
+            display: block;
+            width: 100%;
+            margin-top: 5px;
         }
 
         .btn-delete:hover {
@@ -972,7 +961,7 @@
                 sessionStorage.removeItem('oauth_expiry');
             } catch (e) {
                 console.warn('Error clearing token:', e);
-                }
+            }
         }
 
         function handleAuth() {
@@ -999,7 +988,6 @@
                     loadSheetData(appState.currentSheet, true);
                 }
                 alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah dan menghapus kolom.');
-                console.log('Authenticated successfully');
             };
 
             if (gapi.client.getToken() === null) {
@@ -1187,16 +1175,12 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="col-no">No</th>
+                                <th>Field</th>
             `;
 
             // Add column headers (A, B, C, etc.)
             for (let i = 0; i < numCols; i++) {
-                html += `<th>Kolom ${String.fromCharCode(65 + i)}</th>`;
-            }
-            
-            if (accessToken) {
-                html += `<th class="col-actions">Aksi</th>`;
+                html += `<th>Item ${i + 1}</th>`;
             }
             
             html += `
@@ -1214,41 +1198,31 @@
                 
                 for (let colIdx = 0; colIdx < numCols; colIdx++) {
                     const cellValue = values[rowIdx] && values[rowIdx][colIdx] ? values[rowIdx][colIdx] : '';
-                    const colLetter = String.fromCharCode(65 + colIdx);
                     
                     if (rowIdx === 3) { // Status row
                         html += `<td class="editable status-cell">
                             <div class="status-buttons">
                                 <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
-                                        onclick="setStatus(${colIdx}, 'Ya')" 
-                                        data-col="${colIdx}">Ya</button>
+                                        onclick="setStatus(${rowIdx}, ${colIdx}, 'Ya')" 
+                                        data-row="${rowIdx}" data-col="${colIdx}">Ya</button>
                                 <button class="status-btn tidak ${cellValue === 'Tidak' ? 'active' : ''}" 
-                                        onclick="setStatus(${colIdx}, 'Tidak')" 
-                                        data-col="${colIdx}">Tidak</button>
+                                        onclick="setStatus(${rowIdx}, ${colIdx}, 'Tidak')" 
+                                        data-row="${rowIdx}" data-col="${colIdx}">Tidak</button>
                             </div>
+                            ${accessToken ? `<button class="btn-delete" onclick="handleDeleteColumn(${colIdx})">🗑️ Hapus Kolom</button>` : ''}
                         </td>`;
                     } else if (rowIdx === 4) { // Keterangan row
                         html += `<td class="editable">
                             <input type="text" 
                                    class="keterangan-input" 
                                    value="${cellValue}" 
-                                   data-col="${colIdx}"
-                                   onchange="updateKeterangan(${colIdx}, this.value)"
+                                   data-row="${rowIdx}" data-col="${colIdx}"
+                                   onchange="updateKeterangan(${rowIdx}, ${colIdx}, this.value)"
                                    placeholder="Masukkan keterangan...">
                         </td>`;
                     } else {
                         html += `<td>${cellValue}</td>`;
                     }
-                }
-                
-                // Add delete button only for the first row
-                if (rowIdx === 0 && accessToken) {
-                    html += `<td class="actions" rowspan="5">`;
-                    for (let colIdx = 0; colIdx < numCols; colIdx++) {
-                        const colLetter = String.fromCharCode(65 + colIdx);
-                        html += `<button class="btn-delete" onclick="handleDeleteColumn(${colIdx})" style="margin: 5px;">🗑️ ${colLetter}</button><br>`;
-                    }
-                    html += `</td>`;
                 }
                 
                 html += `</tr>`;
@@ -1264,15 +1238,15 @@
         }
 
         // ============ EDIT FUNCTIONS ============
-        function setStatus(colIdx, status) {
-            if (!appState.currentData[3]) {
-                appState.currentData[3] = [];
+        function setStatus(rowIdx, colIdx, status) {
+            if (!appState.currentData[rowIdx]) {
+                appState.currentData[rowIdx] = [];
             }
-            appState.currentData[3][colIdx] = status;
+            appState.currentData[rowIdx][colIdx] = status;
             markAsChanged();
             
             // Update button states
-            const buttons = document.querySelectorAll(`[data-col="${colIdx}"]`);
+            const buttons = document.querySelectorAll(`[data-row="${rowIdx}"][data-col="${colIdx}"]`);
             buttons.forEach(btn => {
                 if (btn.classList.contains('status-btn')) {
                     btn.classList.remove('active');
@@ -1284,11 +1258,11 @@
             });
         }
 
-        function updateKeterangan(colIdx, value) {
-            if (!appState.currentData[4]) {
-                appState.currentData[4] = [];
+        function updateKeterangan(rowIdx, colIdx, value) {
+            if (!appState.currentData[rowIdx]) {
+                appState.currentData[rowIdx] = [];
             }
-            appState.currentData[4][colIdx] = value;
+            appState.currentData[rowIdx][colIdx] = value;
             markAsChanged();
         }
 
@@ -1468,8 +1442,8 @@
         }
 
         function handleDeleteColumn(colIdx) {
-            const colLetter = String.fromCharCode(65 + colIdx);
-            if (!confirm(`⚠️ Yakin ingin menghapus Kolom ${colLetter}?\n\nData yang dihapus tidak dapat dikembalikan!`)) {
+            const colNum = colIdx + 1;
+            if (!confirm(`⚠️ Yakin ingin menghapus Item ${colNum}?\n\nData yang dihapus tidak dapat dikembalikan!`)) {
                 return;
             }
             
@@ -1520,4 +1494,3 @@
     </script>
 </body>
 </html>
-
