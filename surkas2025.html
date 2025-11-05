@@ -829,7 +829,21 @@
                 window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
                 return false;
             }
+            
+            // Update UI based on role
+            updateUIBasedOnRole(authData.role);
+            
             return true;
+        }
+        
+        function updateUIBasedOnRole(role) {
+            const authBtn = document.getElementById('authBtn');
+            const isAdmin = role && role.toLowerCase() === 'admin';
+            
+            // Show auth button only for admin
+            if (authBtn) {
+                authBtn.style.display = isAdmin ? 'flex' : 'none';
+            }
         }
 
         function logout(message = null) {
@@ -1618,10 +1632,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
