@@ -818,33 +818,33 @@
         }
 
         function checkAuth() {
-            const authData = getAuthData();
-            if (!authData) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-            
-            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
-                deleteCookie('userAuth');
-                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-                return false;
-            }
-            
-            // Update UI based on role
-            updateUIBasedOnRole(authData.role);
-            
-            return true;
+        const authData = getAuthData();
+        if (!authData) {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        return false;
         }
-        
+    
+        if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+        deleteCookie('userAuth');
+        window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+        return false;
+        }
+    
+        // Update UI based on role
+        updateUIBasedOnRole(authData.role);
+    
+        return true;
+        }
+
         function updateUIBasedOnRole(role) {
-            const authBtn = document.getElementById('authBtn');
-            const isAdmin = role && role.toLowerCase() === 'admin';
-            
-            // Show auth button only for admin
-            if (authBtn) {
-                authBtn.style.display = isAdmin ? 'flex' : 'none';
-            }
+        const authBtn = document.getElementById('authBtn');
+        const isAdmin = role && role.toLowerCase() === 'admin';
+    
+        // Show auth button only for admin
+        if (authBtn) {
+        authBtn.style.display = isAdmin ? 'flex' : 'none';
         }
+    }
         
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
@@ -1636,5 +1636,6 @@
     </script>
 </body>
 </html>
+
 
 
