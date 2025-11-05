@@ -864,10 +864,14 @@
         }
 
         // Initialize auth
-        if (checkAuth()) {
+            if (checkAuth()) {
             const authData = getAuthData();
             if (authData?.username) {
-                document.getElementById('displayUsername').textContent = authData.username;
+            document.getElementById('displayUsername').textContent = authData.username;
+            }
+        // Update UI based on user role
+            if (authData?.role) {
+            updateUIBasedOnRole(authData.role);
             }
         }
 
@@ -1632,4 +1636,5 @@
     </script>
 </body>
 </html>
+
 
