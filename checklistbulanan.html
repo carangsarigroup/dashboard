@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Pemeriksaan - Google Sheet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .select-wrapper select:hover {
+            border-color: #2E7D32;
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: #2E7D32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #2E7D32;
+            font-size: 12px;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2E7D32;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #2E7D32;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            border-left: 5px solid #f5c6cb;
+        }
+
+        .error strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        th.col-no {
+            width: 50px;
+            text-align: center;
+        }
+
+        th.col-bagian {
+            width: 200px;
+        }
+
+        th.col-item {
+            width: auto;
+        }
+
+        th.col-dasar {
+            width: 150px;
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            color: #495057;
+            vertical-align: top;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        td.no {
+            text-align: center;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        td.bagian {
+            font-weight: 700;
+            background: #f8f9fa;
+            color: #2E7D32;
+        }
+
+        td.sub-item {
+            font-weight: 600;
+            color: #495057;
+            padding-left: 30px;
+        }
+
+        td.description {
+            line-height: 1.6;
+        }
+
+        td.dasar {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            color: #2E7D32;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                padding: 20px;
+                flex-direction: column;
+            }
+
+            .select-wrapper {
+                min-width: 100%;
+            }
+
+            .refresh-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Item Pemeriksaan</h1>
+            <p>Daftar Pemeriksaan Barang Dagangan, Kondisi Fisik & Sistem Administrasi</p>
+        </div>
+        
+        <div class="controls">
+            <div class="select-wrapper">
+                <select id="sheetSelect" onchange="handleSheetChange()">
+                    <option value="">Pilih Sheet...</option>
+                </select>
+            </div>
+            <button class="refresh-btn" onclick="handleRefresh()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Memuat data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIG ============
+        const CONFIG = {
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SPREADSHEET_ID: '1kOKzSSAYlXG33LokTmwRLpzFG-wYlAWUDCjEYvzKKNA', // Replace with your Spreadsheet ID
+            CACHE_DURATION: 5 * 60 * 1000
+        };
+
+        // ============ STATE MANAGEMENT ============
+        let appState = {
+            sheets: [],
+            currentSheet: null,
+            cache: {},
+            lastUpdate: null
+        };
+
+        // ============ UTILITY FUNCTIONS ============
+        function showLoading(message = 'Memuat data...') {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            `;
+        }
+
+        function showError(title, message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <strong>❌ ${title}</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h2>Pilih Sheet untuk Melihat Data</h2>
+                    <p>Gunakan dropdown di atas untuk memilih sheet yang ingin ditampilkan</p>
+                </div>
+            `;
+        }
+
+        // ============ CACHE MANAGEMENT ============
+        function getCachedData(sheetName) {
+            const cached = appState.cache[sheetName];
+            if (!cached) return null;
+            
+            const now = Date.now();
+            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+                delete appState.cache[sheetName];
+                return null;
+            }
+            
+            return cached.data;
+        }
+
+        function setCachedData(sheetName, data) {
+            appState.cache[sheetName] = {
+                data: data,
+                timestamp: Date.now()
+            };
+        }
+
+        // ============ API FUNCTIONS ============
+        async function loadSheetsList() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                appState.sheets = data.sheets.map(sheet => sheet.properties.title);
+                
+                const sheetSelect = document.getElementById('sheetSelect');
+                sheetSelect.innerHTML = '<option value="">Pilih Sheet...</option>' + 
+                    appState.sheets.map(name => 
+                        `<option value="${name}">${name}</option>`
+                    ).join('');
+                
+                showEmptyState();
+                
+            } catch (error) {
+                console.error('Error loading sheets:', error);
+                showError('Gagal Memuat Daftar Sheet', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Pastikan:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Spreadsheet ID benar</li>
+                        <li>API Key valid</li>
+                        <li>Google Sheets API sudah enabled</li>
+                        <li>Sheet sudah public</li>
+                    </ul>
+                `);
+            }
+        }
+
+        async function loadSheetData(sheetName, forceRefresh = false) {
+            if (!sheetName) {
+                showEmptyState();
+                return;
+            }
+
+            if (!forceRefresh) {
+                const cached = getCachedData(sheetName);
+                if (cached) {
+                    console.log('Using cached data for:', sheetName);
+                    displayData(cached, sheetName);
+                    return;
+                }
+            }
+            
+            showLoading(`Memuat data: ${sheetName}`);
+            appState.currentSheet = sheetName;
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.values || data.values.length === 0) {
+                    showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
+                    return;
+                }
+                
+                setCachedData(sheetName, data.values);
+                appState.lastUpdate = new Date();
+                
+                displayData(data.values, sheetName);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Gagal Memuat Data', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Sheet:</strong> "${sheetName}"
+                `);
+            }
+        }
+
+        // ============ DISPLAY FUNCTIONS ============
+        function displayData(values, sheetName) {
+            // Skip first row (headers from sheet)
+            const dataRows = values.slice(1);
+            
+            if (dataRows.length === 0) {
+                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"`);
+                return;
+            }
+
+            let html = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-no">No</th>
+                                <th class="col-bagian">Bagian</th>
+                                <th class="col-item">Item Pemeriksaan</th>
+                                <th class="col-dasar">Dasar PWR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            let rowNumber = 1;
+            dataRows.forEach((row, index) => {
+                const no = row[0] || '';
+                const bagian = row[1] || '';
+                const item = row[2] || '';
+                const dasar = row[3] || '';
+                
+                // Skip empty rows
+                if (!bagian && !item) return;
+                
+                // Determine row type
+                let rowClass = '';
+                let displayNo = '';
+                
+                if (bagian && !no.match(/^[a-z]\./)) {
+                    // Main section (Roman numerals)
+                    rowClass = 'bagian';
+                    displayNo = no;
+                } else if (no.match(/^[a-z]\./)) {
+                    // Sub-item (a., b., c., etc.)
+                    rowClass = 'sub-item';
+                    displayNo = no;
+                } else {
+                    displayNo = rowNumber++;
+                }
+                
+                html += `
+                    <tr>
+                        <td class="no">${displayNo}</td>
+                        <td class="${rowClass ? rowClass : ''}">${bagian}</td>
+                        <td class="description">${item}</td>
+                        <td class="dasar">${dasar}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('content').innerHTML = html;
+        }
+
+        // ============ EVENT HANDLERS ============
+        function handleSheetChange() {
+            const sheetSelect = document.getElementById('sheetSelect');
+            const selectedSheet = sheetSelect.value;
+            
+            if (selectedSheet) {
+                loadSheetData(selectedSheet);
+            } else {
+                showEmptyState();
+            }
+        }
+
+        function handleRefresh() {
+            const sheetSelect = document.getElementById('sheetSelect');
+            const selectedSheet = sheetSelect.value;
+            
+            if (!selectedSheet) {
+                alert('Pilih sheet terlebih dahulu');
+                return;
+            }
+            
+            loadSheetData(selectedSheet, true);
+        }
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, loading sheets list...');
+            loadSheetsList();
+        });
+    </script>
+</body>
+</html>
