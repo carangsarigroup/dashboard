@@ -1189,17 +1189,25 @@
                         <tbody>
             `;
 
-            // Display data rows (starting from row 1)
+          // Display data rows (starting from row 1)
             for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
-                const row = values[rowIdx] || [];
-                html += `<tr>`;
-                
-                for (let colIdx = 0; colIdx < headers.length; colIdx++) {
-                    const cellValue = row[colIdx] || '';
-                    const header = headers[colIdx] || '';
-                    
-                    // Check if this is a Status column
-                    if (header.toLowerCase().includes('status')) {
+            const row = values[rowIdx] || [];
+            html += `<tr>`;
+    
+            // Check if this is a section header (starts with Roman numerals like I., II., III., etc.)
+            const firstCell = row[0] || '';
+            const isSectionHeader = /^[IVX]+\.\s/.test(firstCell.trim());
+    
+            for (let colIdx = 0; colIdx < headers.length; colIdx++) {
+            const cellValue = row[colIdx] || '';
+            const header = headers[colIdx] || '';
+        
+            // For section headers, show empty cells (for merged cells)
+            if (isSectionHeader && (header.toLowerCase().includes('status') || header.toLowerCase().includes('keterangan'))) {
+            html += `<td></td>`;
+            }
+            // Check if this is a Status column
+            else if (header.toLowerCase().includes('status')) {
                         html += `<td class="editable status-cell">
                             <div class="status-buttons">
                                 <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
@@ -1497,3 +1505,4 @@
     </script>
 </body>
 </html>
+
