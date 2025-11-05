@@ -703,7 +703,7 @@
             </div>
             <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
                 <span>➕</span>
-                <span>Tambah Kolom</span>
+                <span>Tambah Baris</span>
             </button>
             <button class="save-btn" onclick="handleSaveAll()" id="saveBtn" style="display: none;">
                 <span>💾</span>
@@ -727,7 +727,7 @@
     <div id="dataModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Tambah Kolom Baru</h2>
+                <h2>Tambah Baris Baru</h2>
                 <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
             <form id="dataForm" onsubmit="handleFormSubmit(event)">
@@ -761,7 +761,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-submit">Tambah Kolom</button>
+                    <button type="submit" class="btn-submit">Tambah Baris</button>
                     <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
                 </div>
             </form>
@@ -1163,25 +1163,25 @@
 
         // ============ DISPLAY FUNCTIONS ============
         function displayData(values, sheetName) {
-            if (values.length < 5) {
-                showError('Format Data Salah', 'Sheet harus memiliki minimal 5 baris: Bagian, Item Pemeriksaan, Dasar PWR, Status, Keterangan');
+            if (values.length < 2) {
+                showError('Format Data Salah', 'Sheet harus memiliki minimal 2 baris (header dan data)');
                 return;
             }
 
-            const numCols = Math.max(...values.map(row => row.length));
+            // Get headers from first row
+            const headers = values[0] || [];
             
             let html = `
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Field</th>
             `;
 
-            // Add column headers (A, B, C, etc.)
-            for (let i = 0; i < numCols; i++) {
-                html += `<th>Item ${i + 1}</th>`;
-            }
+            // Display column headers from first row
+            headers.forEach((header, idx) => {
+                html += `<th>${header || `Kolom ${idx + 1}`}</th>`;
+            });
             
             html += `
                             </tr>
@@ -1189,17 +1189,17 @@
                         <tbody>
             `;
 
-            // Row labels
-            const rowLabels = ['Bagian', 'Item Pemeriksaan', 'Dasar PWR', 'Status (Ya/Tidak)', 'Keterangan'];
-            
-            for (let rowIdx = 0; rowIdx < 5; rowIdx++) {
+            // Display data rows (starting from row 1)
+            for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
+                const row = values[rowIdx] || [];
                 html += `<tr>`;
-                html += `<td class="row-label">${rowLabels[rowIdx]}</td>`;
                 
-                for (let colIdx = 0; colIdx < numCols; colIdx++) {
-                    const cellValue = values[rowIdx] && values[rowIdx][colIdx] ? values[rowIdx][colIdx] : '';
+                for (let colIdx = 0; colIdx < headers.length; colIdx++) {
+                    const cellValue = row[colIdx] || '';
+                    const header = headers[colIdx] || '';
                     
-                    if (rowIdx === 3) { // Status row
+                    // Check if this is a Status column
+                    if (header.toLowerCase().includes('status')) {
                         html += `<td class="editable status-cell">
                             <div class="status-buttons">
                                 <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
@@ -1209,9 +1209,10 @@
                                         onclick="setStatus(${rowIdx}, ${colIdx}, 'Tidak')" 
                                         data-row="${rowIdx}" data-col="${colIdx}">Tidak</button>
                             </div>
-                            ${accessToken ? `<button class="btn-delete" onclick="handleDeleteColumn(${colIdx})">🗑️ Hapus Kolom</button>` : ''}
                         </td>`;
-                    } else if (rowIdx === 4) { // Keterangan row
+                    }
+                    // Check if this is a Keterangan column
+                    else if (header.toLowerCase().includes('keterangan')) {
                         html += `<td class="editable">
                             <input type="text" 
                                    class="keterangan-input" 
@@ -1220,7 +1221,13 @@
                                    onchange="updateKeterangan(${rowIdx}, ${colIdx}, this.value)"
                                    placeholder="Masukkan keterangan...">
                         </td>`;
-                    } else {
+                    }
+                    // Check if this is the first column (Bagian) - make it bold
+                    else if (colIdx === 0) {
+                        html += `<td class="row-label">${cellValue}</td>`;
+                    }
+                    // Regular data cell
+                    else {
                         html += `<td>${cellValue}</td>`;
                     }
                 }
@@ -1312,20 +1319,15 @@
             }
         }
 
-        async function addColumn(columnData) {
+        async function addColumn(rowData) {
             if (!accessToken) {
                 alert('❌ Harap authenticate terlebih dahulu!');
                 return;
             }
 
             try {
-                // Add data to each row
-                for (let i = 0; i < 5; i++) {
-                    if (!appState.currentData[i]) {
-                        appState.currentData[i] = [];
-                    }
-                    appState.currentData[i].push(columnData[i]);
-                }
+                // Add new row to the data
+                appState.currentData.push(rowData);
 
                 await gapi.client.sheets.spreadsheets.values.update({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
@@ -1339,10 +1341,10 @@
                 delete appState.cache[appState.currentSheet];
                 await loadSheetData(appState.currentSheet, true);
                 
-                alert('✅ Kolom baru berhasil ditambahkan!');
+                alert('✅ Baris baru berhasil ditambahkan!');
             } catch (error) {
-                console.error('Error adding column:', error);
-                alert('❌ Gagal menambahkan kolom: ' + error.message);
+                console.error('Error adding row:', error);
+                alert('❌ Gagal menambahkan baris: ' + error.message);
                 throw error;
             }
         }
@@ -1459,7 +1461,8 @@
             const status = document.getElementById('status').value;
             const keterangan = document.getElementById('keterangan').value;
 
-            const columnData = [
+            // Create row data matching the column structure
+            const rowData = [
                 bagian,
                 itemPemeriksaan,
                 dasarPWR,
@@ -1467,7 +1470,7 @@
                 keterangan
             ];
 
-            await addColumn(columnData);
+            await addColumn(rowData);
             closeModal();
         }
 
