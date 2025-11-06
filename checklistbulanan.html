@@ -991,8 +991,8 @@
             document.getElementById('content').innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📊</div>
-                    <h2>Pilih Sheet untuk Melihat Data</h2>
-                    <p>Gunakan dropdown di atas untuk memilih sheet yang ingin ditampilkan</p>
+                    <h2>Pilih Toko untuk Melihat Data</h2>
+                    <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
                 </div>
             `;
         }
@@ -1041,7 +1041,7 @@
                 appState.sheets = data.sheets.map(sheet => sheet.properties.title);
                 
                 const sheetSelect = document.getElementById('sheetSelect');
-                sheetSelect.innerHTML = '<option value="">Pilih Sheet...</option>' + 
+                sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
                     appState.sheets.map(name => 
                         `<option value="${name}">${name}</option>`
                     ).join('');
@@ -1050,15 +1050,14 @@
                 
             } catch (error) {
                 console.error('Error loading sheets:', error);
-                showError('Gagal Memuat Daftar Sheet', `
+                showError('Gagal Memuat Daftar Toko', `
                     ${error.message}
                     <br><br>
                     <strong>Pastikan:</strong>
                     <ul style="margin-top: 10px; margin-left: 20px;">
-                        <li>Spreadsheet ID benar</li>
+                        <li>Database ID benar</li>
                         <li>API Key valid</li>
-                        <li>Google Sheets API sudah enabled</li>
-                        <li>Sheet sudah public</li>
+                        <li>Google API sudah enabled</li>
                     </ul>
                 `);
             }
@@ -1466,6 +1465,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
 
