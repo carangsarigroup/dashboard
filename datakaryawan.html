@@ -822,71 +822,92 @@
         
         /* Auto-logout warning modal */
         .logout-warning {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 10000;
-        justify-content: center;
-        align-items: center;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
         }
 
         .logout-warning.show {
-        display: flex;
+            display: flex;
         }
 
         .warning-content {
-        background: white;
-        padding: 40px;
-        border-radius: 20px;
-        text-align: center;
-        max-width: 400px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        animation: fadeInUp 0.3s ease-out;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.3s ease-out;
         }
 
         .warning-content h3 {
-        color: #FF69B4;
-        margin-bottom: 15px;
-        font-size: 1.5em;
+            color: #FF69B4;
+            margin-bottom: 15px;
+            font-size: 1.5em;
         }
 
         .warning-content p {
-        color: #666;
-        margin-bottom: 25px;
-        font-size: 1.1em;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
         }
 
         .warning-content button {
-        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
-        font-size: 1em;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .warning-content button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+        
+        .whatsapp-btn {
+            color: #25D366;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .whatsapp-btn:hover {
+            background: #25D366;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
         }
     </style>
 </head>
 
 <body>
     <div class="logout-warning" id="logoutWarning">
-    <div class="warning-content">
-        <h3>⚠️ Peringatan Inaktivitas</h3>
-        <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
-        <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        <div class="warning-content">
+            <h3>⚠️ Peringatan Inaktivitas</h3>
+            <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+            <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        </div>
     </div>
-    </div>
+    
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
@@ -990,6 +1011,11 @@
                 <div class="form-group">
                     <label for="coordinatorName">Nama Kepala Toko</label>
                     <input type="text" id="coordinatorName" placeholder="Nama kepala toko">
+                </div>
+
+                <div class="form-group">
+                    <label for="coordinatorWhatsapp">WhatsApp Kepala Toko</label>
+                    <input type="tel" id="coordinatorWhatsapp" placeholder="Contoh: 081234567890 atau +6281234567890">
                 </div>
 
                 <div class="form-actions">
@@ -1104,56 +1130,47 @@
         let inactivityTimer;
         let warningTimer;
         let countdownInterval;
-        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+        const INACTIVITY_LIMIT = 5 * 60 * 1000;
+        const WARNING_TIME = 60 * 1000;
 
         function startInactivityTimer() {
-        clearTimeout(inactivityTimer);
-        clearTimeout(warningTimer);
-        clearInterval(countdownInterval);
-    
-        // Hide warning if shown
-        document.getElementById('logoutWarning').classList.remove('show');
-    
-        // Set warning timer (4 minutes)
-        warningTimer = setTimeout(() => {
-        showLogoutWarning();
-        }, INACTIVITY_LIMIT - WARNING_TIME);
-    
-        // Set logout timer (5 minutes)
-        inactivityTimer = setTimeout(() => {
-        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
-        }, INACTIVITY_LIMIT);
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            clearInterval(countdownInterval);
+            
+            document.getElementById('logoutWarning').classList.remove('show');
+            
+            warningTimer = setTimeout(() => {
+                showLogoutWarning();
+            }, INACTIVITY_LIMIT - WARNING_TIME);
+            
+            inactivityTimer = setTimeout(() => {
+                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+            }, INACTIVITY_LIMIT);
         }
 
         function showLogoutWarning() {
-        document.getElementById('logoutWarning').classList.add('show');
-        let countdown = 60;
-        document.getElementById('warningCountdown').textContent = countdown;
-    
-        countdownInterval = setInterval(() => {
-        countdown--;
-        document.getElementById('warningCountdown').textContent = countdown;
-        if (countdown <= 0) {
-            clearInterval(countdownInterval);
+            document.getElementById('logoutWarning').classList.add('show');
+            let countdown = 60;
+            document.getElementById('warningCountdown').textContent = countdown;
+            
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('warningCountdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
         }
-        }, 1000);
-    }
 
         function resetInactivityTimer() {
-        startInactivityTimer();
-    }
+            startInactivityTimer();
+        }
 
-        // Listen for user activity
         const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
         activityEvents.forEach(event => {
-        document.addEventListener(event, resetInactivityTimer, true);
-    });
-
-        // Start timer when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-        startInactivityTimer();
-    });
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
 
         function updateUIBasedOnRole(role) {
             const authBtn = document.getElementById('authBtn');
@@ -1467,6 +1484,7 @@
                 
                 if (position && position.toLowerCase().includes('koordinator')) {
                     storeMap[storeName].coordinator.name = name.trim();
+                    storeMap[storeName].coordinator.whatsapp = row[3] || '';
                 } else {
                     storeMap[storeName].employees.push({
                         name: name.trim(),
@@ -1562,6 +1580,20 @@
                                         <span class="label">Kepala Toko:</span>
                                         <span class="value">${highlightText(store.coordinator.name, searchTerm)}</span>
                                     </div>
+                                    ${store.coordinator.whatsapp ? `
+                                        <div class="store-info-row">
+                                            <span class="icon">📱</span>
+                                            <span class="label">WhatsApp:</span>
+                                            <span class="value">
+                                                <a href="https://wa.me/${store.coordinator.whatsapp.replace(/\D/g, '')}" 
+                                                   target="_blank" 
+                                                   class="whatsapp-btn"
+                                                   title="Chat via WhatsApp">
+                                                    ${store.coordinator.whatsapp} 💬
+                                                </a>
+                                            </span>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             ` : ''}
                         </div>
@@ -1642,6 +1674,7 @@
             document.getElementById('storeName').value = store.name;
             document.getElementById('storeCode').value = store.code;
             document.getElementById('coordinatorName').value = store.coordinator.name;
+            document.getElementById('coordinatorWhatsapp').value = store.coordinator.whatsapp || '';
             
             document.getElementById('storeModal').classList.add('active');
         }
@@ -1690,18 +1723,17 @@
             const storeName = document.getElementById('storeName').value;
             const storeCode = document.getElementById('storeCode').value;
             const coordinatorName = document.getElementById('coordinatorName').value;
+            const coordinatorWhatsapp = document.getElementById('coordinatorWhatsapp').value;
             const editStoreIndex = document.getElementById('editStoreIndex').value;
 
             const fullStoreName = storeCode ? `${storeName} (${storeCode})` : storeName;
 
             try {
                 if (editStoreIndex !== '') {
-                    // Update existing store
                     const store = filteredStores[parseInt(editStoreIndex)];
-                    await updateStoreInSheet(store, fullStoreName, coordinatorName);
+                    await updateStoreInSheet(store, fullStoreName, coordinatorName, coordinatorWhatsapp);
                 } else {
-                    // Add new store
-                    const rowData = [fullStoreName, 'Koordinator Toko', coordinatorName];
+                    const rowData = [fullStoreName, 'Koordinator Toko', coordinatorName, coordinatorWhatsapp];
                     await addRow(rowData);
                 }
                 
@@ -1729,10 +1761,8 @@
 
             try {
                 if (empIdx !== '') {
-                    // Update existing employee
                     await updateEmployeeInSheet(store, parseInt(empIdx), employeeName);
                 } else {
-                    // Add new employee
                     const rowData = [fullStoreName, 'Karyawan', employeeName];
                     await addRow(rowData);
                 }
@@ -1748,7 +1778,7 @@
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.append({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:C`,
+                    range: `${CONFIG.SHEET_NAME}!A:D`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [rowData]
@@ -1765,8 +1795,7 @@
             }
         }
 
-        async function updateStoreInSheet(store, newStoreName, newCoordinatorName) {
-            // Find all rows for this store and update them
+        async function updateStoreInSheet(store, newStoreName, newCoordinatorName, newCoordinatorWhatsapp) {
             const rows = appState.currentData;
             const updates = [];
             
@@ -1777,8 +1806,8 @@
                 if (row[0] === oldStoreName) {
                     if (row[1] && row[1].toLowerCase().includes('koordinator')) {
                         updates.push({
-                            range: `${CONFIG.SHEET_NAME}!A${i + 1}:C${i + 1}`,
-                            values: [[newStoreName, row[1], newCoordinatorName]]
+                            range: `${CONFIG.SHEET_NAME}!A${i + 1}:D${i + 1}`,
+                            values: [[newStoreName, row[1], newCoordinatorName, newCoordinatorWhatsapp]]
                         });
                     } else {
                         updates.push({
@@ -1858,7 +1887,6 @@
                 const rows = appState.currentData;
                 const deleteRequests = [];
                 
-                // Find all rows for this store (from bottom to top to avoid index shifts)
                 for (let i = rows.length - 1; i >= 1; i--) {
                     if (rows[i][0] === oldStoreName) {
                         deleteRequests.push({
@@ -1952,6 +1980,7 @@
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
             console.log('Page loaded, waiting for Google APIs...');
+            startInactivityTimer();
             
             setTimeout(() => {
                 if (typeof gapi !== 'undefined') {
@@ -1964,7 +1993,6 @@
 
             fetchDataFromGoogleSheets();
             
-            // Auto-sync every 5 minutes
             setInterval(() => {
                 console.log('Auto-syncing data...');
                 fetchDataFromGoogleSheets(true);
@@ -1985,5 +2013,3 @@
     </script>
 </body>
 </html>
-
-
