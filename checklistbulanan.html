@@ -991,8 +991,8 @@
         function storeOAuthToken(token, expiresIn = 3600) {
             try {
                 const expiryTime = Date.now() + (expiresIn * 1000);
-                sessionStorage.setItem('oauth_token', token);
-                sessionStorage.setItem('oauth_expiry', expiryTime.toString());
+                localStorage.setItem('oauth_token', token);
+                localStorage.setItem('oauth_expiry', expiryTime.toString());
                 console.log('OAuth token stored');
             } catch (e) {
                 console.warn('Could not store OAuth token:', e);
@@ -1001,8 +1001,8 @@
 
         function restoreStoredToken() {
             try {
-                const storedToken = sessionStorage.getItem('oauth_token');
-                const expiry = sessionStorage.getItem('oauth_expiry');
+                const storedToken = localStorage.getItem('oauth_token');
+                const expiry = localStorage.getItem('oauth_expiry');
                 
                 if (!storedToken || !expiry) {
                     return false;
@@ -1030,8 +1030,8 @@
 
         function clearStoredToken() {
             try {
-                sessionStorage.removeItem('oauth_token');
-                sessionStorage.removeItem('oauth_expiry');
+                localStorage.removeItem('oauth_token');
+                localStorage.removeItem('oauth_expiry');
             } catch (e) {
                 console.warn('Error clearing token:', e);
             }
@@ -1584,6 +1584,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
 
