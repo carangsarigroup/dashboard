@@ -672,10 +672,73 @@
                 flex-direction: column;
             }
         }
+        /* Auto-logout warning modal */
+        .logout-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        }
+
+        .logout-warning.show {
+        display: flex;
+        }
+
+        .warning-content {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        animation: fadeInUp 0.3s ease-out;
+        }
+
+        .warning-content h3 {
+        color: #FF69B4;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+        }
+
+        .warning-content p {
+        color: #666;
+        margin-bottom: 25px;
+        font-size: 1.1em;
+        }
+
+        .warning-content button {
+        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        }
+
+        .warning-content button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
     </style>
 </head>
 
 <body>
+    <div class="logout-warning" id="logoutWarning">
+    <div class="warning-content">
+        <h3>⚠️ Peringatan Inaktivitas</h3>
+        <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+        <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+    </div>
+    </div>
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
@@ -836,6 +899,61 @@
         return true;
         }
 
+        // ============ AUTO-LOGOUT INACTIVITY TIMER ============
+        let inactivityTimer;
+        let warningTimer;
+        let countdownInterval;
+        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+
+        function startInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        clearTimeout(warningTimer);
+        clearInterval(countdownInterval);
+    
+        // Hide warning if shown
+        document.getElementById('logoutWarning').classList.remove('show');
+    
+        // Set warning timer (4 minutes)
+        warningTimer = setTimeout(() => {
+        showLogoutWarning();
+        }, INACTIVITY_LIMIT - WARNING_TIME);
+    
+        // Set logout timer (5 minutes)
+        inactivityTimer = setTimeout(() => {
+        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+        }, INACTIVITY_LIMIT);
+    }
+
+        function showLogoutWarning() {
+        document.getElementById('logoutWarning').classList.add('show');
+        let countdown = 60;
+        document.getElementById('warningCountdown').textContent = countdown;
+    
+        countdownInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('warningCountdown').textContent = countdown;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+        function resetInactivityTimer() {
+        startInactivityTimer();
+        }
+
+        // Listen for user activity
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        activityEvents.forEach(event => {
+        document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // Start timer when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+        startInactivityTimer();
+        });
+        
         function updateUIBasedOnRole(role) {
         const authBtn = document.getElementById('authBtn');
         const isAdmin = role && role.toLowerCase() === 'admin';
@@ -1636,6 +1754,7 @@
     </script>
 </body>
 </html>
+
 
 
 
