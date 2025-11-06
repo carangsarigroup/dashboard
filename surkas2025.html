@@ -112,6 +112,24 @@
             box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
         }
 
+        .select-wrapper select.filtered {
+            border-color: #FF69B4;
+            background: #fff5f9;
+            font-weight: 600;
+        }
+
+        .filter-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
         .select-wrapper::after {
             content: '▼';
             position: absolute;
@@ -770,6 +788,15 @@
                     <option value="">Pilih Toko...</option>
                 </select>
             </div>
+            <div class="select-wrapper">
+            <select id="triwulanFilter" onchange="handleTriwulanFilter()">
+            <option value="all">Semua Triwulan</option>
+            <option value="1">TW1 (Q1)</option>
+            <option value="2">TW2 (Q2)</option>
+            <option value="3">TW3 (Q3)</option>
+            <option value="4">TW4 (Q4)</option>
+                </select>
+            </div>
             <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
                 <span>➕</span>
                 <span>Tambah Data</span>
@@ -1014,7 +1041,8 @@
             currentSheet: null,
             cache: {},
             lastUpdate: null,
-            currentData: []
+            currentData: [],
+            currentFilter: 'all'
         };
 
         // ============ OAUTH INITIALIZATION ============
@@ -1396,98 +1424,153 @@
             });
         }
 
+        // ============ FILTER FUNCTIONS ============
+        function handleTriwulanFilter() {
+        const filterSelect = document.getElementById('triwulanFilter');
+        const selectedFilter = filterSelect.value;
+        appState.currentFilter = selectedFilter;
+    
+        // Add visual feedback
+        if (selectedFilter !== 'all') {
+        filterSelect.classList.add('filtered');
+        } else {
+        filterSelect.classList.remove('filtered');
+        }
+    
+        // Reload display with filter
+        if (appState.currentSheet && appState.currentData.length > 0) {
+        displayData(appState.currentData, appState.currentSheet);
+        }
+    }
+
+        function filterDataByTriwulan(dataRows) {
+        if (appState.currentFilter === 'all') {
+        return dataRows;
+        }
+        
+        return dataRows.filter(row => {
+        const triwulan = row[0] ? row[0].toString().trim() : '';
+        return triwulan === appState.currentFilter;
+        });
+    }
+
+        function getTriwulanLabel(value) {
+        const labels = {
+        '1': 'Triwulan 1 (Q1)',
+        '2': 'Triwulan 2 (Q2)',
+        '3': 'Triwulan 3 (Q3)',
+        '4': 'Triwulan 4 (Q4)',
+        'all': 'Semua Triwulan'
+        };
+        return labels[value] || 'Semua Triwulan';
+    }
+        
         // ============ DISPLAY FUNCTIONS ============
         function displayData(values, sheetName) {
-            const headers = values[0];
-            const dataRows = values.slice(1).filter(row => row[1]);
-            
-            if (dataRows.length === 0) {
-                showError('Data Kosong', `Tidak ada data valid di sheet "${sheetName}"`);
-                return;
-            }
-
-            const totals = calculateTotals(dataRows);
-            const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            let html = `
-                <div class="stats">
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.ebitdaLR)}</h3>
-                        <p>Total EBITDA LR</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
-                        <p>Total Laba Net Ditransfer</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>${formatRupiah(totals.bayarListrik)}</h3>
-                        <p>Total Bayar Listrik</p>
-                    </div>
-                    <div class="stat-card-finale">
-                        <h3>${formatRupiah(totals.sisaSurkas)}</h3>
-                        <p>Total Sisa Surplus Kas</p>
-                    </div>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TRIWULAN</th>
-                                <th>BULAN</th>
-                                <th>EBITDA LR</th>
-                                <th>PENGGUNAAN LABA KAS</th>
-                                <th>LABA NET DITRANSFER</th>
-                                <th>BAYAR LISTRIK</th>
-                               <th>SISA SURKAS</th>
-                                ${accessToken ? '<th>AKSI</th>' : ''}
-                            </tr>
-                        </thead>
-                        <tbody>
-            `    ;
-            
-                dataRows.forEach((row, index) => {
-                const data = processRowData(row);
-                let colorClass = 'zero';
-                if (data.sisaSurkas > 0) colorClass = 'positive';
-                else if (data.sisaSurkas < 0) colorClass = 'negative';
-                
-                const rowIndex = index + 2;
-
-                html += `
-                    <tr>
-                        <td class="triwulan">${data.triwulan}</td>
-                        <td class="month">${data.bulan}</td>
-                        <td class="currency">${formatRupiah(data.ebitdaLR)}</td>
-                        <td class="currency">${formatRupiah(data.penggunaanLabaKas)}</td>
-                        <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
-                        <td class="currency">${formatRupiah(data.bayarListrik)}</td>
-                        <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
-                        ${accessToken ? `
-                        <td class="actions">
-                            <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
-                            <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
-                        </td>
-                        ` : ''}
-                    </tr>
-                `;
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            document.getElementById('content').innerHTML = html;
+        const headers = values[0];
+        const allDataRows = values.slice(1).filter(row => row[1]);
+    
+        // APPLY FILTER
+        const dataRows = filterDataByTriwulan(allDataRows);
+    
+        if (dataRows.length === 0) {
+        const filterLabel = getTriwulanLabel(appState.currentFilter);
+        showError('Data Kosong', `Tidak ada data untuk ${filterLabel} di sheet "${sheetName}"`);
+        return;
         }
+
+        const totals = calculateTotals(dataRows);
+        const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+        });
+    
+        // TAMBAHKAN FILTER BADGE
+        const filterBadge = appState.currentFilter !== 'all' 
+        ? `<div class="filter-badge">📊 Menampilkan: ${getTriwulanLabel(appState.currentFilter)}</div>`
+        : '';
+    
+        let html = `
+        ${filterBadge}
+        <div class="stats">
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.ebitdaLR)}</h3>
+                <p>Total EBITDA LR${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
+                <p>Total Laba Net Ditransfer${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.bayarListrik)}</h3>
+                <p>Total Bayar Listrik${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card-finale">
+                <h3>${formatRupiah(totals.sisaSurkas)}</h3>
+                <p>Total Sisa Surplus Kas${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TRIWULAN</th>
+                        <th>BULAN</th>
+                        <th>EBITDA LR</th>
+                        <th>PENGGUNAAN LABA KAS</th>
+                        <th>LABA NET DITRANSFER</th>
+                        <th>BAYAR LISTRIK</th>
+                       <th>SISA SURKAS</th>
+                        ${accessToken ? '<th>AKSI</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    dataRows.forEach((row, index) => {
+        const data = processRowData(row);
+        let colorClass = 'zero';
+        if (data.sisaSurkas > 0) colorClass = 'positive';
+        else if (data.sisaSurkas < 0) colorClass = 'negative';
+        
+        // Find original row index in allDataRows for proper edit/delete
+        const originalIndex = allDataRows.findIndex(r => 
+            r[0] === row[0] && r[1] === row[1] && r[2] === row[2]
+        );
+        const rowIndex = originalIndex + 2;
+
+        html += `
+            <tr>
+                <td class="triwulan">${data.triwulan}</td>
+                <td class="month">${data.bulan}</td>
+                <td class="currency">${formatRupiah(data.ebitdaLR)}</td>
+                <td class="currency">${formatRupiah(data.penggunaanLabaKas)}</td>
+                <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
+                <td class="currency">${formatRupiah(data.bayarListrik)}</td>
+                <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
+                ${accessToken ? `
+                <td class="actions">
+                    <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                </td>
+                ` : ''}
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('content').innerHTML = html;
+}
 
         // ============ MODAL FUNCTIONS ============
         function openAddModal() {
@@ -1666,16 +1749,24 @@
 
         // ============ EVENT HANDLERS ============
         function handleSheetChange() {
-            const sheetSelect = document.getElementById('sheetSelect');
-            const selectedSheet = sheetSelect.value;
-            
-            if (selectedSheet) {
-                saveLastSheet(selectedSheet);
-                loadSheetData(selectedSheet);
-            } else {
-                showEmptyState();
-            }
+        const sheetSelect = document.getElementById('sheetSelect');
+        const selectedSheet = sheetSelect.value;
+    
+        if (selectedSheet) {
+        // Reset filter when changing sheet
+        appState.currentFilter = 'all';
+        const filterSelect = document.getElementById('triwulanFilter');
+        if (filterSelect) {
+            filterSelect.value = 'all';
+            filterSelect.classList.remove('filtered');
         }
+        
+        saveLastSheet(selectedSheet);
+        loadSheetData(selectedSheet);
+        } else {
+        showEmptyState();
+        }
+    }
 
         function handleRefresh() {
             const sheetSelect = document.getElementById('sheetSelect');
@@ -1754,6 +1845,7 @@
     </script>
 </body>
 </html>
+
 
 
 
