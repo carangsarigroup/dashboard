@@ -1248,53 +1248,53 @@
 
         // ============ TOKEN STORAGE ============
         function storeOAuthToken(token, expiresIn = 3600) {
-            try {
-                const expiryTime = Date.now() + (expiresIn * 1000);
-                sessionStorage.setItem('oauth_token', token);
-                sessionStorage.setItem('oauth_expiry', expiryTime.toString());
-                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
-            } catch (e) {
-                console.warn('Could not store OAuth token:', e);
-            }
+        try {
+        const expiryTime = Date.now() + (expiresIn * 1000);
+        localStorage.setItem('oauth_token', token); // GANTI sessionStorage jadi localStorage
+        localStorage.setItem('oauth_expiry', expiryTime.toString());
+        console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
+        } catch (e) {
+        console.warn('Could not store OAuth token:', e);
         }
+    }
 
         function restoreStoredToken() {
-            try {
-                const storedToken = sessionStorage.getItem('oauth_token');
-                const expiry = sessionStorage.getItem('oauth_expiry');
-                
-                if (!storedToken || !expiry) {
-                    return false;
-                }
-                
-                const expiryTime = parseInt(expiry);
-                const now = Date.now();
-                
-                if (now < expiryTime - 300000) {
-                    accessToken = storedToken;
-                    gapi.client.setToken({ access_token: storedToken });
-                    updateAuthButton(true);
-                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
-                    return true;
-                } else {
-                    clearStoredToken();
-                    console.log('Stored token expired');
-                    return false;
-                }
-            } catch (e) {
-                console.warn('Error restoring token:', e);
-                return false;
-            }
+        try {
+        const storedToken = localStorage.getItem('oauth_token'); // GANTI sessionStorage
+        const expiry = localStorage.getItem('oauth_expiry'); // GANTI sessionStorage
+        
+        if (!storedToken || !expiry) {
+            return false;
         }
+        
+        const expiryTime = parseInt(expiry);
+        const now = Date.now();
+        
+        if (now < expiryTime - 300000) {
+            accessToken = storedToken;
+            gapi.client.setToken({ access_token: storedToken });
+            updateAuthButton(true);
+            console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
+            return true;
+        } else {
+            clearStoredToken();
+            console.log('Stored token expired');
+            return false;
+        }
+        } catch (e) {
+        console.warn('Error restoring token:', e);
+        return false;
+        }
+    }
 
         function clearStoredToken() {
-            try {
-                sessionStorage.removeItem('oauth_token');
-                sessionStorage.removeItem('oauth_expiry');
-            } catch (e) {
-                console.warn('Error clearing token:', e);
-            }
+        try {
+        localStorage.removeItem('oauth_token'); // GANTI sessionStorage
+        localStorage.removeItem('oauth_expiry'); // GANTI sessionStorage
+        } catch (e) {
+        console.warn('Error clearing token:', e);
         }
+    }
 
         function handleAuth() {
             if (accessToken) {
@@ -2013,4 +2013,5 @@
     </script>
 </body>
 </html>
+
 
