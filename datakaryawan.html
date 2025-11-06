@@ -1260,8 +1260,8 @@
 
         function restoreStoredToken() {
         try {
-        const storedToken = localStorage.getItem('oauth_token'); // GANTI sessionStorage
-        const expiry = localStorage.getItem('oauth_expiry'); // GANTI sessionStorage
+        const storedToken = localStorage.getItem('oauth_token');
+        const expiry = localStorage.getItem('oauth_expiry');
         
         if (!storedToken || !expiry) {
             return false;
@@ -1274,16 +1274,22 @@
             accessToken = storedToken;
             gapi.client.setToken({ access_token: storedToken });
             updateAuthButton(true);
+            
+            // TAMBAHKAN 2 BARIS INI:
+            if (filteredStores.length > 0) {
+                renderStores(filteredStores); // Re-render untuk munculkan tombol
+            }
+            
             console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
             return true;
-        } else {
+            } else {
             clearStoredToken();
             console.log('Stored token expired');
             return false;
-        }
-        } catch (e) {
-        console.warn('Error restoring token:', e);
-        return false;
+            }
+            } catch (e) {
+            console.warn('Error restoring token:', e);
+            return false;
         }
     }
 
@@ -2013,5 +2019,6 @@
     </script>
 </body>
 </html>
+
 
 
