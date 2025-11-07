@@ -5,96 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Tagihan Listrik Toko</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
         }
         
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
-        
-        .controls {
-            padding: 20px;
-            background: #f8f9fa;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
         }
         
-        .btn {
-            padding: 12px 24px;
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+            padding: 12px 30px;
+            border: 2px solid #FF69B4;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover {
+            background: #FF69B4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .select-wrapper select:hover {
+            border-color: #FF69B4;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #FF69B4;
+            font-size: 12px;
+        }
+
+        .add-btn, .refresh-btn {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 12px 30px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+            white-space: nowrap;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-success {
+
+        .add-btn {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
         }
         
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-        
-        select {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
+        .refresh-btn:hover, .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
         }
         
-        .content { padding: 30px; }
+        .content {
+            padding: 30px;
+        }
         
         .loading {
             text-align: center;
             padding: 60px 20px;
         }
-        
-        .spinner {
+
+        .loading-spinner {
             display: inline-block;
             width: 50px;
             height: 50px;
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
+            border-top: 5px solid #FF69B4;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #FF69B4;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            border-left: 5px solid #f5c6cb;
+        }
+
+        .error strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
         
         .stats {
@@ -105,43 +227,324 @@
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
             padding: 25px;
             border-radius: 12px;
             text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
         }
         
-        .stat-card h3 { font-size: 1.8em; margin-bottom: 8px; }
+        .stat-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
         
         th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
             padding: 16px;
             text-align: center;
             font-weight: 600;
+            font-size: 0.9em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        th:last-child {
+            border-right: none;
         }
         
         td {
             padding: 14px 16px;
             border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            color: #495057;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        td:first-child {
             text-align: center;
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        td.toko-name {
+            font-weight: 600;
+            color: #FF69B4;
+        }
+
+        td.number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        td.currency {
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: #28a745;
+        }
+
+        td.actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #4A90E2;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
         }
         
-        tbody tr:hover { background: #f8f9fa; }
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
         
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
         .total-row {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
             font-weight: 700;
+            border-top: 3px solid #28a745;
         }
-        
+
+        .total-row td {
+            padding: 18px 16px;
+            font-size: 1.1em;
+            color: white;
+            border-bottom: none;
+        }
+
+        .total-row td:first-child {
+            color: white;
+        }
+
+        .last-update {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .month-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+        }
+
+        .user-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .auth-btn.authenticated {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .summary-section {
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #FF69B4;
+        }
+
+        .summary-section h3 {
+            color: #FF69B4;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .summary-item .label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #FF69B4;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            color: #FF69B4;
+            margin-bottom: 10px;
+        }
+
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -151,14 +554,20 @@
             height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 2000;
+            animation: fadeIn 0.3s ease;
         }
-        
+
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .modal-content {
             background: white;
             border-radius: 15px;
@@ -167,99 +576,244 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
         }
-        
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #FF69B4;
+            font-size: 1.5em;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #FF69B4;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
+            color: #495057;
         }
-        
+
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #dee2e6;
             border-radius: 8px;
             font-size: 16px;
+            transition: all 0.3s ease;
         }
-        
-        .user-bar {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .form-actions {
             display: flex;
             gap: 15px;
-            z-index: 1000;
+            margin-top: 30px;
         }
-        
-        .user-info {
-            background: white;
-            padding: 12px 25px;
-            border-radius: 30px;
+
+        .btn-submit, .btn-cancel {
+            flex: 1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            color: #667eea;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .logout-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
         }
-        
-        .logout-warning.show { display: flex; }
-        
-        .warning-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
-        
-        .warning-content h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.5em;
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
         }
-        
-        .warning-content p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 1.1em;
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
-        
+
         @media (max-width: 768px) {
-            .controls { flex-direction: column; }
-            select { min-width: 100%; }
+            body {
+                padding: 10px;
+            }
+
+            .user-bar {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                padding: 20px;
+                flex-direction: column;
+            }
+
+            .select-wrapper {
+                min-width: 100%;
+            }
+
+            .back-btn, .refresh-btn, .add-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                font-size: 0.85em;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
         }
+        
+        /* Auto-logout warning modal */
+        .logout-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .logout-warning.show {
+        display: flex;
+    }
+
+        .warning-content {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+        .warning-content h3 {
+        color: #FF69B4;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+
+        .warning-content p {
+        color: #666;
+        margin-bottom: 25px;
+        font-size: 1.1em;
+    }
+
+        .warning-content button {
+        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .warning-content button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+    }
     </style>
 </head>
+
 <body>
     <div class="logout-warning" id="logoutWarning">
-        <div class="warning-content">
-            <h3>⚠️ Peringatan Inaktivitas</h3>
-            <p>Anda akan logout otomatis dalam <strong><span id="countdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
-            <button class="btn btn-primary" onclick="resetTimer()">Saya Masih Di Sini</button>
-        </div>
+    <div class="warning-content">
+        <h3>⚠️ Peringatan Inaktivitas</h3>
+        <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+        <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
     </div>
-
+    </div>
     <div class="user-bar">
-        <div class="user-info">👤 <span id="username">Guest</span></div>
-        <button class="btn btn-primary" onclick="handleAuth()" id="authBtn">🔐 Login</button>
-        <button class="btn btn-success" onclick="logout()">🚪 Logout</button>
+        <div class="user-info">
+            <span>👤</span>
+            <span id="displayUsername">Guest</span>
+        </div>
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+            <span>🔐</span>
+            <span id="authBtnText">Otentikasi</span>
+        </button>
+        <button onclick="logout()" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </button>
     </div>
 
     <div class="container">
@@ -269,96 +823,307 @@
         </div>
         
         <div class="controls">
-            <a href="index.html" class="btn btn-primary">🏠 Dashboard</a>
-            <select id="monthSelect" onchange="loadMonth()">
-                <option value="">Pilih Bulan...</option>
-                <option value="Informasi_Umum">Informasi Umum</option>
-                <option value="Januari_2025">Januari 2025</option>
-                <option value="Februari_2025">Februari 2025</option>
-                <option value="Maret_2025">Maret 2025</option>
-                <option value="April_2025">April 2025</option>
-                <option value="Mei_2025">Mei 2025</option>
-                <option value="Juni_2025">Juni 2025</option>
-                <option value="Juli_2025">Juli 2025</option>
-                <option value="Agustus_2025">Agustus 2025</option>
-                <option value="September_2025">September 2025</option>
-                <option value="Oktober_2025">Oktober 2025</option>
-                <option value="November_2025">November 2025</option>
-                <option value="Desember_2025">Desember 2025</option>
-            </select>
-            <button class="btn btn-success" onclick="openModal()" id="addBtn" style="display:none">➕ Tambah</button>
-            <button class="btn btn-primary" onclick="refresh()">🔄 Refresh</button>
+            <a href="index.html" class="back-btn">
+                <span>🏠</span>
+                <span>Kembali ke Dashboard</span>
+            </a>
+            <div class="select-wrapper">
+                <select id="monthSelect" onchange="handleMonthChange()">
+                    <option value="">Pilih Bulan...</option>
+                    <option value="Informasi_Umum">Informasi Umum</option>
+                    <option value="Januari_2025">Januari 2025</option>
+                    <option value="Februari_2025">Februari 2025</option>
+                    <option value="Maret_2025">Maret 2025</option>
+                    <option value="April_2025">April 2025</option>
+                    <option value="Mei_2025">Mei 2025</option>
+                    <option value="Juni_2025">Juni 2025</option>
+                    <option value="Juli_2025">Juli 2025</option>
+                    <option value="Agustus_2025">Agustus 2025</option>
+                    <option value="September_2025">September 2025</option>
+                    <option value="Oktober_2025">Oktober 2025</option>
+                    <option value="November_2025">November 2025</option>
+                    <option value="Desember_2025">Desember 2025</option>
+                </select>
+            </div>
+            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
+                <span>➕</span>
+                <span>Tambah Data</span>
+            </button>
+            <button class="refresh-btn" onclick="handleRefresh()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
         </div>
         
         <div class="content" id="content">
-            <div style="text-align:center; padding:60px">
-                <h2>⚡ Pilih Bulan untuk Melihat Data</h2>
+            <div class="empty-state">
+                <div class="empty-state-icon">⚡</div>
+                <h2>Pilih Bulan untuk Melihat Data</h2>
+                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
             </div>
         </div>
     </div>
 
-    <div id="modal" class="modal">
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">Tambah Data</h2>
-            <form id="form" onsubmit="saveData(event)">
-                <input type="hidden" id="rowIndex">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+
                 <div class="form-group">
-                    <label>No *</label>
-                    <input type="number" id="nomor" required>
+                    <label for="nomor">No *</label>
+                    <input type="number" id="nomor" placeholder="Nomor urut" required>
                 </div>
+                
                 <div class="form-group">
-                    <label>Nama Toko *</label>
-                    <input type="text" id="namaToko" required>
+                    <label for="namaToko">Nama Toko *</label>
+                    <input type="text" id="namaToko" placeholder="Nama toko" required>
                 </div>
-                <div class="form-group" id="idPelangganGroup">
-                    <label>ID Pelanggan</label>
-                    <input type="text" id="idPelanggan">
+
+                <div class="form-group">
+                    <label for="idPelanggan">ID Pelanggan</label>
+                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan PLN">
                 </div>
-                <div class="form-group" id="standAwalGroup">
-                    <label>Stand Awal *</label>
-                    <input type="number" id="standAwal" oninput="calcUsage()">
+
+                <div class="form-group">
+                    <label for="standAwal">Stand Awal *</label>
+                    <input type="number" id="standAwal" placeholder="0" required oninput="calculateUsage()">
                 </div>
-                <div class="form-group" id="standAkhirGroup">
-                    <label>Stand Akhir *</label>
-                    <input type="number" id="standAkhir" oninput="calcUsage()">
+
+                <div class="form-group">
+                    <label for="standAkhir">Stand Akhir *</label>
+                    <input type="number" id="standAkhir" placeholder="0" required oninput="calculateUsage()">
                 </div>
-                <div class="form-group" id="penggunaanGroup">
-                    <label>Penggunaan (kWh)</label>
-                    <input type="number" id="penggunaan" readonly style="background:#e9ecef">
+
+                <div class="form-group">
+                    <label for="penggunaan">Penggunaan (kWh) - Auto</label>
+                    <input type="number" id="penggunaan" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
                 </div>
-                <div class="form-group" id="biayaGroup">
-                    <label>Biaya Listrik *</label>
-                    <input type="number" id="biaya">
+
+                <div class="form-group">
+                    <label for="biaya">Biaya Listrik *</label>
+                    <input type="number" id="biaya" placeholder="0" required>
                 </div>
-                <div style="display:flex; gap:15px">
-                    <button type="submit" class="btn btn-success" style="flex:1">Simpan</button>
-                    <button type="button" class="btn" onclick="closeModal()" style="flex:1; background:#6c757d; color:white">Batal</button>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="submitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Google API Scripts -->
     <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
+        // ============ AUTH SYSTEM ============
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+        function getAuthData() {
+            try {
+                const authString = getCookie('userAuth');
+                if (!authString) return null;
+                return JSON.parse(atob(authString));
+            } catch (e) {
+                console.error('Auth parse error:', e);
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const authData = getAuthData();
+            if (!authData) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            
+            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+                deleteCookie('userAuth');
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+                return false;
+            }
+
+            updateUIBasedOnRole(authData.role);
+            return true;
+        }
+
+        // ============ AUTO-LOGOUT INACTIVITY TIMER ============
+        let inactivityTimer;
+        let warningTimer;
+        let countdownInterval;
+        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+
+        function startInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        clearTimeout(warningTimer);
+        clearInterval(countdownInterval);
+    
+        // Hide warning if shown
+        document.getElementById('logoutWarning').classList.remove('show');
+    
+        // Set warning timer (4 minutes)
+        warningTimer = setTimeout(() => {
+        showLogoutWarning();
+        }, INACTIVITY_LIMIT - WARNING_TIME);
+    
+        // Set logout timer (5 minutes)
+        inactivityTimer = setTimeout(() => {
+        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+        }, INACTIVITY_LIMIT);
+    }
+
+        function showLogoutWarning() {
+        document.getElementById('logoutWarning').classList.add('show');
+        let countdown = 60;
+        document.getElementById('warningCountdown').textContent = countdown;
+    
+        countdownInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('warningCountdown').textContent = countdown;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+        function resetInactivityTimer() {
+        startInactivityTimer();
+    }
+
+        // Listen for user activity
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        activityEvents.forEach(event => {
+        document.addEventListener(event, resetInactivityTimer, true);
+    });
+
+        // Start timer when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+        startInactivityTimer();
+    });
+        
+        function updateUIBasedOnRole(role) {
+            const authBtn = document.getElementById('authBtn');
+            const isAdmin = role && role.toLowerCase() === 'admin';
+            
+            if (authBtn) {
+                authBtn.style.display = isAdmin ? 'flex' : 'none';
+            }
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            
+            accessToken = null;
+            clearStoredToken();
+            if (typeof gapi !== 'undefined' && gapi.client) {
+                gapi.client.setToken(null);
+            }
+            updateAuthButton(false);
+            
+            deleteCookie('userAuth');
+            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+        }
+
+        // Initialize auth
+        if (checkAuth()) {
+            const authData = getAuthData();
+            if (authData?.username) {
+                document.getElementById('displayUsername').textContent = authData.username;
+            }
+            if (authData?.role) {
+                updateUIBasedOnRole(authData.role);
+            }
+        }
+
+        // ============ CONFIG ============
         const CONFIG = {
             CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+            CACHE_DURATION: 5 * 60 * 1000
         };
 
-        let tokenClient, accessToken = null, currentMonth = null, currentData = [];
-        let inactivityTimer, warningTimer, countdownInterval;
-        let gapiInited = false, gisInited = false;
-        const INACTIVITY_TIME = 5 * 60 * 1000;
-        const WARNING_TIME = 60 * 1000;
+        // ============ OAUTH STATE ============
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
 
+        // ============ STATE MANAGEMENT ============
+        let appState = {
+            currentMonth: null,
+            cache: {},
+            lastUpdate: null,
+            currentData: []
+        };
+
+        // ============ OAUTH INITIALIZATION ============
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+                console.log('GAPI client initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI client:', error);
+            }
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                prompt: '',
+                callback: ''
+            });
+            gisInited = true;
+            maybeEnableButtons();
+            console.log('GIS initialized');
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                if (restoreStoredToken()) {
+                    console.log('Restored OAuth token from storage');
+                }
+            }
+        }
+
+        // ============ TOKEN STORAGE ============
         function storeOAuthToken(token, expiresIn = 3600) {
             try {
                 const expiryTime = Date.now() + (expiresIn * 1000);
-                const data = { token, expiryTime };
-                sessionStorage.setItem('oauth_data', JSON.stringify(data));
+                localStorage.setItem('oauth_token', token);
+                localStorage.setItem('oauth_expiry', expiryTime.toString());
                 console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
             } catch (e) {
                 console.warn('Could not store OAuth token:', e);
@@ -367,15 +1132,19 @@
 
         function restoreStoredToken() {
             try {
-                const stored = sessionStorage.getItem('oauth_data');
-                if (!stored) return false;
+                const storedToken = localStorage.getItem('oauth_token');
+                const expiry = localStorage.getItem('oauth_expiry');
                 
-                const { token, expiryTime } = JSON.parse(stored);
+                if (!storedToken || !expiry) {
+                    return false;
+                }
+                
+                const expiryTime = parseInt(expiry);
                 const now = Date.now();
                 
                 if (now < expiryTime - 300000) {
-                    accessToken = token;
-                    gapi.client.setToken({ access_token: token });
+                    accessToken = storedToken;
+                    gapi.client.setToken({ access_token: storedToken });
                     updateAuthButton(true);
                     console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
                     return true;
@@ -392,101 +1161,11 @@
 
         function clearStoredToken() {
             try {
-                sessionStorage.removeItem('oauth_data');
+                localStorage.removeItem('oauth_token');
+                localStorage.removeItem('oauth_expiry');
             } catch (e) {
                 console.warn('Error clearing token:', e);
             }
-        }
-
-        function updateAuthButton(authenticated) {
-            const btn = document.getElementById('authBtn');
-            const addBtn = document.getElementById('addBtn');
-            if (authenticated) {
-                btn.textContent = '✓ Authenticated';
-                btn.style.background = '#28a745';
-                addBtn.style.display = 'inline-flex';
-            } else {
-                btn.textContent = '🔐 Login';
-                btn.style.background = '';
-                addBtn.style.display = 'none';
-            }
-        }
-
-        function startTimer() {
-            clearTimeout(inactivityTimer);
-            clearTimeout(warningTimer);
-            clearInterval(countdownInterval);
-            document.getElementById('logoutWarning').classList.remove('show');
-
-            warningTimer = setTimeout(() => {
-                document.getElementById('logoutWarning').classList.add('show');
-                let countdown = 60;
-                document.getElementById('countdown').textContent = countdown;
-                
-                countdownInterval = setInterval(() => {
-                    countdown--;
-                    document.getElementById('countdown').textContent = countdown;
-                    if (countdown <= 0) clearInterval(countdownInterval);
-                }, 1000);
-            }, INACTIVITY_TIME - WARNING_TIME);
-
-            inactivityTimer = setTimeout(() => {
-                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
-            }, INACTIVITY_TIME);
-        }
-
-        function resetTimer() {
-            startTimer();
-        }
-
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
-            document.addEventListener(evt, resetTimer, true);
-        });
-
-        function checkAuth() {
-            const cookie = document.cookie.split(';').find(c => c.trim().startsWith('userAuth='));
-            if (!cookie) {
-                window.location.href = 'login.html';
-                return false;
-            }
-            const auth = JSON.parse(atob(cookie.split('=')[1]));
-            if (auth.username) document.getElementById('username').textContent = auth.username;
-            if (auth.role?.toLowerCase() === 'admin') {
-                document.getElementById('authBtn').style.display = 'flex';
-            }
-            return true;
-        }
-
-        function logout(message = null) {
-            if (!message && !confirm('Yakin ingin logout?')) return;
-            
-            document.cookie = 'userAuth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            clearStoredToken();
-            
-            const url = message 
-                ? 'login.html?message=' + encodeURIComponent(message)
-                : 'login.html';
-            window.location.href = url;
-        }
-
-        function gapiLoaded() {
-            gapi.load('client', async () => {
-                await gapi.client.init({
-                    apiKey: CONFIG.API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                });
-                gapiInited = true;
-                restoreStoredToken();
-            });
-        }
-
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CONFIG.CLIENT_ID,
-                scope: CONFIG.SCOPES,
-                callback: () => {}
-            });
-            gisInited = true;
         }
 
         function handleAuth() {
@@ -509,8 +1188,8 @@
                 gapi.client.setToken({ access_token: accessToken });
                 
                 updateAuthButton(true);
-                if (currentMonth) {
-                    loadMonth();
+                if (appState.currentMonth) {
+                    loadMonthData(appState.currentMonth, true);
                 }
                 alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
                 console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
@@ -523,306 +1202,798 @@
             }
         }
 
-        async function loadMonth() {
-            const month = document.getElementById('monthSelect').value;
-            if (!month) {
-                document.getElementById('content').innerHTML = '<div style="text-align:center; padding:60px"><h2>⚡ Pilih Bulan untuk Melihat Data</h2></div>';
-                return;
-            }
-
-            currentMonth = month;
-            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
-
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${month}?key=${CONFIG.API_KEY}`;
-                const resp = await fetch(url);
-                const data = await resp.json();
-                
-                if (!data.values || data.values.length === 0) {
-                    document.getElementById('content').innerHTML = '<div style="text-align:center; padding:60px"><h2>No data found</h2></div>';
-                    return;
-                }
-
-                currentData = data.values;
-                displayData(data.values, month);
-            } catch (error) {
-                document.getElementById('content').innerHTML = `<div style="padding:20px; background:#f8d7da; color:#721c24; border-radius:8px">Error: ${error.message}</div>`;
+        function updateAuthButton(isAuthenticated) {
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
+            
+            if (isAuthenticated) {
+                authBtn.classList.add('authenticated');
+                authBtnText.textContent = '✓ Terotentikasi';
+                if (addBtn) addBtn.style.display = 'inline-flex';
+            } else {
+                authBtn.classList.remove('authenticated');
+                authBtnText.textContent = 'Authenticate';
+                if (addBtn) addBtn.style.display = 'none';
             }
         }
 
-        function displayData(values, sheet) {
-            const rows = values.slice(1).filter(r => r[1]);
+        // ============ UTILITY FUNCTIONS ============
+        function formatRupiah(value) {
+            if (!value && value !== 0) return 'Rp0';
             
-            if (sheet === 'Informasi_Umum') {
-                displayInfo(rows);
+            const num = typeof value === 'string' 
+                ? parseFloat(value.replace(/[^\d.-]/g, ''))
+                : value;
+            
+            if (isNaN(num)) return 'Rp0';
+            
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        }
+
+        function formatNumber(value) {
+            if (!value) return '-';
+            
+            const num = typeof value === 'string'
+                ? parseFloat(value.replace(/[^\d.-]/g, ''))
+                : value;
+            
+            if (isNaN(num)) return value;
+            
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        function parseNumber(value) {
+            if (!value) return 0;
+            const str = value.toString().replace(/[^\d.-]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function showLoading(message = 'Memuat data...') {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            `;
+        }
+
+        function showError(title, message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <strong>❌ ${title}</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚡</div>
+                    <h2>Pilih Bulan untuk Melihat Data</h2>
+                    <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+                </div>
+            `;
+        }
+
+        // ============ CACHE MANAGEMENT ============
+        function getCachedData(monthName) {
+            const cached = appState.cache[monthName];
+            if (!cached) return null;
+            
+            const now = Date.now();
+            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+                delete appState.cache[monthName];
+                return null;
+            }
+            
+            return cached.data;
+        }
+
+        function setCachedData(monthName, data) {
+            appState.cache[monthName] = {
+                data: data,
+                timestamp: Date.now()
+            };
+        }
+
+        // ============ LOCAL STORAGE ============
+        function saveLastMonth(monthName) {
+            try {
+                const data = { month: monthName, timestamp: Date.now() };
+                sessionStorage.setItem('lastMonth', JSON.stringify(data));
+            } catch (e) {
+                console.warn('Could not save to sessionStorage:', e);
+            }
+        }
+
+        function getLastMonth() {
+            try {
+                const stored = sessionStorage.getItem('lastMonth');
+                if (!stored) return null;
+                const data = JSON.parse(stored);
+                if (Date.now() - data.timestamp > 3600000) return null;
+                return data.month;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============ API FUNCTIONS ============
+        async function loadMonthData(monthName, forceRefresh = false) {
+            if (!monthName) {
+                showEmptyState();
                 return;
             }
 
-            let totalUsage = 0, totalCost = 0;
-            rows.forEach(r => {
-                totalUsage += parseNum(r[5]);
-                totalCost += parseNum(r[6]);
+            if (!forceRefresh) {
+                const cached = getCachedData(monthName);
+                if (cached) {
+                    console.log('Using cached data for:', monthName);
+                    displayData(cached, monthName);
+                    return;
+                }
+            }
+            
+            showLoading(`Memuat data: ${monthName.replace('_', ' ')}`);
+            appState.currentMonth = monthName;
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(monthName)}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.values || data.values.length === 0) {
+                    showError('Data Kosong', `Tidak ada data di bulan "${monthName.replace('_', ' ')}"`);
+                    return;
+                }
+                
+                setCachedData(monthName, data.values);
+                appState.lastUpdate = new Date();
+                appState.currentData = data.values;
+                
+                displayData(data.values, monthName);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Gagal Memuat Data', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Bulan:</strong> "${monthName.replace('_', ' ')}"
+                `);
+            }
+        }
+
+        // ============ DISPLAY FUNCTIONS ============
+        function displayData(values, sheetName) {
+            // Check if this is the Informasi_Umum sheet
+            if (sheetName === 'Informasi_Umum') {
+            displayInformasiUmum(values, sheetName);
+            return;
+            }
+            const headers = values[0];
+            const dataRows = values.slice(1).filter(row => row[1]);
+            
+            if (dataRows.length === 0) {
+                showError('Data Kosong', `Tidak ada data valid di bulan "${sheetName.replace('_', ' ')}"`);
+                return;
+            }
+
+            let totalPenggunaan = 0;
+            let totalTagihan = 0;
+
+            dataRows.forEach(row => {
+                totalPenggunaan += parseNumber(row[5]);
+                totalTagihan += parseNumber(row[6]);
             });
 
-            let html = `
-                <div class="stats">
-                    <div class="stat-card"><h3>${rows.length}</h3><p>Total Toko</p></div>
-                    <div class="stat-card"><h3>${formatNum(totalUsage)} kWh</h3><p>Total Usage</p></div>
-                    <div class="stat-card"><h3>${formatCurr(totalCost)}</h3><p>Total Cost</p></div>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No</th><th>Nama Toko</th><th>Stand Awal</th><th>Stand Akhir</th>
-                            <th>Usage (kWh)</th><th>Cost</th>
-                            ${accessToken ? '<th>Action</th>' : ''}
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
 
-            rows.forEach((r, i) => {
-                const idx = i + 2;
+            const monthDisplay = sheetName.replace('_', ' ');
+            
+            let html = `
+                <div class="month-badge">📅 ${monthDisplay}</div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>${dataRows.length}</h3>
+                        <p>Total Toko</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${formatNumber(totalPenggunaan)} kWh</h3>
+                        <p>Total Penggunaan</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${formatRupiah(totalTagihan)}</h3>
+                        <p>Total Tagihan</p>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Toko</th>
+                                <th>Stand Awal</th>
+                                <th>Stand Akhir</th>
+                                <th>Penggunaan (kWh)</th>
+                                <th>Biaya Listrik</th>
+                                ${accessToken ? '<th>AKSI</th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            dataRows.forEach((row, index) => {
+                const nomor = row[0] || (index + 1);
+                const namaToko = row[1] || '-';
+                const standAwal = row[3] || '-';
+                const standAkhir = row[4] || '-';
+                const penggunaan = row[5] || '-';
+                const biaya = row[6] || '-';
+
+                const rowIndex = index + 2;
+
                 html += `
                     <tr>
-                        <td>${r[0] || i+1}</td>
-                        <td>${r[1]}</td>
-                        <td>${formatNum(r[3])}</td>
-                        <td>${formatNum(r[4])}</td>
-                        <td>${formatNum(r[5])}</td>
-                        <td>${formatCurr(r[6])}</td>
-                        ${accessToken ? `<td>
-                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px; background:#4A90E2; color:white">✏️</button>
-                            <button class="btn" onclick="delRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
-                        </td>` : ''}
+                        <td>${nomor}</td>
+                        <td class="toko-name">${namaToko}</td>
+                        <td class="number">${formatNumber(standAwal)}</td>
+                        <td class="number">${formatNumber(standAkhir)}</td>
+                        <td class="number">${formatNumber(penggunaan)}</td>
+                        <td class="currency">${formatRupiah(biaya)}</td>
+                        ${accessToken ? `
+                        <td class="actions">
+                            <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                        </td>
+                        ` : ''}
                     </tr>
                 `;
             });
 
             html += `
-                        <tr class="total-row">
-                            <td colspan="4" style="text-align:right">TOTAL</td>
-                            <td>${formatNum(totalUsage)}</td>
-                            <td>${formatCurr(totalCost)}</td>
-                            ${accessToken ? '<td></td>' : ''}
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-
-            document.getElementById('content').innerHTML = html;
-        }
-
-        function displayInfo(rows) {
-            let html = `
-                <div class="stats">
-                    <div class="stat-card"><h3>${rows.length}</h3><p>Total Toko</p></div>
+                            <tr class="total-row">
+                                <td colspan="${accessToken ? '4' : '4'}" style="text-align: right; padding-right: 20px;">TOTAL</td>
+                                <td class="number" style="color: white;">${formatNumber(totalPenggunaan)}</td>
+                                <td class="currency" style="color: white;">${formatRupiah(totalTagihan)}</td>
+                                ${accessToken ? '<td></td>' : ''}
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No</th><th>Nama Toko</th><th>Daya (W)</th><th>ID Pelanggan</th><th>Alas Nama</th>
-                            ${accessToken ? '<th>Action</th>' : ''}
-                        </tr>
-                    </thead>
-                    <tbody>
+
+                <div class="summary-section">
+                    <h3>📊 Ringkasan ${monthDisplay}</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="label">Jumlah Toko</div>
+                            <div class="value">${dataRows.length} Toko</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Penggunaan Listrik</div>
+                            <div class="value">${formatNumber(totalPenggunaan)} kWh</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Rata-rata Penggunaan per Toko</div>
+                            <div class="value">${formatNumber(Math.round(totalPenggunaan / dataRows.length))} kWh</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Total Biaya Listrik</div>
+                            <div class="value">${formatRupiah(totalTagihan)}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Rata-rata Biaya per Toko</div>
+                            <div class="value">${formatRupiah(Math.round(totalTagihan / dataRows.length))}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="last-update">
+                    ⏱️ Terakhir diperbarui: ${updateTime}
+                </div>
             `;
-
-            rows.forEach((r, i) => {
-                const idx = i + 2;
-                html += `
-                    <tr>
-                        <td>${r[0] || i+1}</td>
-                        <td>${r[1]}</td>
-                        <td>${r[2] ? formatNum(r[2]) + ' W' : '-'}</td>
-                        <td>${r[3] || '-'}</td>
-                        <td>${r[4] || '-'}</td>
-                        ${accessToken ? `<td>
-                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px; background:#4A90E2; color:white">✏️</button>
-                            <button class="btn" onclick="delRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
-                        </td>` : ''}
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
+            
             document.getElementById('content').innerHTML = html;
         }
 
-        function openModal() {
-            if (!currentMonth) {
-                alert('Pilih bulan terlebih dahulu!');
-                return;
-            }
-            document.getElementById('modalTitle').textContent = 'Tambah Data';
-            document.getElementById('form').reset();
-            document.getElementById('rowIndex').value = '';
-            
-            const isInfo = currentMonth === 'Informasi_Umum';
-            document.getElementById('standAwalGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('standAkhirGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('penggunaanGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('biayaGroup').style.display = isInfo ? 'none' : 'block';
-            
-            document.getElementById('modal').classList.add('active');
+        // ============ INFORMASI UMUM DISPLAY ============
+        function displayInformasiUmum(values, sheetName) {
+        const headers = values[0];
+        const dataRows = values.slice(1).filter(row => row[1]); // Filter rows with Nama Toko
+    
+        if (dataRows.length === 0) {
+        showError('Data Kosong', 'Tidak ada data di Informasi Umum');
+        return;
         }
 
-        function editRow(idx) {
-            if (!currentData[idx - 1]) return;
-            const r = currentData[idx - 1];
-            const isInfo = currentMonth === 'Informasi_Umum';
+        const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+        });
+
+        let html = `
+        <div class="month-badge">📋 Informasi Umum Toko</div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>${dataRows.length}</h3>
+                <p>Total Toko Terdaftar</p>
+            </div>
+            <div class="stat-card">
+                <h3>${dataRows.filter(row => row[2]).length}</h3>
+                <p>Toko dengan Daya Listrik</p>
+            </div>
+            <div class="stat-card">
+                <h3>${dataRows.filter(row => row[3]).length}</h3>
+                <p>Toko dengan ID Pelanggan</p>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Toko</th>
+                        <th>Daya Listrik (Watt)</th>
+                        <th>ID Pelanggan PLN</th>
+                        <th>Alas Nama</th>
+                        ${accessToken ? '<th>AKSI</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>
+    `    ;
+    
+        dataRows.forEach((row, index) => {
+        const nomor = row[0] || (index + 1);
+        const namaToko = row[1] || '-';
+        const dayaListrik = row[2] ? formatNumber(row[2]) + ' W' : '-';
+        const idPelanggan = row[3] || '-';
+        const alasNama = row[4] || '-';
+
+        const rowIndex = index + 2;
+
+        html += `
+            <tr>
+                <td>${nomor}</td>
+                <td class="toko-name">${namaToko}</td>
+                <td class="number">${dayaListrik}</td>
+                <td>${idPelanggan}</td>
+                <td>${alasNama}</td>
+                ${accessToken ? `
+                <td class="actions">
+                    <button class="btn-edit" onclick="openEditModalInfo(${rowIndex})">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                </td>
+                ` : ''}
+            </tr>
+        `;
+    });
+
+        html += `
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-section">
+            <h3>📊 Ringkasan Informasi Umum</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Total Toko Terdaftar</div>
+                    <div class="value">${dataRows.length} Toko</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Toko dengan Daya Listrik</div>
+                    <div class="value">${dataRows.filter(row => row[2]).length} Toko</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Toko dengan ID Pelanggan</div>
+                    <div class="value">${dataRows.filter(row => row[3]).length} Toko</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Toko dengan Alas Nama</div>
+                    <div class="value">${dataRows.filter(row => row[4]).length} Toko</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-update">
+            ⏱️ Terakhir diperbarui: ${updateTime}
+        </div>
+    `;
+    
+    document.getElementById('content').innerHTML = html;
+}
+        
+        // ============ MODAL FUNCTIONS ============
+        function openAddModal() {
+        if (!appState.currentMonth) {
+        alert('Pilih bulan terlebih dahulu!');
+        return;
+        }
+
+        // Check if we're in Informasi_Umum sheet
+        if (appState.currentMonth === 'Informasi_Umum') {
+        openAddModalInfo();
+        return;
+        }
+
+        document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+        document.getElementById('submitBtnText').textContent = 'Simpan';
+        document.getElementById('dataForm').reset();
+        document.getElementById('editRowIndex').value = '';
+        document.getElementById('dataModal').classList.add('active');
+        }
+
+        function openAddModalInfo() {
+        // For Informasi_Umum - show simplified form
+        const modal = document.getElementById('dataModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const form = document.getElementById('dataForm');
+    
+        modalTitle.textContent = 'Tambah Data Toko';
+        document.getElementById('submitBtnText').textContent = 'Simpan';
+        document.getElementById('editRowIndex').value = '';
+    
+        // Hide billing-specific fields
+        form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
+    
+        // Update labels for Informasi_Umum
+        form.querySelector('label[for="idPelanggan"]').textContent = 'ID Pelanggan PLN';
+        form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+    
+        form.reset();
+        modal.classList.add('active');
+    }
+
+        function openEditModalInfo(rowIndex) {
+        if (!appState.currentData || appState.currentData.length < rowIndex) {
+        alert('Data tidak ditemukan!');
+        return;
+    }
+
+        const row = appState.currentData[rowIndex - 1];
+        const modal = document.getElementById('dataModal');
+        const form = document.getElementById('dataForm');
+
+        document.getElementById('modalTitle').textContent = 'Edit Data Toko';
+        document.getElementById('submitBtnText').textContent = 'Update';
+        document.getElementById('editRowIndex').value = rowIndex;
+    
+        // Hide billing-specific fields
+        form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
+        form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
+    
+        // Fill data
+        document.getElementById('nomor').value = row[0] || '';
+        document.getElementById('namaToko').value = row[1] || '';
+        document.getElementById('idPelanggan').value = row[3] || '';
+    
+        modal.classList.add('active');
+    }
+        
+        function openEditModal(rowIndex) {
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
+            alert('Data tidak ditemukan!');
+            return;
+        }
+
+        const row = appState.currentData[rowIndex - 1];
+const form = document.getElementById('dataForm');
+
+// Show all fields for monthly data
+form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
+form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
+form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
+form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
+form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+
+document.getElementById('modalTitle').textContent = 'Edit Data';
+document.getElementById('submitBtnText').textContent = 'Update';
+document.getElementById('editRowIndex').value = rowIndex;
             
-            document.getElementById('modalTitle').textContent = 'Edit Data';
-            document.getElementById('rowIndex').value = idx;
-            document.getElementById('nomor').value = r[0] || '';
-            document.getElementById('namaToko').value = r[1] || '';
-            document.getElementById('idPelanggan').value = r[isInfo ? 3 : 2] || '';
+            document.getElementById('nomor').value = row[0] || '';
+            document.getElementById('namaToko').value = row[1] || '';
+            document.getElementById('idPelanggan').value = row[2] || '';
+            document.getElementById('standAwal').value = parseNumber(row[3]);
+            document.getElementById('standAkhir').value = parseNumber(row[4]);
+            document.getElementById('biaya').value = parseNumber(row[6]);
             
-            if (!isInfo) {
-                document.getElementById('standAwal').value = parseNum(r[3]);
-                document.getElementById('standAkhir').value = parseNum(r[4]);
-                document.getElementById('biaya').value = parseNum(r[6]);
-                calcUsage();
-            }
-            
-            document.getElementById('standAwalGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('standAkhirGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('penggunaanGroup').style.display = isInfo ? 'none' : 'block';
-            document.getElementById('biayaGroup').style.display = isInfo ? 'none' : 'block';
-            
-            document.getElementById('modal').classList.add('active');
+            calculateUsage();
+
+            document.getElementById('dataModal').classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.remove('active');
+    const modal = document.getElementById('dataModal');
+    const form = document.getElementById('dataForm');
+    
+    // Reset form display
+    form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
+    form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
+    form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
+    form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
+    form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+    
+    modal.classList.remove('active');
+    form.reset();
+}
+
+        // ============ AUTO CALCULATION ============
+        function calculateUsage() {
+            const standAwal = parseNumber(document.getElementById('standAwal').value) || 0;
+            const standAkhir = parseNumber(document.getElementById('standAkhir').value) || 0;
+            
+            const penggunaan = standAkhir - standAwal;
+            
+            document.getElementById('penggunaan').value = penggunaan >= 0 ? penggunaan : 0;
         }
 
-        function calcUsage() {
-            const awal = parseNum(document.getElementById('standAwal').value);
-            const akhir = parseNum(document.getElementById('standAkhir').value);
-            document.getElementById('penggunaan').value = Math.max(0, akhir - awal);
-        }
-
-        async function saveData(e) {
-            e.preventDefault();
+        // ============ CRUD FUNCTIONS ============
+        async function addRow(sheetName, rowData) {
             if (!accessToken) {
-                alert('Please authenticate first!');
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
-
-            const isInfo = currentMonth === 'Informasi_Umum';
-            const rowData = isInfo ? [
-                document.getElementById('nomor').value,
-                document.getElementById('namaToko').value,
-                '',
-                document.getElementById('idPelanggan').value,
-                ''
-            ] : [
-                document.getElementById('nomor').value,
-                document.getElementById('namaToko').value,
-                document.getElementById('idPelanggan').value,
-                parseNum(document.getElementById('standAwal').value),
-                parseNum(document.getElementById('standAkhir').value),
-                parseNum(document.getElementById('penggunaan').value),
-                parseNum(document.getElementById('biaya').value)
-            ];
-
-            const idx = document.getElementById('rowIndex').value;
-
+            
             try {
-                if (idx) {
-                    await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: `${currentMonth}!A${idx}:G${idx}`,
-                        valueInputOption: 'USER_ENTERED',
-                        resource: { values: [rowData] }
-                    });
-                    alert('✅ Data updated!');
-                } else {
-                    await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: `${currentMonth}!A:G`,
-                        valueInputOption: 'USER_ENTERED',
-                        resource: { values: [rowData] }
-                    });
-                    alert('✅ Data added!');
-                }
-                closeModal();
-                loadMonth();
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A:G`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row added:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Data berhasil ditambahkan!');
+                return response;
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('Error adding row:', error);
+                alert('❌ Gagal menambahkan data: ' + error.message);
+                throw error;
             }
         }
 
-        async function deleteRow(idx) {
-            if (!confirm('Delete this row?')) return;
+        async function updateRow(sheetName, rowIndex, rowData) {
             if (!accessToken) {
-                alert('Please authenticate first!');
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
+            
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Row updated:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Data berhasil diupdate!');
+                return response;
+            } catch (error) {
+                console.error('Error updating row:', error);
+                alert('❌ Gagal mengupdate data: ' + error.message);
+                throw error;
+            }
+        }
 
+        async function deleteRow(sheetName, rowIndex) {
+            if (!accessToken) {
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                return;
+            }
+            
             try {
                 const spreadsheet = await gapi.client.sheets.spreadsheets.get({
                     spreadsheetId: CONFIG.SPREADSHEET_ID
                 });
-                const sheet = spreadsheet.result.sheets.find(s => s.properties.title === currentMonth);
                 
-                await gapi.client.sheets.spreadsheets.batchUpdate({
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === sheetName
+                );
+                
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                
+                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
                     resource: {
                         requests: [{
                             deleteDimension: {
                                 range: {
-                                    sheetId: sheet.properties.sheetId,
+                                    sheetId: sheetId,
                                     dimension: 'ROWS',
-                                    startIndex: idx - 1,
-                                    endIndex: idx
+                                    startIndex: rowIndex - 1,
+                                    endIndex: rowIndex
                                 }
                             }
                         }]
                     }
                 });
-                alert('✅ Row deleted!');
-                loadMonth();
+                
+                console.log('Row deleted:', response);
+                
+                delete appState.cache[sheetName];
+                await loadMonthData(sheetName, true);
+                
+                alert('✅ Baris berhasil dihapus sepenuhnya!');
+                return response;
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('Error deleting row:', error);
+                alert('❌ Gagal menghapus baris: ' + error.message);
+                throw error;
             }
         }
 
-        function delRow(idx) {
-            deleteRow(idx);
+        // ============ EVENT HANDLERS ============
+        function handleMonthChange() {
+            const monthSelect = document.getElementById('monthSelect');
+            const selectedMonth = monthSelect.value;
+            
+            if (selectedMonth) {
+                saveLastMonth(selectedMonth);
+                loadMonthData(selectedMonth);
+            } else {
+                showEmptyState();
+            }
         }
 
-        function refresh() {
-            loadMonth();
+        function handleRefresh() {
+            const monthSelect = document.getElementById('monthSelect');
+            const selectedMonth = monthSelect.value;
+            
+            if (!selectedMonth) {
+                alert('Pilih bulan terlebih dahulu');
+                return;
+            }
+            
+            loadMonthData(selectedMonth, true);
         }
 
-        function parseNum(v) {
-            if (!v) return 0;
-            const n = parseFloat(v.toString().replace(/[^\d.-]/g, ''));
-            return isNaN(n) ? 0 : n;
+        function handleDelete(rowIndex) {
+            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+                return;
+            }
+            
+            deleteRow(appState.currentMonth, rowIndex);
         }
 
-        function formatNum(v) {
-            if (!v && v !== 0) return '-';
-            return new Intl.NumberFormat('id-ID').format(parseNum(v));
-        }
+        async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const nomor = document.getElementById('nomor').value;
+    const namaToko = document.getElementById('namaToko').value;
+    const idPelanggan = document.getElementById('idPelanggan').value;
+    const editRowIndex = document.getElementById('editRowIndex').value;
 
-        function formatCurr(v) {
-            if (!v && v !== 0) return 'Rp0';
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
-            }).format(parseNum(v));
-        }
+    let rowData;
 
-        if (checkAuth()) {
-            startTimer();
+    // Check if this is Informasi_Umum sheet
+    if (appState.currentMonth === 'Informasi_Umum') {
+        // For Informasi_Umum: No, Nama Toko, Daya Listrik, ID Pelanggan, Alas Nama
+        // We'll keep existing daya listrik and alas nama if editing
+        let dayaListrik = '';
+        let alasNama = '';
+        
+        if (editRowIndex && appState.currentData[editRowIndex - 1]) {
+            const existingRow = appState.currentData[editRowIndex - 1];
+            dayaListrik = existingRow[2] || '';
+            alasNama = existingRow[4] || '';
+        }
+        
+        rowData = [
+            nomor,
+            namaToko,
+            dayaListrik,
+            idPelanggan,
+            alasNama
+        ];
+    } else {
+        // For monthly billing data
+        const standAwal = parseNumber(document.getElementById('standAwal').value);
+        const standAkhir = parseNumber(document.getElementById('standAkhir').value);
+        const penggunaan = parseNumber(document.getElementById('penggunaan').value);
+        const biaya = parseNumber(document.getElementById('biaya').value);
+
+        rowData = [
+            nomor,
+            namaToko,
+            idPelanggan,
+            standAwal,
+            standAkhir,
+            penggunaan,
+            biaya
+        ];
+    }
+    
+    if (editRowIndex) {
+        await updateRow(appState.currentMonth, parseInt(editRowIndex), rowData);
+    } else {
+        await addRow(appState.currentMonth, rowData);
+    }
+    
+    closeModal();
+}
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, waiting for Google APIs...');
+            
             setTimeout(() => {
-                if (typeof gapi !== 'undefined') gapiLoaded();
-                if (typeof google !== 'undefined') gisLoaded();
+                if (typeof gapi !== 'undefined') {
+                    gapiLoaded();
+                }
+                if (typeof google !== 'undefined') {
+                    gisLoaded();
+                }
             }, 500);
+
+            const currentMonth = new Date().toLocaleString('id-ID', { month: 'long' });
+            const currentYear = new Date().getFullYear();
+            const monthKey = `${currentMonth}_${currentYear}`;
+            
+            const lastMonth = getLastMonth();
+            const monthSelect = document.getElementById('monthSelect');
+            
+            if (lastMonth) {
+                monthSelect.value = lastMonth;
+                setTimeout(() => loadMonthData(lastMonth), 1000);
+            } else if (document.querySelector(`option[value="${monthKey}"]`)) {
+                monthSelect.value = monthKey;
+                setTimeout(() => loadMonthData(monthKey), 1000);
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
     </script>
 </body>
