@@ -442,10 +442,41 @@
 
         function handleAuth() {
             if (accessToken) {
-                alert('Already authenticated!');
+                alert('Sudah terauthentikasi!');
                 return;
             }
-            tokenClient.requestAccessToken({ prompt: 'consent' });
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    console.error('Auth error:', response);
+                    alert('Gagal authenticate: ' + response.error);
+                    clearStoredToken();
+                    return;
+                }
+                
+                accessToken = response.access_token;
+                
+                // Store token with expiry (default 3600 seconds = 1 hour)
+                const expiresIn = response.expires_in || 3600;
+                storeOAuthToken(accessToken, expiresIn);
+                
+                // Set token in gapi client
+                gapi.client.setToken({ access_token: accessToken });
+                
+                updateAuthButton(true);
+                // Refresh the current month data to show action buttons
+                if (currentMonth) {
+                    loadMonth();
+                }
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
         }
 
         // Data Loading
