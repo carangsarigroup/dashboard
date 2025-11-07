@@ -518,8 +518,8 @@
                         <td>${formatNum(r[5])}</td>
                         <td>${formatCurr(r[6])}</td>
                         ${accessToken ? `<td>
-                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px">✏️</button>
-                            <button class="btn" onclick="deleteRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
+                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px; background:#4A90E2; color:white">✏️</button>
+                            <button class="btn" onclick="delRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
                         </td>` : ''}
                     </tr>
                 `;
@@ -564,8 +564,8 @@
                         <td>${r[3] || '-'}</td>
                         <td>${r[4] || '-'}</td>
                         ${accessToken ? `<td>
-                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px">✏️</button>
-                            <button class="btn" onclick="deleteRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
+                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px; background:#4A90E2; color:white">✏️</button>
+                            <button class="btn" onclick="delRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
                         </td>` : ''}
                     </tr>
                 `;
@@ -714,6 +714,10 @@
             } catch (error) {
                 alert('Error: ' + error.message);
             }
+        }
+
+        function delRow(idx) {
+            deleteRow(idx);
         }
 
         function refresh() {
