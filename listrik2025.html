@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Tagihan Listrik Toko</title>
+    <script async src="https://apis.google.com/js/api.js"></script>
+    <script async src="https://accounts.google.com/gsi/client"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
@@ -45,10 +47,24 @@
     </style>
 </head>
 <body>
+    <div id="logout-warning" class="modal">
+        <div class="modal-content">
+            <h2>Sesi Anda akan berakhir!</h2>
+            <p>Sesi Anda akan berakhir dalam <span id="countdown-timer">60</span> detik karena tidak ada aktivitas. Klik di mana saja untuk melanjutkan.</p>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>⚡ SIMTOCS - Tagihan Listrik Toko</h1>
             <p>Monitoring Penggunaan dan Biaya Listrik</p>
+            <div id="user-bar" style="display: none;">
+                <p>Selamat datang, <span id="user-name"></span>! (<span id="user-role"></span>)</p>
+                <button onclick="handleAuthClick()" class="btn btn-danger">Logout</button>
+            </div>
+            <div id="login-bar">
+                <button onclick="handleAuthClick()" class="btn btn-primary">Login dengan Google</button>
+            </div>
         </div>
         
         <div class="controls">
@@ -135,19 +151,137 @@
     </div>
 
     <script>
-        // Configuration
+        // --- AUTHENTICATION & INACTIVITY ---
+        let inactivityTimer;
+        let logoutWarningTimer;
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            clearTimeout(logoutWarningTimer);
+            hideLogoutWarning();
+            inactivityTimer = setTimeout(showLogoutWarning, 5 * 60 * 1000); // 5 minutes
+        }
+
+        function showLogoutWarning() {
+            const warningModal = document.getElementById('logout-warning');
+            warningModal.classList.add('active');
+            let countdown = 60;
+            document.getElementById('countdown-timer').textContent = countdown;
+
+            logoutWarningTimer = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown-timer').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(logoutWarningTimer);
+                    handleLogout();
+                }
+            }, 1000);
+        }
+
+        function hideLogoutWarning() {
+            const warningModal = document.getElementById('logout-warning');
+            warningModal.classList.remove('active');
+            clearInterval(logoutWarningTimer);
+        }
+
+        function handleLogout() {
+            const token = gapi.client.getToken();
+            if (token) {
+                google.accounts.oauth2.revoke(token.access_token, () => {
+                    gapi.client.setToken(null);
+                    localStorage.removeItem('gAuthToken');
+                    updateUiForLoggedOutState();
+                });
+            }
+        }
+
+        function updateUiForLoggedInState(profile) {
+            document.getElementById('login-bar').style.display = 'none';
+            document.getElementById('user-bar').style.display = 'block';
+            document.getElementById('user-name').textContent = profile.getName();
+            document.getElementById('user-role').textContent = localStorage.getItem('userRole') || 'User';
+            resetInactivityTimer();
+        }
+
+        function updateUiForLoggedOutState() {
+            document.getElementById('login-bar').style.display = 'block';
+            document.getElementById('user-bar').style.display = 'none';
+            document.getElementById('content').innerHTML = '<div class="empty-state"><h2>Silakan login untuk melihat data.</h2></div>';
+            clearTimeout(inactivityTimer);
+            clearTimeout(logoutWarningTimer);
+        }
+
+        // --- GOOGLE API & OAUTH ---
         const CONFIG = {
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
+            CLIENT_ID: '''874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com''',
+            API_KEY: '''AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0''',
+            SPREADSHEET_ID: '''11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ''',
+            SCOPES: '''https://www.googleapis.com/auth/spreadsheets'''
         };
 
-        // State management
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                apiKey: CONFIG.API_KEY,
+                discoveryDocs: ['''https://sheets.googleapis.com/$discovery/rest?version=v4'''],
+            });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                callback: '', // defined later
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                const token = JSON.parse(localStorage.getItem('gAuthToken'));
+                if (token && token.expires_at > Date.now()) {
+                    gapi.client.setToken(token);
+                    // You might want to fetch profile info here
+                    updateUiForLoggedInState({ getName: () => 'User' });
+                }
+            }
+        }
+
+        function handleAuthClick() {
+            if (gapi.client.getToken() === null) {
+                tokenClient.callback = async (resp) => {
+                    if (resp.error !== undefined) {
+                        throw (resp);
+                    }
+                    const token = gapi.client.getToken();
+                    token.expires_at = Date.now() + (token.expires_in * 1000);
+                    localStorage.setItem('gAuthToken', JSON.stringify(token));
+                    // You might want to fetch profile info here
+                    updateUiForLoggedInState({ getName: () => 'User' });
+                };
+
+                if (gapi.client.getToken() === null) {
+                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                }
+            } else {
+                handleLogout();
+            }
+        }
+
+        // --- APP LOGIC ---
         let appState = {
             currentMonth: null,
             currentData: [],
-            accessToken: null
         };
 
         // Utility functions
@@ -203,7 +337,6 @@
             document.getElementById('editRowIndex').value = '';
             document.getElementById('dataForm').reset();
             
-            // Toggle billing fields
             const billingFields = document.querySelectorAll('.billing-fields');
             billingFields.forEach(field => {
                 field.style.display = isInfoMode ? 'none' : 'block';
@@ -224,13 +357,11 @@
             document.getElementById('modalTitle').textContent = 'Edit Data';
             document.getElementById('editRowIndex').value = rowIndex;
             
-            // Toggle billing fields
             const billingFields = document.querySelectorAll('.billing-fields');
             billingFields.forEach(field => {
                 field.style.display = isInfoMode ? 'none' : 'block';
             });
             
-            // Fill form data
             document.getElementById('nomor').value = row[0] || '';
             document.getElementById('namaToko').value = row[1] || '';
             document.getElementById('idPelanggan').value = row[2] || '';
@@ -258,18 +389,18 @@
         }
 
         // Data functions
-        function handleMonthChange() {
+        async function handleMonthChange() {
             const monthSelect = document.getElementById('monthSelect');
             const selectedMonth = monthSelect.value;
             
             if (selectedMonth) {
-                loadMonthData(selectedMonth);
+                await loadMonthData(selectedMonth);
             } else {
                 showEmptyState();
             }
         }
 
-        function handleRefresh() {
+        async function handleRefresh() {
             const monthSelect = document.getElementById('monthSelect');
             const selectedMonth = monthSelect.value;
             
@@ -278,22 +409,27 @@
                 return;
             }
             
-            loadMonthData(selectedMonth);
+            await loadMonthData(selectedMonth);
         }
 
-        function handleDelete(rowIndex) {
+        async function handleDelete(rowIndex) {
             if (!confirm('⚠️ Yakin ingin menghapus data ini?')) return;
             
-            // Remove from local data
-            appState.currentData.splice(rowIndex - 1, 1);
-            
-            // Re-render table
-            renderTable(appState.currentData);
-            
-            alert('✅ Data berhasil dihapus!');
+            showLoading('Menghapus data...');
+            try {
+                const range = `${appState.currentMonth}!A${rowIndex + 1}:Z${rowIndex + 1}`;
+                await gapi.client.sheets.spreadsheets.values.clear({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: range,
+                });
+                await handleRefresh();
+                alert('✅ Data berhasil dihapus!');
+            } catch (err) {
+                showError('Gagal menghapus data: ' + err.message);
+            }
         }
 
-        function handleFormSubmit(event) {
+        async function handleFormSubmit(event) {
             event.preventDefault();
             
             const nomor = document.getElementById('nomor').value;
@@ -302,30 +438,43 @@
             const editRowIndex = document.getElementById('editRowIndex').value;
             const isInfoMode = appState.currentMonth === 'Informasi_Umum';
             
-            let rowData;
+            let values;
             
             if (isInfoMode) {
-                rowData = [nomor, namaToko, '', idPelanggan, ''];
+                values = [[nomor, namaToko, idPelanggan]];
             } else {
                 const standAwal = parseNumber(document.getElementById('standAwal').value);
                 const standAkhir = parseNumber(document.getElementById('standAkhir').value);
                 const penggunaan = parseNumber(document.getElementById('penggunaan').value);
                 const biaya = parseNumber(document.getElementById('biaya').value);
                 
-                rowData = [nomor, namaToko, idPelanggan, standAwal, standAkhir, penggunaan, biaya];
+                values = [[nomor, namaToko, idPelanggan, standAwal, standAkhir, penggunaan, biaya]];
             }
             
-            if (editRowIndex) {
-                // Edit existing row
-                appState.currentData[editRowIndex - 1] = rowData;
-            } else {
-                // Add new row
-                appState.currentData.push(rowData);
+            showLoading('Menyimpan data...');
+            try {
+                if (editRowIndex) {
+                    const range = `${appState.currentMonth}!A${parseInt(editRowIndex) + 1}`;
+                    await gapi.client.sheets.spreadsheets.values.update({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        range: range,
+                        valueInputOption: 'USER_ENTERED',
+                        resource: { values: values },
+                    });
+                } else {
+                    await gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        range: appState.currentMonth,
+                        valueInputOption: 'USER_ENTERED',
+                        resource: { values: values },
+                    });
+                }
+                await handleRefresh();
+                closeModal();
+                alert('✅ Data berhasil disimpan!');
+            } catch (err) {
+                showError('Gagal menyimpan data: ' + err.message);
             }
-            
-            renderTable(appState.currentData);
-            closeModal();
-            alert('✅ Data berhasil disimpan!');
         }
 
         function renderTable(data) {
@@ -333,14 +482,12 @@
             
             let html = '<div class="table-container"><table>';
             
-            // Header
             if (isInfoMode) {
                 html += '<thead><tr><th>No</th><th>Nama Toko</th><th>ID Pelanggan</th><th>Aksi</th></tr></thead>';
             } else {
                 html += '<thead><tr><th>No</th><th>Nama Toko</th><th>ID Pelanggan</th><th>Stand Awal</th><th>Stand Akhir</th><th>Penggunaan</th><th>Biaya</th><th>Aksi</th></tr></thead>';
             }
             
-            // Body
             html += '<tbody>';
             let totalBiaya = 0;
             
@@ -365,22 +512,16 @@
                 html += '</tr>';
             });
             
-            // Total row
             if (!isInfoMode && data.length > 0) {
-                html += `<tr style="background: #e8f5e8; font-weight: bold;">
-                    <td colspan="6">TOTAL</td>
-                    <td class="currency">${formatRupiah(totalBiaya)}</td>
-                    <td></td>
-                </tr>`;
+                html += `<tr style="background: #e8f5e8; font-weight: bold;"><td colspan="6">TOTAL</td><td class="currency">${formatRupiah(totalBiaya)}</td><td></td></tr>`;
             }
             
             html += '</tbody></table></div>';
             
-            // Stats for info mode
             if (isInfoMode) {
                 html += '<div class="stats">';
-                html += `<div class="stat-card"><h3>${data.length}</h3><p>Total Toko</p></div>`;
-                html += `<div class="stat-card"><h3>${data.filter(r => r[2]).length}</h3><p>Toko dengan ID Pelanggan</p></div>`;
+                html += `<div class="stat-card"><h3>${data.length}</h3><p>Total Toko</p></div>';
+                html += `<div class="stat-card"><h3>${data.filter(r => r[2]).length}</h3><p>Toko dengan ID Pelanggan</p></div>';
                 html += '</div>';
             }
             
@@ -388,34 +529,23 @@
             document.getElementById('addBtn').style.display = 'inline-block';
         }
 
-        function loadMonthData(monthName) {
+        async function loadMonthData(monthName) {
             showLoading();
-            
-            // Simulate loading data (in real app, this would fetch from Google Sheets)
-            setTimeout(() => {
-                // Mock data for demonstration
-                const mockData = {
-                    'Informasi_Umum': [
-                        ['1', 'Toko A', '123456789'],
-                        ['2', 'Toko B', '987654321'],
-                        ['3', 'Toko C', '']
-                    ],
-                    'Januari_2025': [
-                        ['1', 'Toko A', '123456789', '100', '150', '50', '75000'],
-                        ['2', 'Toko B', '987654321', '200', '280', '80', '120000'],
-                        ['3', 'Toko C', '', '50', '75', '25', '37500']
-                    ]
-                };
-                
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: monthName,
+                });
                 appState.currentMonth = monthName;
-                appState.currentData = mockData[monthName] || [];
-                
+                appState.currentData = response.result.values || [];
                 if (appState.currentData.length > 0) {
                     renderTable(appState.currentData);
                 } else {
                     document.getElementById('content').innerHTML = '<div class="empty-state"><h2>Tidak ada data untuk bulan ini</h2></div>';
                 }
-            }, 1000);
+            } catch (err) {
+                showError('Gagal memuat data: ' + err.result.error.message);
+            }
         }
 
         // Event listeners
@@ -424,20 +554,15 @@
             if (event.target === modal) {
                 closeModal();
             }
-        }
+            resetInactivityTimer();
+        };
+        document.onmousemove = resetInactivityTimer;
+        document.onkeypress = resetInactivityTimer;
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
-            // Auto-select current month
-            const currentMonth = new Date().toLocaleString('id-ID', { month: 'long' });
-            const currentYear = new Date().getFullYear();
-            const monthKey = `${currentMonth}_${currentYear}`;
-            
-            const monthSelect = document.getElementById('monthSelect');
-            if (document.querySelector(`option[value="${monthKey}"]`)) {
-                monthSelect.value = monthKey;
-                loadMonthData(monthKey);
-            }
+            gapiLoaded();
+            gisLoaded();
         });
     </script>
 </body>
