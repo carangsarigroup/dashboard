@@ -1838,7 +1838,7 @@
 
         async function handleFormSubmit(event) {
             event.preventDefault();
-            
+            calculateValues();
             const triwulan = document.getElementById('triwulan').value;
             const bulan = document.getElementById('bulan').value;
             const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
@@ -1893,3 +1893,4 @@
     </script>
 </body>
 </html>
+
