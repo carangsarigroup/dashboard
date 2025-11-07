@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+const CONFIG = {
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBR<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -350,8 +352,60 @@
 
         let tokenClient, accessToken = null, currentMonth = null, currentData = [];
         let inactivityTimer, warningTimer, countdownInterval;
+        let gapiInited = false, gisInited = false;
         const INACTIVITY_TIME = 5 * 60 * 1000; // 5 minutes
         const WARNING_TIME = 60 * 1000; // Show warning 1 minute before
+
+        // ============ TOKEN STORAGE (SHARED ACROSS TABS) ============
+        function storeOAuthToken(token, expiresIn = 3600) {
+            try {
+                const expiryTime = Date.now() + (expiresIn * 1000);
+                localStorage.setItem('oauth_token', token);
+                localStorage.setItem('oauth_expiry', expiryTime.toString());
+                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
+            } catch (e) {
+                console.warn('Could not store OAuth token:', e);
+            }
+        }
+
+        function restoreStoredToken() {
+            try {
+                const storedToken = localStorage.getItem('oauth_token');
+                const expiry = localStorage.getItem('oauth_expiry');
+                
+                if (!storedToken || !expiry) {
+                    return false;
+                }
+                
+                const expiryTime = parseInt(expiry);
+                const now = Date.now();
+                
+                // Check if token is still valid (with 5 min buffer)
+                if (now < expiryTime - 300000) {
+                    accessToken = storedToken;
+                    gapi.client.setToken({ access_token: storedToken });
+                    updateAuthButton(true);
+                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
+                    return true;
+                } else {
+                    clearStoredToken();
+                    console.log('Stored token expired');
+                    return false;
+                }
+            } catch (e) {
+                console.warn('Error restoring token:', e);
+                return false;
+            }
+        }
+
+        function clearStoredToken() {
+            try {
+                localStorage.removeItem('oauth_token');
+                localStorage.removeItem('oauth_expiry');
+            } catch (e) {
+                console.warn('Error clearing token:', e);
+            }
+        }
 
         // Auto-logout timer
         function startTimer() {
