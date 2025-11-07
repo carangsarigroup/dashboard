@@ -1,6 +1,4 @@
-const CONFIG = {
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBR<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -353,15 +351,14 @@ const CONFIG = {
         let tokenClient, accessToken = null, currentMonth = null, currentData = [];
         let inactivityTimer, warningTimer, countdownInterval;
         let gapiInited = false, gisInited = false;
-        const INACTIVITY_TIME = 5 * 60 * 1000; // 5 minutes
-        const WARNING_TIME = 60 * 1000; // Show warning 1 minute before
+        const INACTIVITY_TIME = 5 * 60 * 1000;
+        const WARNING_TIME = 60 * 1000;
 
-        // ============ TOKEN STORAGE (SHARED ACROSS TABS) ============
         function storeOAuthToken(token, expiresIn = 3600) {
             try {
                 const expiryTime = Date.now() + (expiresIn * 1000);
-                localStorage.setItem('oauth_token', token);
-                localStorage.setItem('oauth_expiry', expiryTime.toString());
+                const data = { token, expiryTime };
+                sessionStorage.setItem('oauth_data', JSON.stringify(data));
                 console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
             } catch (e) {
                 console.warn('Could not store OAuth token:', e);
@@ -370,20 +367,15 @@ const CONFIG = {
 
         function restoreStoredToken() {
             try {
-                const storedToken = localStorage.getItem('oauth_token');
-                const expiry = localStorage.getItem('oauth_expiry');
+                const stored = sessionStorage.getItem('oauth_data');
+                if (!stored) return false;
                 
-                if (!storedToken || !expiry) {
-                    return false;
-                }
-                
-                const expiryTime = parseInt(expiry);
+                const { token, expiryTime } = JSON.parse(stored);
                 const now = Date.now();
                 
-                // Check if token is still valid (with 5 min buffer)
                 if (now < expiryTime - 300000) {
-                    accessToken = storedToken;
-                    gapi.client.setToken({ access_token: storedToken });
+                    accessToken = token;
+                    gapi.client.setToken({ access_token: token });
                     updateAuthButton(true);
                     console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
                     return true;
@@ -400,14 +392,26 @@ const CONFIG = {
 
         function clearStoredToken() {
             try {
-                localStorage.removeItem('oauth_token');
-                localStorage.removeItem('oauth_expiry');
+                sessionStorage.removeItem('oauth_data');
             } catch (e) {
                 console.warn('Error clearing token:', e);
             }
         }
 
-        // Auto-logout timer
+        function updateAuthButton(authenticated) {
+            const btn = document.getElementById('authBtn');
+            const addBtn = document.getElementById('addBtn');
+            if (authenticated) {
+                btn.textContent = '✓ Authenticated';
+                btn.style.background = '#28a745';
+                addBtn.style.display = 'inline-flex';
+            } else {
+                btn.textContent = '🔐 Login';
+                btn.style.background = '';
+                addBtn.style.display = 'none';
+            }
+        }
+
         function startTimer() {
             clearTimeout(inactivityTimer);
             clearTimeout(warningTimer);
@@ -435,12 +439,10 @@ const CONFIG = {
             startTimer();
         }
 
-        // Listen for user activity
         ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
             document.addEventListener(evt, resetTimer, true);
         });
 
-        // Auth Check
         function checkAuth() {
             const cookie = document.cookie.split(';').find(c => c.trim().startsWith('userAuth='));
             if (!cookie) {
@@ -459,6 +461,7 @@ const CONFIG = {
             if (!message && !confirm('Yakin ingin logout?')) return;
             
             document.cookie = 'userAuth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            clearStoredToken();
             
             const url = message 
                 ? 'login.html?message=' + encodeURIComponent(message)
@@ -466,13 +469,14 @@ const CONFIG = {
             window.location.href = url;
         }
 
-        // Google API Init
         function gapiLoaded() {
             gapi.load('client', async () => {
                 await gapi.client.init({
                     apiKey: CONFIG.API_KEY,
                     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
                 });
+                gapiInited = true;
+                restoreStoredToken();
             });
         }
 
@@ -480,18 +484,9 @@ const CONFIG = {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.CLIENT_ID,
                 scope: CONFIG.SCOPES,
-                callback: (resp) => {
-                    if (resp.error) {
-                        alert('Auth failed: ' + resp.error);
-                        return;
-                    }
-                    accessToken = resp.access_token;
-                    gapi.client.setToken({ access_token: accessToken });
-                    document.getElementById('authBtn').textContent = '✓ Authenticated';
-                    document.getElementById('addBtn').style.display = 'inline-flex';
-                    alert('✅ Authenticated! You can now add, edit, and delete data.');
-                }
+                callback: () => {}
             });
+            gisInited = true;
         }
 
         function handleAuth() {
@@ -509,16 +504,11 @@ const CONFIG = {
                 }
                 
                 accessToken = response.access_token;
-                
-                // Store token with expiry (default 3600 seconds = 1 hour)
                 const expiresIn = response.expires_in || 3600;
                 storeOAuthToken(accessToken, expiresIn);
-                
-                // Set token in gapi client
                 gapi.client.setToken({ access_token: accessToken });
                 
                 updateAuthButton(true);
-                // Refresh the current month data to show action buttons
                 if (currentMonth) {
                     loadMonth();
                 }
@@ -533,7 +523,6 @@ const CONFIG = {
             }
         }
 
-        // Data Loading
         async function loadMonth() {
             const month = document.getElementById('monthSelect').value;
             if (!month) {
@@ -660,7 +649,6 @@ const CONFIG = {
             document.getElementById('content').innerHTML = html;
         }
 
-        // Modal
         function openModal() {
             if (!currentMonth) {
                 alert('Pilih bulan terlebih dahulu!');
@@ -809,7 +797,6 @@ const CONFIG = {
             loadMonth();
         }
 
-        // Utilities
         function parseNum(v) {
             if (!v) return 0;
             const n = parseFloat(v.toString().replace(/[^\d.-]/g, ''));
@@ -830,9 +817,8 @@ const CONFIG = {
             }).format(parseNum(v));
         }
 
-        // Init
         if (checkAuth()) {
-            startTimer(); // Start inactivity timer
+            startTimer();
             setTimeout(() => {
                 if (typeof gapi !== 'undefined') gapiLoaded();
                 if (typeof google !== 'undefined') gisLoaded();
