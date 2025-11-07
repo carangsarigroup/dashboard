@@ -1486,9 +1486,9 @@
         // Kolom I=8, J=9, K=10. Ini adalah baris I-L.
         const surkasUsageData = values.slice(1) // Skip header row
             .map((row) => ({
-                bulan: row[8], // Kolom I: BULAN PENGGUNAAN SURKAS
-                nominal: parseNumber(row[9]), // Kolom J: NOMINAL PENGGUNAAN SURKAS
-                tujuan: row[10] // Kolom K: TUJUAN PENGGUNAAN SURKAS
+                bulan: row[7], // Kolom I: BULAN PENGGUNAAN SURKAS
+                nominal: parseNumber(row[8]), // Kolom J: NOMINAL PENGGUNAAN SURKAS
+                tujuan: row[9] // Kolom K: TUJUAN PENGGUNAAN SURKAS
                 // Note: Index 11 (column L) is for notes
             }))
             .filter(item => item.bulan); // Only include rows where "Bulan Penggunaan Surkas" is not empty
@@ -1893,3 +1893,4 @@
     </script>
 </body>
 </html>
+
