@@ -4,72 +4,273 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Tagihan Listrik Toko</title>
-    <script async src="https://apis.google.com/js/api.js"></script>
-    <script async src="https://accounts.google.com/gsi/client"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%); color: white; padding: 30px; text-align: center; }
-        .header h1 { font-size: 2em; margin-bottom: 10px; }
-        .controls { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
-        .btn:hover { opacity: 0.8; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ffc107; color: #212529; }
-        select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        .content { padding: 20px; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f8f9fa; font-weight: bold; }
-        tr:hover { background: #f5f5f5; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal.active { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .close { font-size: 24px; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .loading { text-align: center; padding: 40px; }
-        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; }
-        .stat-card h3 { color: #FF69B4; margin-bottom: 5px; }
-        .currency { text-align: right; }
-        .number { text-align: right; }
-        @media (max-width: 768px) { .controls { flex-direction: column; } .btn { width: 100%; } }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+        
+        select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .content { padding: 30px; }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-card h3 { font-size: 1.8em; margin-bottom: 8px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        tbody tr:hover { background: #f8f9fa; }
+        
+        .total-row {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            font-weight: 700;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .user-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .user-info {
+            background: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .logout-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logout-warning.show { display: flex; }
+        
+        .warning-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .warning-content h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .warning-content p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 768px) {
+            .controls { flex-direction: column; }
+            select { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
-    <div id="logout-warning" class="modal">
-        <div class="modal-content">
-            <h2>Sesi Anda akan berakhir!</h2>
-            <p>Sesi Anda akan berakhir dalam <span id="countdown-timer">60</span> detik karena tidak ada aktivitas. Klik di mana saja untuk melanjutkan.</p>
+    <div class="logout-warning" id="logoutWarning">
+        <div class="warning-content">
+            <h3>⚠️ Peringatan Inaktivitas</h3>
+            <p>Anda akan logout otomatis dalam <strong><span id="countdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+            <button class="btn btn-primary" onclick="resetTimer()">Saya Masih Di Sini</button>
         </div>
+    </div>
+
+    <div class="user-bar">
+        <div class="user-info">👤 <span id="username">Guest</span></div>
+        <button class="btn btn-primary" onclick="handleAuth()" id="authBtn">🔐 Login</button>
+        <button class="btn btn-success" onclick="logout()">🚪 Logout</button>
     </div>
 
     <div class="container">
         <div class="header">
             <h1>⚡ SIMTOCS - Tagihan Listrik Toko</h1>
             <p>Monitoring Penggunaan dan Biaya Listrik</p>
-            <div id="user-bar" style="display: none;">
-                <p>Selamat datang, <span id="user-name"></span>! (<span id="user-role"></span>)</p>
-                <button onclick="handleAuthClick()" class="btn btn-danger">Logout</button>
-            </div>
-            <div id="login-bar">
-                <button onclick="handleAuthClick()" class="btn btn-primary">Login dengan Google</button>
-            </div>
         </div>
         
         <div class="controls">
             <a href="index.html" class="btn btn-primary">🏠 Dashboard</a>
-            <select id="monthSelect" onchange="handleMonthChange()">
+            <select id="monthSelect" onchange="loadMonth()">
                 <option value="">Pilih Bulan...</option>
                 <option value="Informasi_Umum">Informasi Umum</option>
                 <option value="Januari_2025">Januari 2025</option>
@@ -85,485 +286,469 @@
                 <option value="November_2025">November 2025</option>
                 <option value="Desember_2025">Desember 2025</option>
             </select>
-            <button class="btn btn-success" onclick="openAddModal()" id="addBtn" style="display: none;">➕ Tambah Data</button>
-            <button class="btn btn-warning" onclick="handleRefresh()">🔄 Refresh</button>
+            <button class="btn btn-success" onclick="openModal()" id="addBtn" style="display:none">➕ Tambah</button>
+            <button class="btn btn-primary" onclick="refresh()">🔄 Refresh</button>
         </div>
         
         <div class="content" id="content">
-            <div class="empty-state">
-                <h2>Pilih Bulan untuk Melihat Data</h2>
-                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+            <div style="text-align:center; padding:60px">
+                <h2>⚡ Pilih Bulan untuk Melihat Data</h2>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div id="dataModal" class="modal">
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Tambah Data Baru</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <form id="dataForm" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="editRowIndex" value="">
-                
+            <h2 id="modalTitle">Tambah Data</h2>
+            <form id="form" onsubmit="saveData(event)">
+                <input type="hidden" id="rowIndex">
                 <div class="form-group">
-                    <label for="nomor">No *</label>
-                    <input type="number" id="nomor" placeholder="Nomor urut" required>
+                    <label>No *</label>
+                    <input type="number" id="nomor" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="namaToko">Nama Toko *</label>
-                    <input type="text" id="namaToko" placeholder="Nama toko" required>
+                    <label>Nama Toko *</label>
+                    <input type="text" id="namaToko" required>
                 </div>
-
                 <div class="form-group" id="idPelangganGroup">
-                    <label for="idPelanggan">ID Pelanggan</label>
-                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan PLN">
+                    <label>ID Pelanggan</label>
+                    <input type="text" id="idPelanggan">
                 </div>
-
-                <div class="form-group billing-fields">
-                    <label for="standAwal">Stand Awal *</label>
-                    <input type="number" id="standAwal" placeholder="0" required oninput="calculateUsage()">
+                <div class="form-group" id="standAwalGroup">
+                    <label>Stand Awal *</label>
+                    <input type="number" id="standAwal" oninput="calcUsage()">
                 </div>
-
-                <div class="form-group billing-fields">
-                    <label for="standAkhir">Stand Akhir *</label>
-                    <input type="number" id="standAkhir" placeholder="0" required oninput="calculateUsage()">
+                <div class="form-group" id="standAkhirGroup">
+                    <label>Stand Akhir *</label>
+                    <input type="number" id="standAkhir" oninput="calcUsage()">
                 </div>
-
-                <div class="form-group billing-fields">
-                    <label for="penggunaan">Penggunaan (kWh)</label>
-                    <input type="number" id="penggunaan" placeholder="Otomatis dihitung" readonly style="background: #e9ecef;">
+                <div class="form-group" id="penggunaanGroup">
+                    <label>Penggunaan (kWh)</label>
+                    <input type="number" id="penggunaan" readonly style="background:#e9ecef">
                 </div>
-
-                <div class="form-group billing-fields">
-                    <label for="biaya">Biaya Listrik *</label>
-                    <input type="number" id="biaya" placeholder="0" required>
+                <div class="form-group" id="biayaGroup">
+                    <label>Biaya Listrik *</label>
+                    <input type="number" id="biaya">
                 </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-success">Simpan</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                <div style="display:flex; gap:15px">
+                    <button type="submit" class="btn btn-success" style="flex:1">Simpan</button>
+                    <button type="button" class="btn" onclick="closeModal()" style="flex:1; background:#6c757d; color:white">Batal</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script>
-        // --- AUTHENTICATION & INACTIVITY ---
-        let inactivityTimer;
-        let logoutWarningTimer;
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            clearTimeout(logoutWarningTimer);
-            hideLogoutWarning();
-            inactivityTimer = setTimeout(showLogoutWarning, 5 * 60 * 1000); // 5 minutes
-        }
-
-        function showLogoutWarning() {
-            const warningModal = document.getElementById('logout-warning');
-            warningModal.classList.add('active');
-            let countdown = 60;
-            document.getElementById('countdown-timer').textContent = countdown;
-
-            logoutWarningTimer = setInterval(() => {
-                countdown--;
-                document.getElementById('countdown-timer').textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(logoutWarningTimer);
-                    handleLogout();
-                }
-            }, 1000);
-        }
-
-        function hideLogoutWarning() {
-            const warningModal = document.getElementById('logout-warning');
-            warningModal.classList.remove('active');
-            clearInterval(logoutWarningTimer);
-        }
-
-        function handleLogout() {
-            const token = gapi.client.getToken();
-            if (token) {
-                google.accounts.oauth2.revoke(token.access_token, () => {
-                    gapi.client.setToken(null);
-                    localStorage.removeItem('gAuthToken');
-                    updateUiForLoggedOutState();
-                });
-            }
-        }
-
-        function updateUiForLoggedInState(profile) {
-            document.getElementById('login-bar').style.display = 'none';
-            document.getElementById('user-bar').style.display = 'block';
-            document.getElementById('user-name').textContent = profile.getName();
-            document.getElementById('user-role').textContent = localStorage.getItem('userRole') || 'User';
-            resetInactivityTimer();
-        }
-
-        function updateUiForLoggedOutState() {
-            document.getElementById('login-bar').style.display = 'block';
-            document.getElementById('user-bar').style.display = 'none';
-            document.getElementById('content').innerHTML = '<div class="empty-state"><h2>Silakan login untuk melihat data.</h2></div>';
-            clearTimeout(inactivityTimer);
-            clearTimeout(logoutWarningTimer);
-        }
-
-        // --- GOOGLE API & OAUTH ---
         const CONFIG = {
-            CLIENT_ID: '''874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com''',
-            API_KEY: '''AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0''',
-            SPREADSHEET_ID: '''11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ''',
-            SCOPES: '''https://www.googleapis.com/auth/spreadsheets'''
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SPREADSHEET_ID: '11mcPMAfI30QJNI5Vp9M5XW2kyglLVsfRkC2uFNDD1sQ',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
         };
 
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
+        let tokenClient, accessToken = null, currentMonth = null, currentData = [];
+        let inactivityTimer, warningTimer, countdownInterval;
+        const INACTIVITY_TIME = 5 * 60 * 1000; // 5 minutes
+        const WARNING_TIME = 60 * 1000; // Show warning 1 minute before
 
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
+        // Auto-logout timer
+        function startTimer() {
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            clearInterval(countdownInterval);
+            document.getElementById('logoutWarning').classList.remove('show');
+
+            warningTimer = setTimeout(() => {
+                document.getElementById('logoutWarning').classList.add('show');
+                let countdown = 60;
+                document.getElementById('countdown').textContent = countdown;
+                
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    document.getElementById('countdown').textContent = countdown;
+                    if (countdown <= 0) clearInterval(countdownInterval);
+                }, 1000);
+            }, INACTIVITY_TIME - WARNING_TIME);
+
+            inactivityTimer = setTimeout(() => {
+                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+            }, INACTIVITY_TIME);
         }
 
-        async function initializeGapiClient() {
-            await gapi.client.init({
-                apiKey: CONFIG.API_KEY,
-                discoveryDocs: ['''https://sheets.googleapis.com/$discovery/rest?version=v4'''],
+        function resetTimer() {
+            startTimer();
+        }
+
+        // Listen for user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
+            document.addEventListener(evt, resetTimer, true);
+        });
+
+        // Auth Check
+        function checkAuth() {
+            const cookie = document.cookie.split(';').find(c => c.trim().startsWith('userAuth='));
+            if (!cookie) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const auth = JSON.parse(atob(cookie.split('=')[1]));
+            if (auth.username) document.getElementById('username').textContent = auth.username;
+            if (auth.role?.toLowerCase() === 'admin') {
+                document.getElementById('authBtn').style.display = 'flex';
+            }
+            return true;
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            
+            document.cookie = 'userAuth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            
+            const url = message 
+                ? 'login.html?message=' + encodeURIComponent(message)
+                : 'login.html';
+            window.location.href = url;
+        }
+
+        // Google API Init
+        function gapiLoaded() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
             });
-            gapiInited = true;
-            maybeEnableButtons();
         }
 
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.CLIENT_ID,
                 scope: CONFIG.SCOPES,
-                callback: '', // defined later
-            });
-            gisInited = true;
-            maybeEnableButtons();
-        }
-
-        function maybeEnableButtons() {
-            if (gapiInited && gisInited) {
-                const token = JSON.parse(localStorage.getItem('gAuthToken'));
-                if (token && token.expires_at > Date.now()) {
-                    gapi.client.setToken(token);
-                    // You might want to fetch profile info here
-                    updateUiForLoggedInState({ getName: () => 'User' });
-                }
-            }
-        }
-
-        function handleAuthClick() {
-            if (gapi.client.getToken() === null) {
-                tokenClient.callback = async (resp) => {
-                    if (resp.error !== undefined) {
-                        throw (resp);
+                callback: (resp) => {
+                    if (resp.error) {
+                        alert('Auth failed: ' + resp.error);
+                        return;
                     }
-                    const token = gapi.client.getToken();
-                    token.expires_at = Date.now() + (token.expires_in * 1000);
-                    localStorage.setItem('gAuthToken', JSON.stringify(token));
-                    // You might want to fetch profile info here
-                    updateUiForLoggedInState({ getName: () => 'User' });
-                };
-
-                if (gapi.client.getToken() === null) {
-                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                    accessToken = resp.access_token;
+                    gapi.client.setToken({ access_token: accessToken });
+                    document.getElementById('authBtn').textContent = '✓ Authenticated';
+                    document.getElementById('addBtn').style.display = 'inline-flex';
+                    alert('✅ Authenticated! You can now add, edit, and delete data.');
                 }
-            } else {
-                handleLogout();
+            });
+        }
+
+        function handleAuth() {
+            if (accessToken) {
+                alert('Already authenticated!');
+                return;
+            }
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        }
+
+        // Data Loading
+        async function loadMonth() {
+            const month = document.getElementById('monthSelect').value;
+            if (!month) {
+                document.getElementById('content').innerHTML = '<div style="text-align:center; padding:60px"><h2>⚡ Pilih Bulan untuk Melihat Data</h2></div>';
+                return;
+            }
+
+            currentMonth = month;
+            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${month}?key=${CONFIG.API_KEY}`;
+                const resp = await fetch(url);
+                const data = await resp.json();
+                
+                if (!data.values || data.values.length === 0) {
+                    document.getElementById('content').innerHTML = '<div style="text-align:center; padding:60px"><h2>No data found</h2></div>';
+                    return;
+                }
+
+                currentData = data.values;
+                displayData(data.values, month);
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div style="padding:20px; background:#f8d7da; color:#721c24; border-radius:8px">Error: ${error.message}</div>`;
             }
         }
 
-        // --- APP LOGIC ---
-        let appState = {
-            currentMonth: null,
-            currentData: [],
-        };
+        function displayData(values, sheet) {
+            const rows = values.slice(1).filter(r => r[1]);
+            
+            if (sheet === 'Informasi_Umum') {
+                displayInfo(rows);
+                return;
+            }
 
-        // Utility functions
-        function formatRupiah(value) {
-            if (!value && value !== 0) return 'Rp0';
-            const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
-            if (isNaN(num)) return 'Rp0';
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-        }
+            let totalUsage = 0, totalCost = 0;
+            rows.forEach(r => {
+                totalUsage += parseNum(r[5]);
+                totalCost += parseNum(r[6]);
+            });
 
-        function formatNumber(value) {
-            if (!value) return '-';
-            const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
-            if (isNaN(num)) return value;
-            return new Intl.NumberFormat('id-ID').format(num);
-        }
-
-        function parseNumber(value) {
-            if (!value) return 0;
-            const str = value.toString().replace(/[^\d.-]/g, '');
-            const num = parseFloat(str);
-            return isNaN(num) ? 0 : num;
-        }
-
-        // UI functions
-        function showLoading(message = 'Memuat data...') {
-            document.getElementById('content').innerHTML = `<div class="loading"><h3>${message}</h3></div>`;
-        }
-
-        function showError(message) {
-            document.getElementById('content').innerHTML = `<div class="error">❌ ${message}</div>`;
-        }
-
-        function showEmptyState() {
-            document.getElementById('content').innerHTML = `
-                <div class="empty-state">
-                    <h2>Pilih Bulan untuk Melihat Data</h2>
-                    <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+            let html = `
+                <div class="stats">
+                    <div class="stat-card"><h3>${rows.length}</h3><p>Total Toko</p></div>
+                    <div class="stat-card"><h3>${formatNum(totalUsage)} kWh</h3><p>Total Usage</p></div>
+                    <div class="stat-card"><h3>${formatCurr(totalCost)}</h3><p>Total Cost</p></div>
                 </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Nama Toko</th><th>Stand Awal</th><th>Stand Akhir</th>
+                            <th>Usage (kWh)</th><th>Cost</th>
+                            ${accessToken ? '<th>Action</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
+
+            rows.forEach((r, i) => {
+                const idx = i + 2;
+                html += `
+                    <tr>
+                        <td>${r[0] || i+1}</td>
+                        <td>${r[1]}</td>
+                        <td>${formatNum(r[3])}</td>
+                        <td>${formatNum(r[4])}</td>
+                        <td>${formatNum(r[5])}</td>
+                        <td>${formatCurr(r[6])}</td>
+                        ${accessToken ? `<td>
+                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px">✏️</button>
+                            <button class="btn" onclick="deleteRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
+                        </td>` : ''}
+                    </tr>
+                `;
+            });
+
+            html += `
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align:right">TOTAL</td>
+                            <td>${formatNum(totalUsage)}</td>
+                            <td>${formatCurr(totalCost)}</td>
+                            ${accessToken ? '<td></td>' : ''}
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('content').innerHTML = html;
         }
 
-        // Modal functions
-        function openAddModal() {
-            if (!appState.currentMonth) {
+        function displayInfo(rows) {
+            let html = `
+                <div class="stats">
+                    <div class="stat-card"><h3>${rows.length}</h3><p>Total Toko</p></div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Nama Toko</th><th>Daya (W)</th><th>ID Pelanggan</th><th>Alas Nama</th>
+                            ${accessToken ? '<th>Action</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            rows.forEach((r, i) => {
+                const idx = i + 2;
+                html += `
+                    <tr>
+                        <td>${r[0] || i+1}</td>
+                        <td>${r[1]}</td>
+                        <td>${r[2] ? formatNum(r[2]) + ' W' : '-'}</td>
+                        <td>${r[3] || '-'}</td>
+                        <td>${r[4] || '-'}</td>
+                        ${accessToken ? `<td>
+                            <button class="btn" onclick="editRow(${idx})" style="padding:6px 12px">✏️</button>
+                            <button class="btn" onclick="deleteRow(${idx})" style="padding:6px 12px; background:#dc3545; color:white">🗑️</button>
+                        </td>` : ''}
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('content').innerHTML = html;
+        }
+
+        // Modal
+        function openModal() {
+            if (!currentMonth) {
                 alert('Pilih bulan terlebih dahulu!');
                 return;
             }
-
-            const isInfoMode = appState.currentMonth === 'Informasi_Umum';
+            document.getElementById('modalTitle').textContent = 'Tambah Data';
+            document.getElementById('form').reset();
+            document.getElementById('rowIndex').value = '';
             
-            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
-            document.getElementById('editRowIndex').value = '';
-            document.getElementById('dataForm').reset();
+            const isInfo = currentMonth === 'Informasi_Umum';
+            document.getElementById('standAwalGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('standAkhirGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('penggunaanGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('biayaGroup').style.display = isInfo ? 'none' : 'block';
             
-            const billingFields = document.querySelectorAll('.billing-fields');
-            billingFields.forEach(field => {
-                field.style.display = isInfoMode ? 'none' : 'block';
-            });
-            
-            document.getElementById('dataModal').classList.add('active');
+            document.getElementById('modal').classList.add('active');
         }
 
-        function openEditModal(rowIndex) {
-            if (!appState.currentData || appState.currentData.length < rowIndex) {
-                alert('Data tidak ditemukan!');
-                return;
-            }
-
-            const row = appState.currentData[rowIndex - 1];
-            const isInfoMode = appState.currentMonth === 'Informasi_Umum';
+        function editRow(idx) {
+            if (!currentData[idx - 1]) return;
+            const r = currentData[idx - 1];
+            const isInfo = currentMonth === 'Informasi_Umum';
             
             document.getElementById('modalTitle').textContent = 'Edit Data';
-            document.getElementById('editRowIndex').value = rowIndex;
+            document.getElementById('rowIndex').value = idx;
+            document.getElementById('nomor').value = r[0] || '';
+            document.getElementById('namaToko').value = r[1] || '';
+            document.getElementById('idPelanggan').value = r[isInfo ? 3 : 2] || '';
             
-            const billingFields = document.querySelectorAll('.billing-fields');
-            billingFields.forEach(field => {
-                field.style.display = isInfoMode ? 'none' : 'block';
-            });
-            
-            document.getElementById('nomor').value = row[0] || '';
-            document.getElementById('namaToko').value = row[1] || '';
-            document.getElementById('idPelanggan').value = row[2] || '';
-            
-            if (!isInfoMode) {
-                document.getElementById('standAwal').value = parseNumber(row[3]);
-                document.getElementById('standAkhir').value = parseNumber(row[4]);
-                document.getElementById('biaya').value = parseNumber(row[6]);
-                calculateUsage();
+            if (!isInfo) {
+                document.getElementById('standAwal').value = parseNum(r[3]);
+                document.getElementById('standAkhir').value = parseNum(r[4]);
+                document.getElementById('biaya').value = parseNum(r[6]);
+                calcUsage();
             }
             
-            document.getElementById('dataModal').classList.add('active');
+            document.getElementById('standAwalGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('standAkhirGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('penggunaanGroup').style.display = isInfo ? 'none' : 'block';
+            document.getElementById('biayaGroup').style.display = isInfo ? 'none' : 'block';
+            
+            document.getElementById('modal').classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('dataModal').classList.remove('active');
-            document.getElementById('dataForm').reset();
+            document.getElementById('modal').classList.remove('active');
         }
 
-        function calculateUsage() {
-            const standAwal = parseNumber(document.getElementById('standAwal').value) || 0;
-            const standAkhir = parseNumber(document.getElementById('standAkhir').value) || 0;
-            const penggunaan = standAkhir - standAwal;
-            document.getElementById('penggunaan').value = penggunaan >= 0 ? penggunaan : 0;
+        function calcUsage() {
+            const awal = parseNum(document.getElementById('standAwal').value);
+            const akhir = parseNum(document.getElementById('standAkhir').value);
+            document.getElementById('penggunaan').value = Math.max(0, akhir - awal);
         }
 
-        // Data functions
-        async function handleMonthChange() {
-            const monthSelect = document.getElementById('monthSelect');
-            const selectedMonth = monthSelect.value;
-            
-            if (selectedMonth) {
-                await loadMonthData(selectedMonth);
-            } else {
-                showEmptyState();
-            }
-        }
-
-        async function handleRefresh() {
-            const monthSelect = document.getElementById('monthSelect');
-            const selectedMonth = monthSelect.value;
-            
-            if (!selectedMonth) {
-                alert('Pilih bulan terlebih dahulu');
+        async function saveData(e) {
+            e.preventDefault();
+            if (!accessToken) {
+                alert('Please authenticate first!');
                 return;
             }
-            
-            await loadMonthData(selectedMonth);
-        }
 
-        async function handleDelete(rowIndex) {
-            if (!confirm('⚠️ Yakin ingin menghapus data ini?')) return;
-            
-            showLoading('Menghapus data...');
-            try {
-                const range = `${appState.currentMonth}!A${rowIndex + 1}:Z${rowIndex + 1}`;
-                await gapi.client.sheets.spreadsheets.values.clear({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: range,
-                });
-                await handleRefresh();
-                alert('✅ Data berhasil dihapus!');
-            } catch (err) {
-                showError('Gagal menghapus data: ' + err.message);
-            }
-        }
+            const isInfo = currentMonth === 'Informasi_Umum';
+            const rowData = isInfo ? [
+                document.getElementById('nomor').value,
+                document.getElementById('namaToko').value,
+                '',
+                document.getElementById('idPelanggan').value,
+                ''
+            ] : [
+                document.getElementById('nomor').value,
+                document.getElementById('namaToko').value,
+                document.getElementById('idPelanggan').value,
+                parseNum(document.getElementById('standAwal').value),
+                parseNum(document.getElementById('standAkhir').value),
+                parseNum(document.getElementById('penggunaan').value),
+                parseNum(document.getElementById('biaya').value)
+            ];
 
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            const nomor = document.getElementById('nomor').value;
-            const namaToko = document.getElementById('namaToko').value;
-            const idPelanggan = document.getElementById('idPelanggan').value;
-            const editRowIndex = document.getElementById('editRowIndex').value;
-            const isInfoMode = appState.currentMonth === 'Informasi_Umum';
-            
-            let values;
-            
-            if (isInfoMode) {
-                values = [[nomor, namaToko, idPelanggan]];
-            } else {
-                const standAwal = parseNumber(document.getElementById('standAwal').value);
-                const standAkhir = parseNumber(document.getElementById('standAkhir').value);
-                const penggunaan = parseNumber(document.getElementById('penggunaan').value);
-                const biaya = parseNumber(document.getElementById('biaya').value);
-                
-                values = [[nomor, namaToko, idPelanggan, standAwal, standAkhir, penggunaan, biaya]];
-            }
-            
-            showLoading('Menyimpan data...');
+            const idx = document.getElementById('rowIndex').value;
+
             try {
-                if (editRowIndex) {
-                    const range = `${appState.currentMonth}!A${parseInt(editRowIndex) + 1}`;
+                if (idx) {
                     await gapi.client.sheets.spreadsheets.values.update({
                         spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: range,
+                        range: `${currentMonth}!A${idx}:G${idx}`,
                         valueInputOption: 'USER_ENTERED',
-                        resource: { values: values },
+                        resource: { values: [rowData] }
                     });
+                    alert('✅ Data updated!');
                 } else {
                     await gapi.client.sheets.spreadsheets.values.append({
                         spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: appState.currentMonth,
+                        range: `${currentMonth}!A:G`,
                         valueInputOption: 'USER_ENTERED',
-                        resource: { values: values },
+                        resource: { values: [rowData] }
                     });
+                    alert('✅ Data added!');
                 }
-                await handleRefresh();
                 closeModal();
-                alert('✅ Data berhasil disimpan!');
-            } catch (err) {
-                showError('Gagal menyimpan data: ' + err.message);
+                loadMonth();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         }
 
-        function renderTable(data) {
-            const isInfoMode = appState.currentMonth === 'Informasi_Umum';
-            
-            let html = '<div class="table-container"><table>';
-            
-            if (isInfoMode) {
-                html += '<thead><tr><th>No</th><th>Nama Toko</th><th>ID Pelanggan</th><th>Aksi</th></tr></thead>';
-            } else {
-                html += '<thead><tr><th>No</th><th>Nama Toko</th><th>ID Pelanggan</th><th>Stand Awal</th><th>Stand Akhir</th><th>Penggunaan</th><th>Biaya</th><th>Aksi</th></tr></thead>';
+        async function deleteRow(idx) {
+            if (!confirm('Delete this row?')) return;
+            if (!accessToken) {
+                alert('Please authenticate first!');
+                return;
             }
-            
-            html += '<tbody>';
-            let totalBiaya = 0;
-            
-            data.forEach((row, index) => {
-                html += '<tr>';
-                html += `<td>${row[0] || ''}</td>`;
-                html += `<td>${row[1] || ''}</td>`;
-                html += `<td>${row[2] || ''}</td>`;
-                
-                if (!isInfoMode) {
-                    html += `<td class="number">${formatNumber(row[3])}</td>`;
-                    html += `<td class="number">${formatNumber(row[4])}</td>`;
-                    html += `<td class="number">${formatNumber(row[5])}</td>`;
-                    html += `<td class="currency">${formatRupiah(row[6])}</td>`;
-                    totalBiaya += parseNumber(row[6]);
-                }
-                
-                html += `<td>
-                    <button class="btn btn-primary" onclick="openEditModal(${index + 1})">Edit</button>
-                    <button class="btn btn-danger" onclick="handleDelete(${index + 1})">Hapus</button>
-                </td>`;
-                html += '</tr>';
-            });
-            
-            if (!isInfoMode && data.length > 0) {
-                html += `<tr style="background: #e8f5e8; font-weight: bold;"><td colspan="6">TOTAL</td><td class="currency">${formatRupiah(totalBiaya)}</td><td></td></tr>`;
-            }
-            
-            html += '</tbody></table></div>';
-            
-            if (isInfoMode) {
-                html += '<div class="stats">';
-                html += `<div class="stat-card"><h3>${data.length}</h3><p>Total Toko</p></div>';
-                html += `<div class="stat-card"><h3>${data.filter(r => r[2]).length}</h3><p>Toko dengan ID Pelanggan</p></div>';
-                html += '</div>';
-            }
-            
-            document.getElementById('content').innerHTML = html;
-            document.getElementById('addBtn').style.display = 'inline-block';
-        }
 
-        async function loadMonthData(monthName) {
-            showLoading();
             try {
-                const response = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: monthName,
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
                 });
-                appState.currentMonth = monthName;
-                appState.currentData = response.result.values || [];
-                if (appState.currentData.length > 0) {
-                    renderTable(appState.currentData);
-                } else {
-                    document.getElementById('content').innerHTML = '<div class="empty-state"><h2>Tidak ada data untuk bulan ini</h2></div>';
-                }
-            } catch (err) {
-                showError('Gagal memuat data: ' + err.result.error.message);
+                const sheet = spreadsheet.result.sheets.find(s => s.properties.title === currentMonth);
+                
+                await gapi.client.sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    resource: {
+                        requests: [{
+                            deleteDimension: {
+                                range: {
+                                    sheetId: sheet.properties.sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: idx - 1,
+                                    endIndex: idx
+                                }
+                            }
+                        }]
+                    }
+                });
+                alert('✅ Row deleted!');
+                loadMonth();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         }
 
-        // Event listeners
-        window.onclick = function(event) {
-            const modal = document.getElementById('dataModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-            resetInactivityTimer();
-        };
-        document.onmousemove = resetInactivityTimer;
-        document.onkeypress = resetInactivityTimer;
+        function refresh() {
+            loadMonth();
+        }
 
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
-            gapiLoaded();
-            gisLoaded();
-        });
+        // Utilities
+        function parseNum(v) {
+            if (!v) return 0;
+            const n = parseFloat(v.toString().replace(/[^\d.-]/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
+
+        function formatNum(v) {
+            if (!v && v !== 0) return '-';
+            return new Intl.NumberFormat('id-ID').format(parseNum(v));
+        }
+
+        function formatCurr(v) {
+            if (!v && v !== 0) return 'Rp0';
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(parseNum(v));
+        }
+
+        // Init
+        if (checkAuth()) {
+            startTimer(); // Start inactivity timer
+            setTimeout(() => {
+                if (typeof gapi !== 'undefined') gapiLoaded();
+                if (typeof google !== 'undefined') gisLoaded();
+            }, 500);
+        }
     </script>
 </body>
 </html>
