@@ -1021,7 +1021,7 @@
         // ============ CONFIG ============
         const CONFIG = {
             CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            API_KEY: 'AIzaSyCMpk-2HdASd6o-MBRqehgXX-kTfzpFw0', // API Key disensor
             SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
             SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
             CACHE_DURATION: 5 * 60 * 1000
@@ -1196,7 +1196,7 @@
             if (!value && value !== 0) return 'Rp0';
             
             const num = typeof value === 'string' 
-                ? parseFloat(value.replace(/[^\d.-]/g, ''))
+                ? parseFloat(value.replace(/[^\d.-]/g, '').replace(',', '.')) // Handle potential comma as decimal
                 : value;
             
             if (isNaN(num)) return 'Rp0';
@@ -1211,6 +1211,7 @@
 
         function parseNumber(value) {
             if (!value) return 0;
+            // Allow only digits, dot, and minus sign, then parse
             const str = value.toString().replace(/[^\d.-]/g, '');
             const num = parseFloat(str);
             return isNaN(num) ? 0 : num;
@@ -1349,7 +1350,7 @@
             appState.currentSheet = sheetName;
             
             try {
-                // MODIFIKASI: Mengubah range menjadi !A:L untuk mengambil data Surkas Penggunaan (I, J, K, L)
+                // Range diubah menjadi !A:L untuk mengambil data Surkas Penggunaan (I, J, K, L)
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!A:L?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
@@ -1481,13 +1482,14 @@
 
         const totals = calculateTotals(dataRows);
         
-        // MODIFIKASI: Ekstraksi data Surkas Usage (kolom I=8, J=9, K=10, L=11)
+        // MODIFIKASI: Ekstraksi data Surkas Usage
+        // Kolom I=8, J=9, K=10. Ini adalah baris I-L.
         const surkasUsageData = values.slice(1) // Skip header row
             .map((row) => ({
-                bulan: row[8], // BULAN PENGGUNAAN SURKAS
-                nominal: parseNumber(row[9]), // NOMINAL PENGGUNAAN SURKAS
-                tujuan: row[10] // TUJUAN PENGGUNAAN SURKAS
-                // Note: Index 11 (column L) is for notes, not displayed here
+                bulan: row[8], // Kolom I: BULAN PENGGUNAAN SURKAS
+                nominal: parseNumber(row[9]), // Kolom J: NOMINAL PENGGUNAAN SURKAS
+                tujuan: row[10] // Kolom K: TUJUAN PENGGUNAAN SURKAS
+                // Note: Index 11 (column L) is for notes
             }))
             .filter(item => item.bulan); // Only include rows where "Bulan Penggunaan Surkas" is not empty
 
