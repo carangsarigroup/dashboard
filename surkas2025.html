@@ -210,7 +210,7 @@
             margin-bottom: 10px;
             font-size: 1.1em;
         }
-        
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -815,7 +815,6 @@
         </div>
     </div>
 
-    <!-- Add/Edit Modal -->
     <div id="dataModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -876,7 +875,6 @@
         </div>
     </div>
 
-    <!-- Google API Scripts -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -1351,7 +1349,8 @@
             appState.currentSheet = sheetName;
             
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
+                // MODIFIKASI: Mengubah range menjadi !A:L untuk mengambil data Surkas Penggunaan (I, J, K, L)
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!A:L?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -1468,6 +1467,7 @@
         // ============ DISPLAY FUNCTIONS ============
         function displayData(values, sheetName) {
         const headers = values[0];
+        // Data for main table (A-G)
         const allDataRows = values.slice(1).filter(row => row[1]);
     
         // APPLY FILTER
@@ -1480,6 +1480,17 @@
         }
 
         const totals = calculateTotals(dataRows);
+        
+        // MODIFIKASI: Ekstraksi data Surkas Usage (kolom I=8, J=9, K=10, L=11)
+        const surkasUsageData = values.slice(1) // Skip header row
+            .map((row) => ({
+                bulan: row[8], // BULAN PENGGUNAAN SURKAS
+                nominal: parseNumber(row[9]), // NOMINAL PENGGUNAAN SURKAS
+                tujuan: row[10] // TUJUAN PENGGUNAAN SURKAS
+                // Note: Index 11 (column L) is for notes, not displayed here
+            }))
+            .filter(item => item.bulan); // Only include rows where "Bulan Penggunaan Surkas" is not empty
+
         const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
         year: 'numeric',
         month: 'long',
@@ -1493,6 +1504,23 @@
         const filterBadge = appState.currentFilter !== 'all' 
         ? `<div class="filter-badge">📊 Menampilkan: ${getTriwulanLabel(appState.currentFilter)}</div>`
         : '';
+
+        // MODIFIKASI: Build the Surkas Usage Table Body
+        let surkasUsageHtml = '';
+        if (surkasUsageData.length > 0) {
+            surkasUsageData.forEach((item, index) => {
+                surkasUsageHtml += `
+                    <tr>
+                        <td style="text-align: center;">${index + 1}.</td>
+                        <td>${item.bulan}</td>
+                        <td class="currency">${formatRupiah(item.nominal)}</td>
+                        <td>${item.tujuan}</td>
+                    </tr>
+                `;
+            });
+        } else {
+             surkasUsageHtml = `<tr><td colspan="4" style="text-align: center; color: #6c757d;">Tidak ada data penggunaan surplus kas.</td></tr>`;
+        }
     
         let html = `
         ${filterBadge}
@@ -1515,6 +1543,24 @@
             </div>
         </div>
         
+        <h2 style="color: #FF69B4; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+            Detail Penggunaan Surplus Kas
+        </h2>
+        <div class="table-container surkas-usage-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO.</th>
+                        <th>BULAN PENGGUNAAN SURKAS</th>
+                        <th>NOMINAL PENGGUNAAN SURKAS</th>
+                        <th>TUJUAN PENGGUNAAN SURKAS</th>
+                    </tr>
+                </thead>
+                <tbody id="surkas-usage-tbody">
+                    ${surkasUsageHtml}
+                </tbody>
+            </table>
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -1845,10 +1891,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
