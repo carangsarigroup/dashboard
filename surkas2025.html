@@ -1051,24 +1051,23 @@
         }
 
         async function initializeGapiClient() {
-        try {
+    try {
         await gapi.client.init({
             apiKey: CONFIG.API_KEY,
-            discoveryDocs: ['https://sheets.googleapis.com/discovery/v1/apis/sheets/v4/rest'] // FIXED
+            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
         });
         gapiInited = true;
         maybeEnableButtons();
         console.log('GAPI client initialized');
-        } catch (error) {
+    } catch (error) {
         console.error('Error initializing GAPI client:', error);
-        // Show user-friendly error
         showError('Gagal Inisialisasi API', 
             'Tidak dapat terhubung ke Google Sheets API. ' +
             'Silakan refresh halaman atau cek koneksi internet Anda.<br><br>' +
             'Detail: ' + (error.result?.error?.message || error.message)
-            );
-        }
+        );
     }
+}
 
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1851,6 +1850,7 @@
     </script>
 </body>
 </html>
+
 
 
 
