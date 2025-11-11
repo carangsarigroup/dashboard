@@ -132,6 +132,8 @@
             align-items: center;
             gap: 8px;
             white-space: nowrap;
+            /* Tambahkan display: none secara default. JS akan menampilkannya hanya untuk Admin */
+            display: none; 
         }
 
         .auth-btn:hover {
@@ -181,115 +183,54 @@
                 transform: translateY(0);
             }
         }
-
-        /* --- Tambahkan/Pastikan CSS ini ada di <style> --- */
-.stats-preview {
-    /* Sets up a responsive grid for the 4 mini stats */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: -20px; /* Adjust if needed to position relative to header */
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 100; /* PENTING: Pastikan ini lebih tinggi dari elemen di background */
-}
-
-@media (max-width: 768px) {
-    .stats-preview {
-        grid-template-columns: 1fr;
-    }
-}
-
-.stat-mini {
-    /* Ini mengembalikan kotak putih */
-    background: rgba(255, 255, 255, 0.98); 
-    
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-radius: 20px;
-    padding: 25px 20px;
-    text-align: center;
-    
-    /* Box appearance */
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
-    
-    transition: all 0.3s ease;
-    border: 1px solid rgba(200, 200, 200, 0.3);
-}
-
-.stat-mini:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3); /* Effect on hover */
-}
-
-/* Optional: Styling for content inside stat-mini */
-.stat-mini .icon {
-    font-size: 2.5em;
-    color: #FF69B4; 
-    margin-bottom: 10px;
-}
-
-.stat-mini .value {
-    font-size: 1.8em;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.stat-mini .label {
-    font-size: 0.9em;
-    color: #666;
-    font-weight: 500;
-}
-/* ------------------------------------------- */
-
-@media (max-width: 768px) {
-    /* Ensures stacking on smaller screens */
-    .stats-preview {
-        grid-template-columns: 1fr;
-    }
-}
-
-        .stat-mini {
-    /* This provides the missing white background */
-    background: rgba(255, 255, 255, 0.95); 
-    
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 25px 20px;
-    text-align: center;
-    
-    /* This provides the distinct box look */
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); 
-    
-    transition: all 0.3s ease;
-}
-
-.stat-mini:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.stat-mini .icon {
-    font-size: 2.5em;
-    color: #4A90E2; /* Example color */
-    margin-bottom: 10px;
-}
-
-.stat-mini .value {
-    font-size: 1.8em;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.stat-mini .label {
-    font-size: 0.9em;
-    color: #666;
-    font-weight: 500;
-}
         
+        /* Stats Preview CSS */
+        .stats-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 100; /* Penting untuk visibilitas di atas elemen lain */
+        }
+        
+        .stat-mini {
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
+            transition: all 0.3s ease;
+            border: 1px solid rgba(200, 200, 200, 0.3);
+        }
+
+        .stat-mini:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+        }
+
+        .stat-mini .icon {
+            font-size: 2.5em;
+            color: #FF69B4; 
+            margin-bottom: 10px;
+        }
+
+        .stat-mini .value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-mini .label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+        /* End Stats Preview CSS */
+
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -841,6 +782,7 @@
     .add-btn { padding: 8px 15px; font-size: 0.8em; }
     .announcement-item { flex-direction: column; align-items: flex-start; }
     .announcement-actions { margin-top: 10px; }
+    .stats-preview { grid-template-columns: 1fr; }
 }
 
     </style>
@@ -978,7 +920,7 @@
     </div>
 
     <script>
-        // ============ AUTH & UTILITY FUNCTIONS (COPIED FROM surkasnew1111.html) ============
+        // ============ AUTH & UTILITY FUNCTIONS ============
         function getCookie(name) {
             const nameEQ = name + "=";
             const ca = document.cookie.split(';');
@@ -1014,35 +956,53 @@
             }
             clearStoredToken(); // Clear local storage token
             deleteCookie('userAuth'); // Clear user cookie
-            // Delete current window's auth button to ensure new auth is needed
-            updateAuthButton(false);
+            updateAuthButton(false); // Update UI
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
+        // --- Perbaikan: Menyembunyikan tombol Auth dari Non-Admin ---
         function updateUIBasedOnRole(role) {
             const isAdmin = role && role.toLowerCase() === 'admin';
-            // Show Add Announcement button for Admin
             const addBtn = document.getElementById('adminAnnouncementBtn');
+            const authBtn = document.getElementById('authBtn');
+
+            // 1. Tampilkan tombol Tambah Pengumuman hanya untuk Admin
             if (addBtn) {
                 addBtn.style.display = isAdmin ? 'flex' : 'none';
             }
+
+            // 2. Tampilkan tombol Google Auth hanya untuk Admin
+            if (authBtn) {
+                authBtn.style.display = isAdmin ? 'flex' : 'none';
+                // Jika sudah auth, panggil updateAuthButton untuk mengupdate tampilannya
+                if (accessToken) { 
+                     updateAuthButton(true);
+                } else {
+                     updateAuthButton(false);
+                }
+            }
+            
             // Re-display announcements to show/hide action buttons
             displayAnnouncements();
         }
 
+        // --- Perbaikan: Redirect Wajib Login ---
         function checkAuth() {
             const authData = getAuthData();
             if (!authData) {
-                // If not logged in, just update UI and don't redirect to login for index.html
-                // window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                // REDIRECT WAJIB LOGIN
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
                 return false;
             }
             if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
                 deleteCookie('userAuth');
-                // window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+                // REDIRECT WAJIB LOGIN (Session expired)
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired') + '&redirect=' + encodeURIComponent(window.location.pathname);
                 return false;
             }
-            // Update UI based on role
+            
+            // Update UI
+            document.getElementById('displayUsername').textContent = authData.username;
             updateUIBasedOnRole(authData.role);
             return true;
         }
@@ -1059,15 +1019,12 @@
             clearTimeout(warningTimer);
             clearInterval(countdownInterval);
 
-            // Hide warning if shown
             document.getElementById('logoutWarning').classList.remove('show');
 
-            // Set warning timer (4 minutes)
             warningTimer = setTimeout(() => {
                 showLogoutWarning();
             }, INACTIVITY_LIMIT - WARNING_TIME);
 
-            // Set logout timer (5 minutes)
             inactivityTimer = setTimeout(() => {
                 logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
             }, INACTIVITY_LIMIT);
@@ -1090,30 +1047,27 @@
             startInactivityTimer();
         }
 
-        // Listen for user activity
         const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'visibilitychange'];
         activityEvents.forEach(event => {
             window.addEventListener(event, resetInactivityTimer);
         });
 
-        // ============ CONFIG (MERGED AND ADAPTED) ============
+        // ============ CONFIG ============
         const CONFIG = {
-            // OAuth and API key from surkasnew1111.html
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com', //
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0', //
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets', //
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com', 
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
             
-            // Announcement Sheet Details from indexnewest1111.html
-            SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg', //
-            SHEET_NAME: 'Pengumuman', //
+            SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg', 
+            SHEET_NAME: 'Pengumuman',
         };
 
-        // ============ OAUTH STATE & INITIALIZATION (COPIED AND ADAPTED) ============
+        // ============ OAUTH STATE & INITIALIZATION ============
         let tokenClient;
         let accessToken = null;
         let gapiInited = false;
         let gisInited = false;
-        let announcementData = []; // Store raw data for editing
+        let announcementData = []; 
 
         function storeOAuthToken(token, expiresIn) {
             try {
@@ -1157,6 +1111,11 @@
         function maybeEnableButtons() {
             if (gapiInited && gisInited) {
                 restoreOAuthToken();
+                // Panggil updateUIBasedOnRole lagi untuk memastikan tombol Auth diperbarui jika token berhasil direstore
+                const authData = getAuthData();
+                if (authData) {
+                    updateUIBasedOnRole(authData.role);
+                }
             }
         }
 
@@ -1190,6 +1149,11 @@
         }
 
         function handleAuth() {
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya Admin yang dapat melakukan Google Sheets Authentication.');
+                return;
+            }
             if (!gapiInited || !gisInited) {
                 alert('Tunggu sebentar, Google API belum selesai diinisialisasi.');
                 return;
@@ -1207,13 +1171,10 @@
                     return;
                 }
                 accessToken = response.access_token;
-                // Store token with expiry (default 3600 seconds = 1 hour)
                 const expiresIn = response.expires_in || 3600;
                 storeOAuthToken(accessToken, expiresIn);
-                // Set token in gapi client
                 gapi.client.setToken({ access_token: accessToken });
                 updateAuthButton(true);
-                // Reload announcements to show action buttons
                 await displayAnnouncements(); 
                 alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus Pengumuman.');
                 console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
@@ -1240,17 +1201,22 @@
             }
         }
 
-        // ============ GOOGLE SHEETS CRUD FUNCTIONS (ADAPTED) ============
+        // ============ GOOGLE SHEETS CRUD FUNCTIONS (Hanya untuk Admin) ============
 
         async function addRow(rowData) {
             if (!accessToken) {
                 alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menambah pengumuman.');
+                return;
+            }
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.append({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:D`, // Columns A: Type, B: Title, C: Content, D: Date
+                    range: `${CONFIG.SHEET_NAME}!A:D`, 
                     valueInputOption: 'USER_ENTERED',
                     insertDataOption: 'INSERT_ROWS',
                     resource: {
@@ -1258,7 +1224,7 @@
                     }
                 });
                 console.log('Row added:', response);
-                await loadAnnouncements(); // Refresh the list
+                await loadAnnouncements(); 
                 alert('✅ Pengumuman berhasil ditambahkan!');
                 return response;
             } catch (error) {
@@ -1273,8 +1239,12 @@
                 alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat mengupdate pengumuman.');
+                return;
+            }
             try {
-                // The range is dynamic based on rowIndex (which is 2 for the first data row)
                 const response = await gapi.client.sheets.spreadsheets.values.update({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: `${CONFIG.SHEET_NAME}!A${rowIndex}:D${rowIndex}`,
@@ -1284,7 +1254,7 @@
                     }
                 });
                 console.log('Row updated:', response);
-                await loadAnnouncements(); // Refresh the list
+                await loadAnnouncements(); 
                 alert('✅ Pengumuman berhasil diupdate!');
                 return response;
             } catch (error) {
@@ -1299,12 +1269,16 @@
                 alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menghapus pengumuman.');
+                return;
+            }
             if (!confirm(`Anda yakin ingin menghapus pengumuman pada baris ke-${rowIndex}?`)) {
                 return;
             }
 
             try {
-                // Get the sheet ID first (required for batchUpdate/deleteDimension)
                 const spreadsheet = await gapi.client.sheets.spreadsheets.get({
                     spreadsheetId: CONFIG.SPREADSHEET_ID
                 });
@@ -1323,7 +1297,7 @@
                             range: {
                                 sheetId: sheetId,
                                 dimension: 'ROWS',
-                                startIndex: rowIndex - 1, // API is 0-indexed, so row 2 is index 1
+                                startIndex: rowIndex - 1, 
                                 endIndex: rowIndex
                             }
                         }
@@ -1336,7 +1310,7 @@
                 });
 
                 console.log('Row deleted:', response);
-                await loadAnnouncements(); // Refresh the list
+                await loadAnnouncements(); 
                 alert('🗑️ Pengumuman berhasil dihapus!');
                 return response;
             } catch (error) {
@@ -1346,7 +1320,7 @@
             }
         }
 
-        // ============ ANNOUNCEMENT FUNCTIONS (UPDATED FOR CRUD) ============
+        // ============ ANNOUNCEMENT FUNCTIONS ============
         async function loadAnnouncements() {
             try {
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
@@ -1358,15 +1332,13 @@
                     return [];
                 }
 
-                // Store raw data (including headers)
                 announcementData = data.values; 
 
-                // Process and return only data rows (excluding header)
                 return data.values.slice(1).map(row => ({
                     type: row[0],
                     title: row[1],
                     content: row[2],
-                    date: row[3] // Format: YYYY-MM-DD
+                    date: row[3] 
                 }));
             } catch (error) {
                 console.error('Error loading announcements:', error);
@@ -1378,9 +1350,14 @@
             if (!isoDate) return 'Tanggal tidak diketahui';
             try {
                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                // Handle potential date format issues from Sheets
+                const dateParts = isoDate.split('-');
+                if (dateParts.length === 3) {
+                    return new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).toLocaleDateString('id-ID', options);
+                }
                 return new Date(isoDate).toLocaleDateString('id-ID', options);
             } catch (e) {
-                return isoDate; // Fallback
+                return isoDate; 
             }
         }
 
@@ -1388,7 +1365,7 @@
             const listContainer = document.querySelector('.announcements-list');
             const board = document.getElementById('announcementBoard');
             const announcements = await loadAnnouncements();
-            listContainer.innerHTML = ''; // Clear previous list
+            listContainer.innerHTML = ''; 
 
             if (announcements.length === 0) {
                 board.style.display = 'none';
@@ -1397,10 +1374,11 @@
 
             board.style.display = 'block';
 
-           const isAdminAuthenticated = accessToken !== null && authData?.role?.toLowerCase() === 'admin';
+            // --- Perbaikan: Pengecekan Peran Admin untuk Tombol CRUD ---
+            const authData = getAuthData();
+            const isAdminAuthenticated = accessToken !== null && authData?.role?.toLowerCase() === 'admin';
             
             announcements.forEach((item, index) => {
-                // RowIndex in sheet is 1-indexed and starts from row 2 (after header row)
                 const rowIndex = index + 2; 
 
                 const itemDiv = document.createElement('div');
@@ -1427,8 +1405,13 @@
         }
 
         function openAnnouncementModal(mode, rowIndex = null) {
-            if (mode === 'add' && !accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu untuk menambah pengumuman!');
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menambah/mengedit pengumuman.');
+                return;
+            }
+            if (mode !== 'add' && !accessToken) {
+                 alert('❌ Harap authenticate Google Sheets API terlebih dahulu!');
                 return;
             }
 
@@ -1444,7 +1427,6 @@
             if (mode === 'add') {
                 modalTitle.textContent = 'Tambah Pengumuman Baru';
                 submitBtnText.textContent = 'Simpan';
-                // Set default date to today
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('date').value = today;
             } else if (mode === 'edit' && rowIndex !== null) {
@@ -1452,15 +1434,12 @@
                     alert('Data pengumuman tidak ditemukan!');
                     return;
                 }
-                // Data is stored from row 1 (header is row 1, first data is row 2 = index 1 in slice(1))
-                // Since announcementData includes the header, the data row index is rowIndex - 1
                 const row = announcementData[rowIndex - 1]; 
                 
                 modalTitle.textContent = 'Edit Pengumuman';
                 submitBtnText.textContent = 'Update';
                 editRowIndexInput.value = rowIndex;
                 
-                // Populate form with existing data
                 document.getElementById('type').value = row[0] || 'UMUM';
                 document.getElementById('title').value = row[1] || '';
                 document.getElementById('content').value = row[2] || '';
@@ -1476,8 +1455,10 @@
 
         async function handleAnnouncementSubmit(event) {
             event.preventDefault();
-            if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!');
+            
+            const authData = getAuthData();
+            if (authData?.role?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat memproses pengumuman.');
                 closeAnnouncementModal();
                 return;
             }
@@ -1487,7 +1468,6 @@
             const content = document.getElementById('content').value;
             const date = document.getElementById('date').value;
 
-            // Sheet columns: Type, Title, Content, Date
             const rowData = [
                 type,
                 title,
@@ -1504,7 +1484,6 @@
                     await addRow(rowData);
                 }
             } catch (e) {
-                // Error handled in addRow/updateRow
                 console.error('Submission failed:', e);
             }
             
@@ -1517,12 +1496,10 @@
         window.addEventListener('DOMContentLoaded', async () => {
             console.log('Dashboard loaded, checking authentication and loading Google APIs...');
             
-            // Check user authentication (login cookie)
+            // --- Perbaikan: Panggil checkAuth() terlebih dahulu untuk redirect jika belum login ---
             const isAuthenticated = checkAuth();
-            const authData = getAuthData();
 
-            if (isAuthenticated && authData?.username) {
-                document.getElementById('displayUsername').textContent = authData.username;
+            if (isAuthenticated) {
                 startInactivityTimer();
             }
 
@@ -1557,6 +1534,3 @@
     </script>
 </body>
 </html>
-
-
-
