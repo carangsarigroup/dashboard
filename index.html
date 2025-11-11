@@ -959,15 +959,14 @@
                     <label for="type">Tipe Pengumuman</label>
                     <select id="type" name="type" required>
                         <option value="PENTING">PENTING</option>
-                        <option value="UPDATE">UPDATE</option>
-                        <option value="FINANCE">KEUANGAN</option>
-                        <option value="CHECKLIST">CHECKLIST</option>
-                        <option value="SDM">SDM</option>
+                        <option value="INFO">INFO</option>
+                        <option value="UMUM">UMUM</option>
+                        <option value="KEUANGAN">KEUANGAN</option>
                     </select>
                 </div>
                 <div class="announcement-form-group">
                     <label for="title">Judul</label>
-                    <input type="text" id="title" name="title" required placeholder="Tulis judul pengumuman di sini...">
+                    <input type="text" id="title" name="title" required placeholder="Contoh: Pembagian Surplus Kas Q1">
                 </div>
                 <div class="announcement-form-group">
                     <label for="content">Isi Pengumuman</label>
@@ -1518,6 +1517,7 @@
             // Always show the board (don't hide it)
             if (board) board.style.display = 'block';
 
+            // Check if admin is authenticated for showing edit/delete buttons
             const isAdminAuthenticated = accessToken !== null && currentUserRole?.toLowerCase() === 'admin';
             
             // If no announcements, show empty state
@@ -1538,18 +1538,28 @@
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'announcement-item';
-                itemDiv.innerHTML = `
+                
+                // Build the HTML with conditional action buttons
+                let itemHTML = `
                     <div class="announcement-content">
                         <span class="announcement-type">${item.type}</span>
                         <div class="announcement-title-text">${item.title}</div>
                         <p>${item.content}</p>
                         <span class="announcement-date">Publikasi: ${formatAnnouncementDate(item.date)}</span>
                     </div>
-                    <div class="announcement-actions ${isAdminAuthenticated ? 'show' : ''}">
-                        <button class="btn-edit" onclick="openAnnouncementModal('edit', ${rowIndex})">✏️ Edit</button>
-                        <button class="btn-delete" onclick="deleteRow(${rowIndex})">🗑️ Hapus</button>
-                    </div>
                 `;
+                
+                // Only add action buttons if admin is authenticated
+                if (isAdminAuthenticated) {
+                    itemHTML += `
+                        <div class="announcement-actions show">
+                            <button class="btn-edit" onclick="openAnnouncementModal('edit', ${rowIndex})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="deleteRow(${rowIndex})">🗑️ Hapus</button>
+                        </div>
+                    `;
+                }
+                
+                itemDiv.innerHTML = itemHTML;
                 if (listContainer) listContainer.appendChild(itemDiv);
             });
         }
@@ -1691,4 +1701,3 @@
     </script>
 </body>
 </html>
-
