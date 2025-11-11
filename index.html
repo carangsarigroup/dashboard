@@ -1072,21 +1072,29 @@
             const addBtn = document.getElementById('adminAnnouncementBtn');
             const authBtn = document.getElementById('authBtn');
 
-            // Show buttons only for Admin
-            if (addBtn) {
-                if (isAdmin) {
-                    addBtn.classList.add('show');
-                } else {
-                    addBtn.classList.remove('show');
-                }
-            }
-
             // Show Google Auth button only for Admin
             if (authBtn) {
                 if (isAdmin) {
                     authBtn.classList.add('show');
                 } else {
                     authBtn.classList.remove('show');
+                }
+            }
+
+            // Show "Tambah Pengumuman" button only if Admin AND authenticated
+            updateAddAnnouncementButton();
+        }
+
+        function updateAddAnnouncementButton() {
+            const addBtn = document.getElementById('adminAnnouncementBtn');
+            const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+            const isAuthenticated = accessToken !== null;
+
+            if (addBtn) {
+                if (isAdmin && isAuthenticated) {
+                    addBtn.classList.add('show');
+                } else {
+                    addBtn.classList.remove('show');
                 }
             }
         }
@@ -1177,6 +1185,7 @@
                 localStorage.removeItem('oauth_token');
                 localStorage.removeItem('oauth_expiry');
                 accessToken = null;
+                updateAddAnnouncementButton(); // Hide add button when token cleared
             } catch (e) {
                 console.warn('Error clearing token:', e);
             }
@@ -1194,6 +1203,9 @@
                     authBtnText.textContent = 'Authenticate';
                 }
             }
+            
+            // Update "Tambah Pengumuman" button visibility
+            updateAddAnnouncementButton();
         }
 
         // ============ GOOGLE API INITIALIZATION ============
@@ -1294,6 +1306,7 @@
                     console.error('Auth error:', response);
                     alert('❌ Gagal authenticate: ' + response.error);
                     clearStoredToken();
+                    updateAddAnnouncementButton(); // Hide add button on failure
                     return;
                 }
                 
@@ -1301,7 +1314,7 @@
                 const expiresIn = response.expires_in || 3600;
                 storeOAuthToken(accessToken, expiresIn);
                 gapi.client.setToken({ access_token: accessToken });
-                updateAuthButton(true);
+                updateAuthButton(true); // This will also update add button visibility
                 
                 await displayAnnouncements();
                 alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus Pengumuman.');
