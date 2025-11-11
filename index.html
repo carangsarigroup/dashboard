@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari - Dashboard</title>
+    <title>SIMTOCS - Surplus Kas Toko</title>
     <style>
         * {
             margin: 0;
@@ -35,51 +35,380 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .header {
-            text-align: center;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
             color: white;
-            margin-bottom: 50px;
-            animation: fadeInDown 0.8s ease-out;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 40px 20px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 40px 30px;
+            text-align: center;
         }
         
         .header h1 {
-            font-size: 3em;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: 1.3em;
-            opacity: 0.95;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        .header .year-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            padding: 12px 35px;
-            border-radius: 30px;
-            margin-top: 20px;
-            font-weight: 600;
+        .header p {
             font-size: 1.1em;
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            opacity: 0.95;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            appearance: none;
             transition: all 0.3s ease;
         }
 
-        .header .year-badge:hover {
+        .select-wrapper select:hover {
+            border-color: #FF69B4;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .select-wrapper select.filtered {
+            border-color: #FF69B4;
+            background: #fff5f9;
+            font-weight: 600;
+        }
+
+        .filter-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #FF69B4;
+            font-size: 12px;
+        }
+
+        .back-btn {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+            padding: 12px 30px;
+            border: 2px solid #FF69B4;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover {
+            background: #FF69B4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #FF69B4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #FF69B4;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            border-left: 5px solid #f5c6cb;
+        }
+
+        .error strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+
+        .stat-card-finale {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card-finale:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .stat-card-finale h3 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card-finale p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+        
+        .refresh-btn, .add-btn {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .refresh-btn:hover, .add-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            color: #495057;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        td.triwulan {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            background: #f8f9fa;
+            color: #FF69B4;
+        }
+
+        td.month {
+            font-weight: 500;
+            padding-left: 30px;
+        }
+
+        td.currency {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        td.currency.positive {
+            color: #28a745;
+        }
+
+        td.currency.negative {
+            color: #dc3545;
+        }
+
+        td.currency.zero {
+            color: #6c757d;
+        }
+
+        td.actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #4A90E2;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
         }
 
         .user-bar {
@@ -93,6 +422,17 @@
             animation: fadeInDown 0.8s ease-out;
         }
 
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .user-info {
             background: rgba(255,255,255,0.95);
             padding: 12px 25px;
@@ -104,11 +444,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
-        
-        /* NEW STYLES FROM SURKAS.HTML */
+
         .auth-btn {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             border: none;
@@ -133,14 +470,6 @@
         .auth-btn.authenticated {
             background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
         }
-        /* END NEW STYLES */
-
-        .user-name {
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
 
         .logout-btn {
             background: rgba(255,255,255,0.95);
@@ -156,8 +485,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .logout-btn:hover {
@@ -166,53 +493,43 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .logout-btn:active {
-            transform: translateY(0);
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .menu-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease-out;
-            animation-fill-mode: both;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .menu-card:nth-child(1) { animation-delay: 0.1s; }
-        .menu-card:nth-child(2) { animation-delay: 0.2s; }
-        .menu-card:nth-child(3) { animation-delay: 0.3s; }
-        .menu-card:nth-child(4) { animation-delay: 0.4s; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-        @keyframes fadeInUp {
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -223,552 +540,118 @@
             }
         }
 
-        .menu-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .menu-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-        .menu-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
-            background: white;
-        }
-        
-        .menu-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            display: block;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
-        }
-
-        .menu-card:hover .menu-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-        
-        .menu-card h2 {
-            font-size: 1.4em;
-            color: #333;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-        
-        .menu-card p {
-            color: #666;
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
-
-        .menu-card .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            margin-top: 15px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
-        }
-        
-        .footer {
-            text-align: center;
-            color: white;
-            margin-top: 60px;
-            opacity: 0.9;
-            animation: fadeIn 1s ease-out 0.5s both;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px 20px;
-            border-radius: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 0.95; }
-        }
-
-        .footer p {
-            font-size: 0.95em;
-        }
-
-        .footer p:last-child {
-            margin-top: 8px;
-            font-size: 0.85em;
-        }
-
-        /* Announcement Board */
-        .announcement-board {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border-radius: 20px;
-            padding: 25px 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3);
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .announcement-board::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
-
-        .announcement-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .announcement-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.3em;
-            font-weight: 700;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .announcement-title .icon {
-            font-size: 1.4em;
-            animation: ring 2s ease-in-out infinite;
-        }
-
-        @keyframes ring {
-            0%, 100% { transform: rotate(0deg); }
-            10%, 30% { transform: rotate(-10deg); }
-            20%, 40% { transform: rotate(10deg); }
-        }
-
-        .announcements-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            position: relative;
-            z-index: 1;
-            max-height: 350px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-        
-        .announcements-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .announcements-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-        .announcements-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 4px;
-        }
-        .announcements-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-
-        .announcement-item {
-            background: rgba(255,255,255,0.95);
-            padding: 18px 22px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            border-left: 5px solid #FF69B4;
-            position: relative;
-        }
-
-        .announcement-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-        }
-
-        .announcement-item.type-surplus {
-            border-left-color: #4CAF50;
-        }
-
-        .announcement-item.type-employee {
-            border-left-color: #2196F3;
-        }
-
-        .announcement-item.type-maintenance {
-            border-left-color: #FF9800;
-        }
-
-        .announcement-item.type-utility {
-            border-left-color: #9C27B0;
-        }
-
-        .announcement-icon {
-            font-size: 2em;
-            flex-shrink: 0;
-        }
-
-        .announcement-content {
-            flex: 1;
-        }
-
-        .announcement-text {
-            color: #333;
-            font-size: 1em;
-            font-weight: 600;
-            margin-bottom: 5px;
-            line-height: 1.4;
-        }
-
-        .announcement-date {
-            color: #666;
-            font-size: 0.85em;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .announcement-badge {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .announcement-admin-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-        }
-
-        .admin-action-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ddd;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .admin-action-btn.edit:hover {
-            background: #4A90E2;
-            color: white;
-        }
-
-        .admin-action-btn.delete:hover {
-            background: #FF69B4;
-            color: white;
-        }
-
-        /* Admin Add Announcement Button */
-        .admin-announcement-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: white;
-            border: none;
-            padding: 18px 30px;
-            border-radius: 50px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
-            z-index: 999;
-            display: none; /* Will be shown by JS if admin */
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .admin-announcement-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(255, 165, 0, 0.5);
-        }
-
-        /* Announcement Modal */
-        .announcement-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .announcement-modal.active {
-            display: flex;
-        }
-
-        .announcement-modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 35px;
-            max-width: 550px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: fadeInUp 0.3s ease-out;
-        }
-
-        .announcement-modal-header {
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 3px solid #FFD700;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .announcement-modal-header h2 {
-            color: #FFA500;
-            font-size: 1.6em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .modal-header h2 {
+            color: #FF69B4;
+            font-size: 1.5em;
         }
 
-        .close-announcement-modal {
+        .close-modal {
             background: none;
             border: none;
             font-size: 2em;
-            color: #999;
+            color: #6c757d;
             cursor: pointer;
-            transition: all 0.2s ease;
             line-height: 1;
+            transition: color 0.2s ease;
         }
 
-        .close-announcement-modal:hover {
-            color: #FFA500;
-            transform: rotate(90deg);
+        .close-modal:hover {
+            color: #FF69B4;
         }
 
-        .announcement-form-group {
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .announcement-form-group label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
-            font-size: 0.95em;
+            color: #495057;
         }
 
-        .announcement-form-group input,
-        .announcement-form-group textarea,
-        .announcement-form-group select {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
-        .announcement-form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .announcement-form-group input:focus,
-        .announcement-form-group textarea:focus,
-        .announcement-form-group select:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #FFA500;
-            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
         }
 
-        .announcement-form-actions {
+        .form-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 30px;
         }
 
-        .btn-submit-announcement,
-        .btn-cancel-announcement {
+        .btn-submit, .btn-cancel {
             flex: 1;
-            padding: 14px 25px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .btn-submit-announcement {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
         }
 
-        .btn-submit-announcement:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
 
-        .btn-cancel-announcement {
-            background: #e0e0e0;
-            color: #666;
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
         }
 
-        .btn-cancel-announcement:hover {
-            background: #d0d0d0;
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
 
-        @keyframes fadeOutUp {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .announcement-board {
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-
-            .announcement-title {
-                font-size: 1.1em;
-            }
-
-            .announcement-item {
-                padding: 15px;
-                padding-right: 50px; /* Make space for admin buttons */
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-            }
-
-            .announcement-icon {
-                font-size: 1.5em;
-            }
-            
-            .announcement-admin-actions {
-                top: 10px;
-                right: 10px;
-            }
-
-            .announcement-badge {
-                align-self: flex-start;
-            }
-
-            .admin-announcement-btn {
-                bottom: 20px;
-                right: 20px;
-                padding: 15px 25px;
-                font-size: 0.9em;
-            }
-
-            .announcement-modal-content {
-                padding: 25px;
-            }
-
-            .announcement-form-actions {
-                flex-direction: column;
-            }
-        }
-        
-        /* Stats Cards */
-        .stats-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-            animation: fadeInUp 0.8s ease-out 0.3s both;
-        }
-
-        .stat-mini {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 15px;
+        .empty-state {
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+            padding: 60px 20px;
+            color: #6c757d;
         }
 
-        .stat-mini:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
         }
 
-        .stat-mini .icon {
-            font-size: 2em;
+        .empty-state h2 {
+            color: #FF69B4;
             margin-bottom: 10px;
         }
 
-        .stat-mini .value {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #FF69B4;
-            margin-bottom: 5px;
-        }
-
-        .stat-mini .label {
-            font-size: 0.85em;
-            color: #666;
-        }
-
-        /* Responsif untuk mobile */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
             .user-bar {
                 top: 10px;
                 right: 10px;
@@ -777,91 +660,36 @@
                 gap: 10px;
             }
 
-            .user-info {
-                padding: 10px 20px;
-                font-size: 0.85em;
-            }
-
-            .user-name {
-                max-width: 120px;
-            }
-
-            .logout-btn {
-                padding: 10px 20px;
-                font-size: 0.85em;
-            }
-            
-            /* NEW */
-            .auth-btn {
-                padding: 10px 20px;
-                font-size: 0.85em;
-            }
-
-            .header {
-                margin-bottom: 30px;
-                padding: 30px 15px;
-            }
-
             .header h1 {
-                font-size: 2em;
-                padding-right: 10px;
-            }
-            
-            .header p {
-                font-size: 1.1em;
+                font-size: 1.8em;
             }
 
-            .header .year-badge {
-                font-size: 0.95em;
-                padding: 10px 25px;
+            .controls {
+                padding: 20px;
+                flex-direction: column;
             }
 
-            .menu-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+            .select-wrapper {
+                min-width: 100%;
             }
 
-            .menu-card {
-                padding: 30px 20px;
+            .back-btn, .refresh-btn, .add-btn {
+                width: 100%;
+                justify-content: center;
             }
 
-            .menu-icon {
-                font-size: 3em;
+            .content {
+                padding: 20px;
             }
 
-            .stats-preview {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+            .modal-content {
+                padding: 20px;
             }
 
-            .stat-mini {
-                padding: 20px 15px;
-            }
-
-            .stat-mini .value {
-                font-size: 1.3em;
+            .form-actions {
+                flex-direction: column;
             }
         }
-
-        /* Animasi loading saat klik */
-        .menu-card:active {
-            transform: translateY(-5px) scale(0.98);
-        }
-
-        /* Pulse animation untuk badge */
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .menu-card:hover .badge {
-            animation: pulse 1s ease-in-out infinite;
-        }
-
         /* Auto-logout warning modal */
         .logout-warning {
         display: none;
@@ -929,15 +757,14 @@
         <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
     </div>
     </div>
-
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
-            <span class="user-name" id="displayUsername">Guest</span>
+            <span id="displayUsername">Guest</span>
         </div>
-        <button id="authBtn" onclick="handleAuth()" class="auth-btn" style="display: none;">
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
             <span>🔐</span>
-            <span id="authBtnText">Otentikasi Google</span>
+            <span id="authBtnText">Otentikasi</span>
         </button>
         <button onclick="logout()" class="logout-btn">
             <span>🚪</span>
@@ -947,139 +774,114 @@
 
     <div class="container">
         <div class="header">
-            <h1>🏪 SIMTOCS</h1>
-            <p>Sistem Informasi Manajemen Toko Carang Sari</p>
-            <div class="year-badge">📅 Tahun 2025</div>
-        </div>
-
-        <div class="announcement-board" id="announcementBoard" style="display: none;">
-            <div class="announcement-header">
-                <div class="announcement-title">
-                    <span class="icon">📢</span>
-                    <span>Pengumuman Terbaru</span>
-                </div>
-                </div>
-            
-            <div class="announcements-list">
-                </div>
+            <h1>💰 SIMTOCS - Surplus Kas Toko</h1>
+            <p>Monitoring dan Pelaporan Pembagian Laba & Kas Triwulanan</p>
         </div>
         
-        <div class="stats-preview">
-            <div class="stat-mini">
-                <div class="icon">🏪</div>
-                <div class="value">4</div>
-                <div class="label">Modul Aktif</div>
+        <div class="controls">
+            <a href="index.html" class="back-btn">
+                <span>🏠</span>
+                <span>Kembali ke Dashboard</span>
+            </a>
+            <div class="select-wrapper">
+                <select id="sheetSelect" onchange="handleSheetChange()">
+                    <option value="">Pilih Toko...</option>
+                </select>
             </div>
-            <div class="stat-mini">
-                <div class="icon">📊</div>
-                <div class="value">Real-time</div>
-                <div class="label">Update Data</div>
+            <div class="select-wrapper">
+            <select id="triwulanFilter" onchange="handleTriwulanFilter()">
+            <option value="all">Semua Triwulan</option>
+            <option value="1">TW1 (Q1)</option>
+            <option value="2">TW2 (Q2)</option>
+            <option value="3">TW3 (Q3)</option>
+            <option value="4">TW4 (Q4)</option>
+                </select>
             </div>
-            <div class="stat-mini">
-                <div class="icon">🔒</div>
-                <div class="value">Secure</div>
-                <div class="label">Authentication</div>
-            </div>
-            <div class="stat-mini">
-                <div class="icon">☁️</div>
-                <div class="value">Cloud</div>
-                <div class="label">Based System</div>
-            </div>
+            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
+                <span>➕</span>
+                <span>Tambah Data</span>
+            </button>
+            <button class="refresh-btn" onclick="handleRefresh()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
         </div>
         
-        <div class="menu-grid">
-            <a href="surkas2025.html" class="menu-card">
-                <span class="menu-icon">💰</span>
-                <h2>Surplus Kas</h2>
-                <p>Monitoring dan pelaporan pembagian surplus kas Toko Carang Sari</p>
-                <span class="badge">Keuangan</span>
-            </a>
-            
-            <a href="listrik2025.html" class="menu-card">
-                <span class="menu-icon">⚡</span>
-                <h2>Pembayaran Listrik Toko</h2>
-                <p>Monitoring tagihan dan pembayaran listrik bulanan Toko Carang Sari</p>
-                <span class="badge">Utilitas</span>
-            </a>
-            
-            <a href="checklistbulanan.html" class="menu-card">
-                <span class="menu-icon">✅</span>
-                <h2>Checklist Kondisi Toko</h2>
-                <p>Kondisi Terkini Toko Carang Sari</p>
-                <span class="badge">Maintenance</span>
-            </a>
-            
-            <a href="datakaryawan.html" class="menu-card">
-                <span class="menu-icon">👥</span>
-                <h2>Data Karyawan Toko</h2>
-                <p>Informasi karyawan toko Carang Sari aktif</p>
-                <span class="badge">SDM</span>
-            </a>
-        </div>
-        
-        <div class="footer">
-            <p>© 2025 SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari. All rights reserved.</p>
-            <p>Dikembangkan dengan ❤️ untuk efisiensi bisnis yang lebih baik</p>
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Memuat data...</div>
+            </div>
         </div>
     </div>
 
-    <button class="admin-announcement-btn" id="adminAnnouncementBtn" onclick="openAnnouncementModal()">
-        <span>📢</span>
-        <span>Tambah Pengumuman</span>
-    </button>
-
-    <div class="announcement-modal" id="announcementModal">
-        <div class="announcement-modal-content">
-            <div class="announcement-modal-header">
-                <h2 id="announcementModalTitle">
-                    <span>📢</span>
-                    <span>Tambah Pengumuman Baru</span>
-                </h2>
-                <button class="close-announcement-modal" onclick="closeAnnouncementModal()">&times;</button>
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
-            
-            <form id="announcementForm" onsubmit="handleAnnouncementSubmit(event)">
-                <input type="hidden" id="announcementRowIndex">
-                
-                <div class="announcement-form-group">
-                    <label for="announcementType">Tipe Pengumuman *</label>
-                    <select id="announcementType" required>
-                        <option value="">Pilih Tipe...</option>
-                        <option value="surplus">💰 Surplus Kas</option>
-                        <option value="employee">👥 Karyawan</option>
-                        <option value="maintenance">✅ Maintenance</option>
-                        <option value="utility">⚡ Utilitas</option>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+
+                <div class="form-group">
+                    <label for="triwulan">Triwulan *</label>
+                    <select id="triwulan" required>
+                        <option value="">Pilih Triwulan</option>
+                        <option value="1">TW1 (Q1)</option>
+                        <option value="2">TW2 (Q2)</option>
+                        <option value="3">TW3 (Q3)</option>
+                        <option value="4">TW4 (Q4)</option>
                     </select>
                 </div>
-
-                <div class="announcement-form-group">
-                    <label for="announcementText">Teks Pengumuman *</label>
-                    <textarea id="announcementText" placeholder="Contoh: Surplus Kas bulan November 2025 telah ditambahkan!" required maxlength="200"></textarea>
-                    <small style="color: #999; font-size: 0.85em;">Maksimal 200 karakter</small>
+                
+                <div class="form-group">
+                <label for="bulan">Bulan *</label>
+                <input type="text" id="bulan" placeholder="Contoh: Januari" required>
                 </div>
 
-                <div class="announcement-form-group">
-                    <label for="announcementDate">Tanggal *</label>
-                    <input type="date" id="announcementDate" required>
+                <div class="form-group">
+                    <label for="ebitdaLR">EBITDA LR *</label>
+                    <input type="number" id="ebitdaLR" placeholder="0" required oninput="calculateValues()">
                 </div>
 
-                <div class="announcement-form-actions">
-                    <button type="submit" class="btn-submit-announcement" id="announcementSubmitBtn">
-                        Publikasikan
+                <div class="form-group">
+                    <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
+                    <input type="number" id="penggunaanLabaKas" placeholder="0" required oninput="calculateValues()">
+                </div>
+
+                <div class="form-group">
+                    <label for="labaNetDitransfer">Laba Net Ditransfer (Auto)</label>
+                    <input type="number" id="labaNetDitransfer" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="bayarListrik">Bayar Listrik *</label>
+                    <input type="number" id="bayarListrik" placeholder="0" required oninput="calculateValues()">
+                </div>
+
+                <div class="form-group">
+                    <label for="sisaSurkas">Sisa Surplus Kas (Auto)</label>
+                    <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="submitBtnText">Simpan</span>
                     </button>
-                    <button type="button" class="btn-cancel-announcement" onclick="closeAnnouncementModal()">
-                        Batal
-                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
+    <!-- Google API Scripts -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script>
-        // ============ AUTH SYSTEM (COOKIE) ============
+        // ============ AUTH SYSTEM ============
         function getCookie(name) {
             const nameEQ = name + "=";
             const ca = document.cookie.split(';');
@@ -1106,65 +908,89 @@
         }
 
         function checkAuth() {
-            const authData = getAuthData();
-            if (!authData) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-            
-            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
-                deleteCookie('userAuth');
-                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
-                return false;
-            }
-
-            // NEW: Update UI based on role
-            updateUIBasedOnRole(authData.role);
-            return true;
+        const authData = getAuthData();
+        if (!authData) {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        return false;
+        }
+    
+        if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+        deleteCookie('userAuth');
+        window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+        return false;
+        }
+    
+        // Update UI based on role
+        updateUIBasedOnRole(authData.role);
+    
+        return true;
         }
 
         // ============ AUTO-LOGOUT INACTIVITY TIMER ============
         let inactivityTimer;
         let warningTimer;
         let countdownInterval;
-        const INACTIVITY_LIMIT = 5 * 60 * 1000;
-        const WARNING_TIME = 60 * 1000;
+        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
 
         function startInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            clearTimeout(warningTimer);
-            clearInterval(countdownInterval);
-            document.getElementById('logoutWarning').classList.remove('show');
-            warningTimer = setTimeout(() => {
-                showLogoutWarning();
-            }, INACTIVITY_LIMIT - WARNING_TIME);
-            inactivityTimer = setTimeout(() => {
-                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
-            }, INACTIVITY_LIMIT);
-        }
+        clearTimeout(inactivityTimer);
+        clearTimeout(warningTimer);
+        clearInterval(countdownInterval);
+    
+        // Hide warning if shown
+        document.getElementById('logoutWarning').classList.remove('show');
+    
+        // Set warning timer (4 minutes)
+        warningTimer = setTimeout(() => {
+        showLogoutWarning();
+        }, INACTIVITY_LIMIT - WARNING_TIME);
+    
+        // Set logout timer (5 minutes)
+        inactivityTimer = setTimeout(() => {
+        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+        }, INACTIVITY_LIMIT);
+    }
 
         function showLogoutWarning() {
-            document.getElementById('logoutWarning').classList.add('show');
-            let countdown = 60;
-            document.getElementById('warningCountdown').textContent = countdown;
-            countdownInterval = setInterval(() => {
-                countdown--;
-                document.getElementById('warningCountdown').textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
+        document.getElementById('logoutWarning').classList.add('show');
+        let countdown = 60;
+        document.getElementById('warningCountdown').textContent = countdown;
+    
+        countdownInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('warningCountdown').textContent = countdown;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
         }
+    }, 1000);
+}
 
         function resetInactivityTimer() {
-            startInactivityTimer();
+        startInactivityTimer();
         }
-        
+
+        // Listen for user activity
         const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
         activityEvents.forEach(event => {
-            document.addEventListener(event, resetInactivityTimer, true);
+        document.addEventListener(event, resetInactivityTimer, true);
         });
 
+        // Start timer when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+        startInactivityTimer();
+        });
+        
+        function updateUIBasedOnRole(role) {
+        const authBtn = document.getElementById('authBtn');
+        const isAdmin = role && role.toLowerCase() === 'admin';
+    
+        // Show auth button only for admin
+        if (authBtn) {
+        authBtn.style.display = isAdmin ? 'flex' : 'none';
+        }
+    }
+        
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
             
@@ -1176,70 +1002,78 @@
             }
             updateAuthButton(false);
             
-            // Clear user auth cookie
+            // Clear user auth
             deleteCookie('userAuth');
+            
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
-        
-        // --- GLOBAL AUTH DATA (from cookie) ---
-        let CURRENT_AUTH_DATA = null;
 
         // Initialize auth
-        if (checkAuth()) {
-            CURRENT_AUTH_DATA = getAuthData();
-            if (CURRENT_AUTH_DATA?.username) {
-                document.getElementById('displayUsername').textContent = CURRENT_AUTH_DATA.username;
+            if (checkAuth()) {
+            const authData = getAuthData();
+            if (authData?.username) {
+            document.getElementById('displayUsername').textContent = authData.username;
             }
-            // NEW: Show/hide admin buttons based on role
-            if (CURRENT_AUTH_DATA?.role) {
-                updateUIBasedOnRole(CURRENT_AUTH_DATA.role);
+        // Update UI based on user role
+            if (authData?.role) {
+            updateUIBasedOnRole(authData.role);
             }
         }
-        
-        // ============ NEW: GOOGLE OAUTH CONFIG (Adapted from surkas.html) ============
+
+        // ============ CONFIG ============
         const CONFIG = {
-            // CLIENT ID from surkas.html
             CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-            // API KEY from index.html (they were the same)
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            // SPREADSHEET ID for Announcements (from index.html)
-            SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg',
-            // SHEET NAME for Announcements (from index.html)
-            SHEET_NAME: 'Pengumuman',
-            // SCOPES from surkas.html
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
+            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+            CACHE_DURATION: 5 * 60 * 1000
         };
 
-        // ============ NEW: OAUTH STATE ============
+        // ============ OAUTH STATE ============
         let tokenClient;
         let accessToken = null;
         let gapiInited = false;
         let gisInited = false;
         
-        // ============ NEW: OAUTH INITIALIZATION (from surkas.html) ============
+        // ============ STATE MANAGEMENT ============
+        let appState = {
+            sheets: [],
+            currentSheet: null,
+            cache: {},
+            lastUpdate: null,
+            currentData: [],
+            currentFilter: 'all'
+        };
+
+        // ============ OAUTH INITIALIZATION ============
         function gapiLoaded() {
             gapi.load('client', initializeGapiClient);
         }
 
         async function initializeGapiClient() {
-            try {
-                await gapi.client.init({
-                    apiKey: CONFIG.API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                });
-                gapiInited = true;
-                maybeEnableButtons();
-                console.log('GAPI client initialized');
-            } catch (error) {
-                console.error('Error initializing GAPI client:', error);
-            }
-        }
+    try {
+        await gapi.client.init({
+            apiKey: CONFIG.API_KEY,
+            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+        console.log('GAPI client initialized');
+    } catch (error) {
+        console.error('Error initializing GAPI client:', error);
+        showError('Gagal Inisialisasi API', 
+            'Tidak dapat terhubung ke Google Sheets API. ' +
+            'Silakan refresh halaman atau cek koneksi internet Anda.<br><br>' +
+            'Detail: ' + (error.result?.error?.message || error.message)
+        );
+    }
+}
 
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.CLIENT_ID,
                 scope: CONFIG.SCOPES,
-                prompt: '',
+                prompt: '', // Allow silent refresh
                 callback: ''
             });
             gisInited = true;
@@ -1249,20 +1083,21 @@
 
         function maybeEnableButtons() {
             if (gapiInited && gisInited) {
+                // Try to restore token first
                 if (restoreStoredToken()) {
                     console.log('Restored OAuth token from storage');
-                    // Refresh announcements to show admin buttons
-                    displayAnnouncements();
                 }
+                loadSheetsList();
             }
         }
 
-        // ============ NEW: TOKEN STORAGE (from surkas.html) ============
+        // ============ TOKEN STORAGE ============
         function storeOAuthToken(token, expiresIn = 3600) {
             try {
                 const expiryTime = Date.now() + (expiresIn * 1000);
                 localStorage.setItem('oauth_token', token);
                 localStorage.setItem('oauth_expiry', expiryTime.toString());
+                console.log('OAuth token stored, expires in:', expiresIn, 'seconds');
             } catch (e) {
                 console.warn('Could not store OAuth token:', e);
             }
@@ -1272,21 +1107,29 @@
             try {
                 const storedToken = localStorage.getItem('oauth_token');
                 const expiry = localStorage.getItem('oauth_expiry');
-                if (!storedToken || !expiry) return false;
+                
+                if (!storedToken || !expiry) {
+                    return false;
+                }
                 
                 const expiryTime = parseInt(expiry);
                 const now = Date.now();
                 
-                if (now < expiryTime - 300000) { // 5 min buffer
+                // Check if token is still valid (with 5 min buffer)
+                if (now < expiryTime - 300000) {
                     accessToken = storedToken;
                     gapi.client.setToken({ access_token: storedToken });
                     updateAuthButton(true);
+                    console.log('Using stored OAuth token, expires in:', Math.floor((expiryTime - now) / 1000), 'seconds');
                     return true;
                 } else {
+                    // Token expired, clear storage
                     clearStoredToken();
+                    console.log('Stored token expired');
                     return false;
                 }
             } catch (e) {
+                console.warn('Error restoring token:', e);
                 return false;
             }
         }
@@ -1299,11 +1142,10 @@
                 console.warn('Error clearing token:', e);
             }
         }
-        
-        // ============ NEW: AUTH HANDLERS (from surkas.html) ============
+
         function handleAuth() {
             if (accessToken) {
-                alert('Sudah terotentikasi!');
+                alert('Sudah terauthentikasi!');
                 return;
             }
 
@@ -1316,14 +1158,21 @@
                 }
                 
                 accessToken = response.access_token;
+                
+                // Store token with expiry (default 3600 seconds = 1 hour)
                 const expiresIn = response.expires_in || 3600;
                 storeOAuthToken(accessToken, expiresIn);
+                
+                // Set token in gapi client
                 gapi.client.setToken({ access_token: accessToken });
                 
                 updateAuthButton(true);
-                // Refresh announcements to show admin buttons
-                await displayAnnouncements();
-                alert('✅ Berhasil authenticate! Sekarang Anda bisa mengelola pengumuman.');
+                // Refresh the current sheet data to show action buttons
+                if (appState.currentSheet) {
+                    loadSheetData(appState.currentSheet, true);
+                }
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus data.\n\nToken akan tetap aktif selama sesi browser ini.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
             };
 
             if (gapi.client.getToken() === null) {
@@ -1336,235 +1185,470 @@
         function updateAuthButton(isAuthenticated) {
             const authBtn = document.getElementById('authBtn');
             const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
             
             if (isAuthenticated) {
                 authBtn.classList.add('authenticated');
-                authBtnText.textContent = '✓ G-Auth Aktif';
+                authBtnText.textContent = '✓ Terotentikasi';
+                if (addBtn) addBtn.style.display = 'inline-flex';
             } else {
                 authBtn.classList.remove('authenticated');
-                authBtnText.textContent = 'Otentikasi Google';
+                authBtnText.textContent = 'Authenticate';
+                if (addBtn) addBtn.style.display = 'none';
             }
         }
-        
-        // NEW: Controls visibility of admin buttons based on *cookie* role
-        function updateUIBasedOnRole(role) {
-            const isAdmin = role && role.toLowerCase() === 'admin';
+
+        // ============ UTILITY FUNCTIONS ============
+        function formatRupiah(value) {
+            if (!value && value !== 0) return 'Rp0';
             
-            // Show "Add Announcement" button
-            document.getElementById('adminAnnouncementBtn').style.display = isAdmin ? 'flex' : 'none';
+            const num = typeof value === 'string' 
+                ? parseFloat(value.replace(/[^\d.-]/g, ''))
+                : value;
             
-            // Show "Authenticate Google" button
-            document.getElementById('authBtn').style.display = isAdmin ? 'flex' : 'none';
+            if (isNaN(num)) return 'Rp0';
+            
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
         }
 
-        // ============ MENU INTERACTIONS ============
-        // Animasi smooth dan feedback visual
-        document.querySelectorAll('.menu-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                this.style.opacity = '0.7';
-                setTimeout(() => {
-                    this.style.opacity = '1';
-                }, 200);
-            });
-        });
-
-        // Log klik untuk analytics
-        document.querySelectorAll('.menu-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                const menuName = this.querySelector('h2').textContent;
-                console.log('Menu diklik:', menuName);
-                // Bisa ditambahkan Google Analytics atau tracking lainnya
-            });
-        });
-
-        // Auto-update timestamp (opsional)
-        function updateTimestamp() {
-            const now = new Date();
-            const timeString = now.toLocaleString('id-ID', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            console.log('Dashboard loaded at:', timeString);
+        function parseNumber(value) {
+            if (!value) return 0;
+            const str = value.toString().replace(/[^\d.-]/g, '');
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
         }
 
-        // ============ ANNOUNCEMENT FUNCTIONS ============
-        
-        // Global variable to store raw announcement data for editing
-        let RAW_ANNOUNCEMENTS_DATA = [];
+        function showLoading(message = 'Memuat data...') {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            `;
+        }
 
-        async function loadAnnouncements() {
+        function showError(title, message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <strong>❌ ${title}</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h2>Pilih Toko untuk Melihat Data</h2>
+                    <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
+                </div>
+            `;
+        }
+
+        // ============ CACHE MANAGEMENT ============
+        function getCachedData(sheetName) {
+            const cached = appState.cache[sheetName];
+            if (!cached) return null;
+            
+            const now = Date.now();
+            if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+                delete appState.cache[sheetName];
+                return null;
+            }
+            
+            return cached.data;
+        }
+
+        function setCachedData(sheetName, data) {
+            appState.cache[sheetName] = {
+                data: data,
+                timestamp: Date.now()
+            };
+        }
+
+        // ============ LOCAL STORAGE ============
+        function saveLastSheet(sheetName) {
             try {
-                // We still use the API Key for the public READ, it's faster
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                const data = { sheet: sheetName, timestamp: Date.now() };
+                sessionStorage.setItem('lastSheet', JSON.stringify(data));
+            } catch (e) {
+                console.warn('Could not save to sessionStorage:', e);
+            }
+        }
+
+        function getLastSheet() {
+            try {
+                const stored = sessionStorage.getItem('lastSheet');
+                if (!stored) return null;
+                const data = JSON.parse(stored);
+                if (Date.now() - data.timestamp > 3600000) return null;
+                return data.sheet;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============ API FUNCTIONS ============
+        async function loadSheetsList() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.error || !data.values || data.values.length <= 1) {
-                    RAW_ANNOUNCEMENTS_DATA = [];
-                    return [];
+                if (data.error) {
+                    throw new Error(data.error.message);
                 }
                 
-                RAW_ANNOUNCEMENTS_DATA = data.values.slice(1);
+                appState.sheets = data.sheets.map(sheet => sheet.properties.title);
                 
-                return RAW_ANNOUNCEMENTS_DATA.map((row, index) => ({
-                    type: row[0] || 'surplus',
-                    text: row[1] || '',
-                    date: row[2] || new Date().toISOString().split('T')[0],
-                    createdAt: row[3] || new Date().toISOString(),
-                    sheetRowIndex: index + 2 // Sheet row (2, 3, 4...)
-                }));
+                const sheetSelect = document.getElementById('sheetSelect');
+                sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
+                    appState.sheets.map(name => 
+                        `<option value="${name}">${name}</option>`
+                    ).join('');
+                
+                const lastSheet = getLastSheet();
+                if (lastSheet && appState.sheets.includes(lastSheet)) {
+                    sheetSelect.value = lastSheet;
+                    loadSheetData(lastSheet);
+                } else {
+                    showEmptyState();
+                }
+                
             } catch (error) {
-                console.log('No announcements or error loading:', error);
-                RAW_ANNOUNCEMENTS_DATA = [];
-                return [];
+                console.error('Error loading sheets:', error);
+                showError('Gagal Memuat Daftar Sheet', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Pastikan:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Spreadsheet ID benar</li>
+                        <li>API Key valid</li>
+                        <li>Google Sheets API sudah enabled</li>
+                        <li>Sheet sudah public</li>
+                    </ul>
+                `);
             }
         }
 
-        async function displayAnnouncements() {
-            const announcements = await loadAnnouncements();
-            const board = document.getElementById('announcementBoard');
-            
-            if (!announcements || announcements.length === 0) {
-                board.style.display = 'none';
+        async function loadSheetData(sheetName, forceRefresh = false) {
+            if (!sheetName) {
+                showEmptyState();
                 return;
             }
 
-            announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            const typeIcons = {
-                surplus: '💰',
-                employee: '👥',
-                maintenance: '✅',
-                utility: '⚡'
-            };
-
-            const typeBadges = {
-                surplus: 'Keuangan',
-                employee: 'SDM',
-                maintenance: 'Maintenance',
-                utility: 'Utilitas'
-            };
-
-            const isAdmin = CURRENT_AUTH_DATA?.role && CURRENT_AUTH_DATA.role.toLowerCase() === 'admin';
+            if (!forceRefresh) {
+                const cached = getCachedData(sheetName);
+                if (cached) {
+                    console.log('Using cached data for:', sheetName);
+                    displayData(cached, sheetName);
+                    return;
+                }
+            }
             
-            const listHtml = announcements.slice(0, 10).map((ann, index) => {
-                const originalDataIndex = RAW_ANNOUNCEMENTS_DATA.findIndex(row => row[1] === ann.text && row[0] === ann.type);
-
-                // --- MODIFIED ---
-                // Only show buttons if user is admin (from cookie) AND has authenticated (OAuth)
-                const adminButtons = (isAdmin && accessToken) ? `
-                    <div class="announcement-admin-actions">
-                        <button class="admin-action-btn edit" title="Edit" onclick="openEditModal(${originalDataIndex})">✏️</button>
-                        <button class="admin-action-btn delete" title="Hapus" onclick="handleDeleteClick(${ann.sheetRowIndex})">🗑️</button>
-                    </div>
-                ` : '';
-
-                return `
-                <div class="announcement-item type-${ann.type}">
-                    ${adminButtons}
-                    <div class="announcement-icon">${typeIcons[ann.type] || '📢'}</div>
-                    <div class="announcement-content">
-                        <div class="announcement-text">${ann.text}</div>
-                        <div class="announcement-date">
-                            <span>🗓️</span>
-                            <span>${formatAnnouncementDate(ann.date)}</span>
-                        </div>
-                    </div>
-                    <div class="announcement-badge">${typeBadges[ann.type] || 'Info'}</div>
-                </div>
-            `}).join('');
-
-            document.querySelector('.announcements-list').innerHTML = listHtml;
-            board.style.display = 'block';
+            showLoading(`Memuat data: ${sheetName}`);
+            appState.currentSheet = sheetName;
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.values || data.values.length === 0) {
+                    showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
+                    return;
+                }
+                
+                setCachedData(sheetName, data.values);
+                appState.lastUpdate = new Date();
+                appState.currentData = data.values;
+                
+                displayData(data.values, sheetName);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Gagal Memuat Data', `
+                    ${error.message}
+                    <br><br>
+                    <strong>Sheet:</strong> "${sheetName}"
+                `);
+            }
         }
 
-        function formatAnnouncementDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+        // ============ DATA PROCESSING ============
+        function processRowData(row) {
+            const triwulan = row[0] || '';
+            const bulan = row[1] || '';
+            const ebitdaLR = parseNumber(row[2]);
+            const penggunaanLabaKas = parseNumber(row[3]);
+            const labaNetDitransfer = parseNumber(row[4]);
+            const bayarListrik = parseNumber(row[5]);
+            
+            let sisaSurkas = parseNumber(row[6]);
+            if (!sisaSurkas && labaNetDitransfer && bayarListrik) {
+                sisaSurkas = labaNetDitransfer - bayarListrik;
+            }
+            
+            return {
+                triwulan,
+                bulan,
+                ebitdaLR,
+                penggunaanLabaKas,
+                labaNetDitransfer,
+                bayarListrik,
+                sisaSurkas
+            };
+        }
+
+        function calculateTotals(rows) {
+            return rows.reduce((totals, row) => {
+                const data = processRowData(row);
+                return {
+                    ebitdaLR: totals.ebitdaLR + data.ebitdaLR,
+                    penggunaanLabaKas: totals.penggunaanLabaKas + data.penggunaanLabaKas,
+                    labaNetDitransfer: totals.labaNetDitransfer + data.labaNetDitransfer,
+                    bayarListrik: totals.bayarListrik + data.bayarListrik,
+                    sisaSurkas: totals.sisaSurkas + data.sisaSurkas
+                };
+            }, {
+                ebitdaLR: 0,
+                penggunaanLabaKas: 0,
+                labaNetDitransfer: 0,
+                bayarListrik: 0,
+                sisaSurkas: 0
             });
         }
 
-        function openAnnouncementModal() {
-            if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu sebelum menambah data.');
-                return;
-            }
-            document.getElementById('modalTitle').innerHTML = '<span>📢</span> <span>Tambah Pengumuman Baru</span>';
-            document.getElementById('announcementSubmitBtn').textContent = 'Publikasikan';
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('announcementForm').reset();
-            document.getElementById('announcementRowIndex').value = '';
-D           document.getElementById('announcementDate').value = today;
-            document.getElementById('announcementModal').classList.add('active');
+        // ============ FILTER FUNCTIONS ============
+        function handleTriwulanFilter() {
+        const filterSelect = document.getElementById('triwulanFilter');
+        const selectedFilter = filterSelect.value;
+        appState.currentFilter = selectedFilter;
+    
+        // Add visual feedback
+        if (selectedFilter !== 'all') {
+        filterSelect.classList.add('filtered');
+        } else {
+        filterSelect.classList.remove('filtered');
+        }
+    
+        // Reload display with filter
+        if (appState.currentSheet && appState.currentData.length > 0) {
+        displayData(appState.currentData, appState.currentSheet);
+        }
+    }
+
+        function filterDataByTriwulan(dataRows) {
+        if (appState.currentFilter === 'all') {
+        return dataRows;
         }
         
-        function openEditModal(dataIndex) {
+        return dataRows.filter(row => {
+        const triwulan = row[0] ? row[0].toString().trim() : '';
+        return triwulan === appState.currentFilter;
+        });
+    }
+
+        function getTriwulanLabel(value) {
+        const labels = {
+        '1': 'Triwulan 1 (Q1)',
+        '2': 'Triwulan 2 (Q2)',
+        '3': 'Triwulan 3 (Q3)',
+        '4': 'Triwulan 4 (Q4)',
+        'all': 'Semua Triwulan'
+        };
+        return labels[value] || 'Semua Triwulan';
+    }
+        
+        // ============ DISPLAY FUNCTIONS ============
+        function displayData(values, sheetName) {
+        const headers = values[0];
+        const allDataRows = values.slice(1).filter(row => row[1]);
+    
+        // APPLY FILTER
+        const dataRows = filterDataByTriwulan(allDataRows);
+    
+        if (dataRows.length === 0) {
+        const filterLabel = getTriwulanLabel(appState.currentFilter);
+        showError('Data Kosong', `Tidak ada data untuk ${filterLabel} di sheet "${sheetName}"`);
+        return;
+        }
+
+        const totals = calculateTotals(dataRows);
+        const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+        });
+    
+        // TAMBAHKAN FILTER BADGE
+        const filterBadge = appState.currentFilter !== 'all' 
+        ? `<div class="filter-badge">📊 Menampilkan: ${getTriwulanLabel(appState.currentFilter)}</div>`
+        : '';
+    
+        let html = `
+        ${filterBadge}
+        <div class="stats">
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.ebitdaLR)}</h3>
+                <p>Total EBITDA LR${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
+                <p>Total Laba Net Ditransfer${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card">
+                <h3>${formatRupiah(totals.bayarListrik)}</h3>
+                <p>Total Bayar Listrik${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+            <div class="stat-card-finale">
+                <h3>${formatRupiah(totals.sisaSurkas)}</h3>
+                <p>Total Sisa Surplus Kas${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TRIWULAN</th>
+                        <th>BULAN</th>
+                        <th>EBITDA LR</th>
+                        <th>PENGGUNAAN LABA KAS</th>
+                        <th>LABA NET DITRANSFER</th>
+                        <th>BAYAR LISTRIK</th>
+                       <th>SISA SURKAS</th>
+                        ${accessToken ? '<th>AKSI</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    dataRows.forEach((row, index) => {
+        const data = processRowData(row);
+        let colorClass = 'zero';
+        if (data.sisaSurkas > 0) colorClass = 'positive';
+        else if (data.sisaSurkas < 0) colorClass = 'negative';
+        
+        // Find original row index in allDataRows for proper edit/delete
+        const originalIndex = allDataRows.findIndex(r => 
+            r[0] === row[0] && r[1] === row[1] && r[2] === row[2]
+        );
+        const rowIndex = originalIndex + 2;
+
+        html += `
+            <tr>
+                <td class="triwulan">${data.triwulan}</td>
+                <td class="month">${data.bulan}</td>
+                <td class="currency">${formatRupiah(data.ebitdaLR)}</td>
+                <td class="currency">${formatRupiah(data.penggunaanLabaKas)}</td>
+                <td class="currency">${formatRupiah(data.labaNetDitransfer)}</td>
+                <td class="currency">${formatRupiah(data.bayarListrik)}</td>
+                <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
+                ${accessToken ? `
+                <td class="actions">
+                    <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                </td>
+                ` : ''}
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('content').innerHTML = html;
+}
+
+        // ============ MODAL FUNCTIONS ============
+        function openAddModal() {
+            if (!appState.currentSheet) {
+                alert('Pilih toko terlebih dahulu!');
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+            document.getElementById('submitBtnText').textContent = 'Simpan';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function openEditModal(rowIndex) {
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
+                alert('Data tidak ditemukan!');
+                return;
+            }
+
+            const row = appState.currentData[rowIndex - 1];
+            const data = processRowData(row);
+
+            document.getElementById('modalTitle').textContent = 'Edit Data';
+            document.getElementById('submitBtnText').textContent = 'Update';
+            document.getElementById('editRowIndex').value = rowIndex;
+            
+            document.getElementById('triwulan').value = data.triwulan;
+            document.getElementById('bulan').value = data.bulan;
+            document.getElementById('ebitdaLR').value = data.ebitdaLR;
+            document.getElementById('penggunaanLabaKas').value = data.penggunaanLabaKas;
+            document.getElementById('bayarListrik').value = data.bayarListrik;
+            
+            // Trigger calculation to populate auto fields
+            calculateValues();
+
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            document.getElementById('dataForm').reset();
+        }
+
+        // ============ AUTO CALCULATION ============
+        function calculateValues() {
+            const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value) || 0;
+            const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value) || 0;
+            const bayarListrik = parseNumber(document.getElementById('bayarListrik').value) || 0;
+            
+            // Calculate Laba Net Ditransfer = EBITDA LR - Penggunaan Laba Kas
+            const labaNetDitransfer = ebitdaLR - penggunaanLabaKas;
+            
+            // Calculate Sisa Surkas = Laba Net Ditransfer - Bayar Listrik
+            const sisaSurkas = labaNetDitransfer - bayarListrik;
+            
+            // Update the readonly fields
+            document.getElementById('labaNetDitransfer').value = labaNetDitransfer;
+            document.getElementById('sisaSurkas').value = sisaSurkas;
+        }
+
+        // ============ CRUD FUNCTIONS ============
+        async function addRow(sheetName, rowData) {
             if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu sebelum mengedit data.');
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
             
-            const data = RAW_ANNOUNCEMENTS_DATA[dataIndex];
-            if (!data) return;
-            const sheetRowIndex = dataIndex + 2;
-            document.getElementById('announcementModalTitle').innerHTML = '<span>✏️</span> <span>Edit Pengumuman</span>';
-            document.getElementById('announcementSubmitBtn').textContent = 'Simpan Perubahan';
-            document.getElementById('announcementRowIndex').value = sheetRowIndex;
-            document.getElementById('announcementType').value = data[0] || 'surplus';
-            document.getElementById('announcementText').value = data[1] || '';
-            document.getElementById('announcementDate').value = data[2] || new Date().toISOString().split('T')[0];
-            document.getElementById('announcementModal').classList.add('active');
-        }
-
-        function closeAnnouncementModal() {
-            document.getElementById('announcementModal').classList.remove('active');
-        }
-
-        async function handleAnnouncementSubmit(event) {
-            event.preventDefault();
-            
-            const rowIndex = document.getElementById('announcementRowIndex').value;
-            const formData = {
-                type: document.getElementById('announcementType').value,
-                text: document.getElementById('announcementText').value,
-                date: document.getElementById('announcementDate').value,
-                createdAt: new Date().toISOString()
-            };
-
-            if (rowIndex) {
-                handleUpdateAnnouncement(rowIndex, formData);
-            } else {
-                handleCreateAnnouncement(formData);
-            }
-        }
-        
-        // ============ NEW: REAL CRUD FUNCTIONS (Adapted from surkas.html) ============
-        
-        async function handleCreateAnnouncement(formData) {
-            if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu.');
-                return;
-            }
-            
-            // Data must match the order in the sheet
-            const rowData = [
-                formData.type,
-                formData.text,
-                formData.date,
-                formData.createdAt
-            ];
-
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.append({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:D`, // Adjust range
+                    range: `${sheetName}!A:G`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [rowData]
@@ -1572,33 +1656,29 @@ D           document.getElementById('announcementDate').value = today;
                 });
                 
                 console.log('Row added:', response);
-                alert('✅ Pengumuman berhasil ditambahkan!');
-                closeAnnouncementModal();
-                await displayAnnouncements(); // Refresh list
                 
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('✅ Data berhasil ditambahkan!');
+                return response;
             } catch (error) {
                 console.error('Error adding row:', error);
-                alert('❌ Gagal menambahkan data: ' + error.result.error.message);
+                alert('❌ Gagal menambahkan data: ' + error.message);
+                throw error;
             }
         }
-        
-        async function handleUpdateAnnouncement(rowIndex, formData) {
+
+        async function updateRow(sheetName, rowIndex, rowData) {
             if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu.');
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
-            
-            const rowData = [
-                formData.type,
-                formData.text,
-                formData.date,
-                new Date().toISOString() // Update 'createdAt' to 'lastEdited'
-            ];
             
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.update({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A${rowIndex}:D${rowIndex}`, // Adjust range
+                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [rowData]
@@ -1606,29 +1686,22 @@ D           document.getElementById('announcementDate').value = today;
                 });
                 
                 console.log('Row updated:', response);
-                alert('✅ Pengumuman berhasil diupdate!');
-                closeAnnouncementModal();
-                await displayAnnouncements(); // Refresh list
                 
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('✅ Data berhasil diupdate!');
+                return response;
             } catch (error) {
                 console.error('Error updating row:', error);
-                alert('❌ Gagal mengupdate data: ' + error.result.error.message);
+                alert('❌ Gagal mengupdate data: ' + error.message);
+                throw error;
             }
         }
 
-        function handleDeleteClick(rowIndex) {
+        async function deleteRow(sheetName, rowIndex) {
             if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu.');
-                return;
-            }
-            if (confirm(`⚠️ Yakin ingin menghapus pengumuman di baris ${rowIndex}?`)) {
-                handleDeleteAnnouncement(rowIndex);
-            }
-        }
-
-        async function handleDeleteAnnouncement(rowIndex) {
-            if (!accessToken) {
-                alert('❌ Harap "Otentikasi Google" terlebih dahulu.');
+                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
             
@@ -1639,14 +1712,16 @@ D           document.getElementById('announcementDate').value = today;
                 });
                 
                 const sheet = spreadsheet.result.sheets.find(
-                    s => s.properties.title === CONFIG.SHEET_NAME
+                    s => s.properties.title === sheetName
                 );
                 
-                if (!sheet) throw new Error('Sheet not found');
+                if (!sheet) {
+                    throw new Error('Sheet not found');
+                }
                 
                 const sheetId = sheet.properties.sheetId;
                 
-                // Delete the entire row
+                // Delete the entire row using batchUpdate
                 const response = await gapi.client.sheets.spreadsheets.batchUpdate({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
                     resource: {
@@ -1655,7 +1730,7 @@ D           document.getElementById('announcementDate').value = today;
                                 range: {
                                     sheetId: sheetId,
                                     dimension: 'ROWS',
-                                    startIndex: rowIndex - 1, // 0-based
+                                    startIndex: rowIndex - 1, // 0-based index
                                     endIndex: rowIndex // exclusive
                                 }
                             }
@@ -1664,26 +1739,98 @@ D           document.getElementById('announcementDate').value = today;
                 });
                 
                 console.log('Row deleted:', response);
-                alert('✅ Pengumuman berhasil dihapus!');
-                await displayAnnouncements(); // Refresh list
                 
+                delete appState.cache[sheetName];
+                await loadSheetData(sheetName, true);
+                
+                alert('✅ Baris berhasil dihapus sepenuhnya!');
+                return response;
             } catch (error) {
                 console.error('Error deleting row:', error);
-                alert('❌ Gagal menghapus baris: ' + error.result.error.message);
+                alert('❌ Gagal menghapus baris: ' + error.message);
+                throw error;
             }
         }
 
-        // ============ INITIALIZATION ============
-        window.addEventListener('DOMContentLoaded', async () => {
-            // Start cookie auth check and inactivity timer
-            if (checkAuth()) {
-                startInactivityTimer();
+        // ============ EVENT HANDLERS ============
+        function handleSheetChange() {
+        const sheetSelect = document.getElementById('sheetSelect');
+        const selectedSheet = sheetSelect.value;
+    
+        if (selectedSheet) {
+        // Reset filter when changing sheet
+        appState.currentFilter = 'all';
+        const filterSelect = document.getElementById('triwulanFilter');
+        if (filterSelect) {
+            filterSelect.value = 'all';
+            filterSelect.classList.remove('filtered');
+        }
+        
+        saveLastSheet(selectedSheet);
+        loadSheetData(selectedSheet);
+        } else {
+        showEmptyState();
+        }
+    }
+
+        function handleRefresh() {
+            const sheetSelect = document.getElementById('sheetSelect');
+            const selectedSheet = sheetSelect.value;
+            
+            if (!selectedSheet) {
+                alert('Pilih toko terlebih dahulu');
+                return;
             }
             
-            // Load announcements (public read)
-            await displayAnnouncements();
+            loadSheetData(selectedSheet, true);
+        }
+
+        function handleDelete(rowIndex) {
+            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+                return;
+            }
             
-            // NEW: Load Google API scripts
+            deleteRow(appState.currentSheet, rowIndex);
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const triwulan = document.getElementById('triwulan').value;
+            const bulan = document.getElementById('bulan').value;
+            const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
+            const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value);
+            const bayarListrik = parseNumber(document.getElementById('bayarListrik').value);
+            
+            // Get calculated values
+            const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
+            const sisaSurkas = parseNumber(document.getElementById('sisaSurkas').value);
+
+            const rowData = [
+                triwulan,
+                bulan,
+                ebitdaLR,
+                penggunaanLabaKas,
+                labaNetDitransfer,
+                bayarListrik,
+                sisaSurkas
+            ];
+
+            const editRowIndex = document.getElementById('editRowIndex').value;
+            
+            if (editRowIndex) {
+                await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData);
+            } else {
+                await addRow(appState.currentSheet, rowData);
+            }
+            
+            closeModal();
+        }
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, waiting for Google APIs...');
+            
             setTimeout(() => {
                 if (typeof gapi !== 'undefined') {
                     gapiLoaded();
@@ -1694,14 +1841,12 @@ D           document.getElementById('announcementDate').value = today;
             }, 500);
         });
 
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('announcementModal');
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
             if (event.target === modal) {
-                closeAnnouncementModal();
+                closeModal();
             }
-        });
-        
+        }
     </script>
 </body>
 </html>
