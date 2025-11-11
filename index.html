@@ -284,6 +284,379 @@
             font-size: 0.85em;
         }
 
+        /* Announcement Board */
+.announcement-board {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 20px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+    position: relative;
+    overflow: hidden;
+}
+
+.announcement-board::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+
+.announcement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.announcement-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.3em;
+    font-weight: 700;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.announcement-title .icon {
+    font-size: 1.4em;
+    animation: ring 2s ease-in-out infinite;
+}
+
+@keyframes ring {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(-10deg); }
+    20%, 40% { transform: rotate(10deg); }
+}
+
+.close-announcements {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.close-announcements:hover {
+    background: white;
+    transform: rotate(90deg) scale(1.1);
+}
+
+.announcements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.announcement-item {
+    background: rgba(255,255,255,0.95);
+    padding: 18px 22px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 5px solid #FF69B4;
+}
+
+.announcement-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.announcement-item.type-surplus {
+    border-left-color: #4CAF50;
+}
+
+.announcement-item.type-employee {
+    border-left-color: #2196F3;
+}
+
+.announcement-item.type-maintenance {
+    border-left-color: #FF9800;
+}
+
+.announcement-item.type-utility {
+    border-left-color: #9C27B0;
+}
+
+.announcement-icon {
+    font-size: 2em;
+    flex-shrink: 0;
+}
+
+.announcement-content {
+    flex: 1;
+}
+
+.announcement-text {
+    color: #333;
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.announcement-date {
+    color: #666;
+    font-size: 0.85em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.announcement-badge {
+    background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Admin Add Announcement Button */
+.admin-announcement-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: white;
+    border: none;
+    padding: 18px 30px;
+    border-radius: 50px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.admin-announcement-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 165, 0, 0.5);
+}
+
+/* Announcement Modal */
+.announcement-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+.announcement-modal.active {
+    display: flex;
+}
+
+.announcement-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    max-width: 550px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.announcement-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #FFD700;
+}
+
+.announcement-modal-header h2 {
+    color: #FFA500;
+    font-size: 1.6em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-announcement-modal {
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.close-announcement-modal:hover {
+    color: #FFA500;
+    transform: rotate(90deg);
+}
+
+.announcement-form-group {
+    margin-bottom: 20px;
+}
+
+.announcement-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.announcement-form-group input,
+.announcement-form-group textarea,
+.announcement-form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.announcement-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.announcement-form-group input:focus,
+.announcement-form-group textarea:focus,
+.announcement-form-group select:focus {
+    outline: none;
+    border-color: #FFA500;
+    box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
+}
+
+.announcement-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.btn-submit-announcement,
+.btn-cancel-announcement {
+    flex: 1;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit-announcement {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.btn-submit-announcement:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4);
+}
+
+.btn-cancel-announcement {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.btn-cancel-announcement:hover {
+    background: #d0d0d0;
+}
+
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .announcement-board {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .announcement-title {
+        font-size: 1.1em;
+    }
+
+    .announcement-item {
+        padding: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .announcement-icon {
+        font-size: 1.5em;
+    }
+
+    .announcement-badge {
+        align-self: flex-start;
+    }
+
+    .admin-announcement-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        font-size: 0.9em;
+    }
+
+    .announcement-modal-content {
+        padding: 25px;
+    }
+
+    .announcement-form-actions {
+        flex-direction: column;
+    }
+}
+        
         /* Stats Cards */
         .stats-preview {
             display: grid;
@@ -501,6 +874,21 @@
             <div class="year-badge">📅 Tahun 2025</div>
         </div>
 
+        <!-- Announcement Board -->
+        <div class="announcement-board" id="announcementBoard" style="display: none;">
+            <div class="announcement-header">
+                <div class="announcement-title">
+                    <span class="icon">📢</span>
+                    <span>Pengumuman Terbaru</span>
+                </div>
+                <button class="close-announcements" onclick="closeAnnouncements()" title="Tutup pengumuman">✕</button>
+            </div>
+            
+            <div class="announcements-list">
+                <!-- Announcements will be loaded here dynamically -->
+            </div>
+        </div>
+        
         <div class="stats-preview">
             <div class="stat-mini">
                 <div class="icon">🏪</div>
@@ -560,6 +948,58 @@
         </div>
     </div>
 
+    <!-- Admin Add Announcement Button (only visible to admin) -->
+    <button class="admin-announcement-btn" id="adminAnnouncementBtn" onclick="openAnnouncementModal()">
+        <span>📢</span>
+        <span>Tambah Pengumuman</span>
+    </button>
+
+    <!-- Announcement Modal -->
+    <div class="announcement-modal" id="announcementModal">
+        <div class="announcement-modal-content">
+            <div class="announcement-modal-header">
+                <h2>
+                    <span>📢</span>
+                    <span>Tambah Pengumuman Baru</span>
+                </h2>
+                <button class="close-announcement-modal" onclick="closeAnnouncementModal()">&times;</button>
+            </div>
+            
+            <form id="announcementForm" onsubmit="handleAnnouncementSubmit(event)">
+                <div class="announcement-form-group">
+                    <label for="announcementType">Tipe Pengumuman *</label>
+                    <select id="announcementType" required>
+                        <option value="">Pilih Tipe...</option>
+                        <option value="surplus">💰 Surplus Kas</option>
+                        <option value="employee">👥 Karyawan</option>
+                        <option value="maintenance">✅ Maintenance</option>
+                        <option value="utility">⚡ Utilitas</option>
+                    </select>
+                </div>
+
+                <div class="announcement-form-group">
+                    <label for="announcementText">Teks Pengumuman *</label>
+                    <textarea id="announcementText" placeholder="Contoh: Surplus Kas bulan November 2025 telah ditambahkan!" required maxlength="200"></textarea>
+                    <small style="color: #999; font-size: 0.85em;">Maksimal 200 karakter</small>
+                </div>
+
+                <div class="announcement-form-group">
+                    <label for="announcementDate">Tanggal *</label>
+                    <input type="date" id="announcementDate" required>
+                </div>
+
+                <div class="announcement-form-actions">
+                    <button type="submit" class="btn-submit-announcement">
+                        Publikasikan
+                    </button>
+                    <button type="button" class="btn-cancel-announcement" onclick="closeAnnouncementModal()">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script>
         // ============ AUTH SYSTEM ============
         function getCookie(name) {
@@ -652,11 +1092,6 @@
         document.addEventListener(event, resetInactivityTimer, true);
         });
 
-        // Start timer when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-        startInactivityTimer();
-        });
-        
         function logout(message = null) {
             if (!message && !confirm('Yakin ingin logout?')) return;
             deleteCookie('userAuth');
@@ -705,16 +1140,136 @@
             console.log('Dashboard loaded at:', timeString);
         }
 
-        window.addEventListener('DOMContentLoaded', updateTimestamp);
+        // ============ GOOGLE SHEETS CONFIG FOR ANNOUNCEMENTS ============
+        const ANNOUNCEMENT_CONFIG = {
+            SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SHEET_NAME: 'Pengumuman'
+        };
+
+        // ============ ANNOUNCEMENT FUNCTIONS ============
+        async function loadAnnouncements() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${ANNOUNCEMENT_CONFIG.SPREADSHEET_ID}/values/${ANNOUNCEMENT_CONFIG.SHEET_NAME}?key=${ANNOUNCEMENT_CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error || !data.values || data.values.length <= 1) {
+                    return [];
+                }
+                
+                return data.values.slice(1).map(row => ({
+                    type: row[0] || 'surplus',
+                    text: row[1] || '',
+                    date: row[2] || new Date().toISOString().split('T')[0],
+                    createdAt: row[3] || new Date().toISOString()
+                }));
+            } catch (error) {
+                console.log('No announcements or error loading:', error);
+                return [];
+            }
+        }
+
+        async function displayAnnouncements() {
+            const announcements = await loadAnnouncements();
+            const board = document.getElementById('announcementBoard');
+            
+            if (!announcements || announcements.length === 0) {
+                board.style.display = 'none';
+                return;
+            }
+
+            announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const typeIcons = {
+                surplus: '💰',
+                employee: '👥',
+                maintenance: '✅',
+                utility: '⚡'
+            };
+
+            const typeBadges = {
+                surplus: 'Keuangan',
+                employee: 'SDM',
+                maintenance: 'Maintenance',
+                utility: 'Utilitas'
+            };
+
+            const listHtml = announcements.slice(0, 10).map(ann => `
+                <div class="announcement-item type-${ann.type}">
+                    <div class="announcement-icon">${typeIcons[ann.type] || '📢'}</div>
+                    <div class="announcement-content">
+                        <div class="announcement-text">${ann.text}</div>
+                        <div class="announcement-date">
+                            <span>🗓️</span>
+                            <span>${formatAnnouncementDate(ann.date)}</span>
+                        </div>
+                    </div>
+                    <div class="announcement-badge">${typeBadges[ann.type] || 'Info'}</div>
+                </div>
+            `).join('');
+
+            document.querySelector('.announcements-list').innerHTML = listHtml;
+            board.style.display = 'block';
+        }
+
+        function formatAnnouncementDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function closeAnnouncements() {
+            const board = document.getElementById('announcementBoard');
+            board.style.animation = 'fadeOutUp 0.5s ease-out';
+            setTimeout(() => {
+                board.style.display = 'none';
+                sessionStorage.setItem('announcementsClosed', 'true');
+            }, 500);
+        }
+
+        function openAnnouncementModal() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('announcementDate').value = today;
+            document.getElementById('announcementForm').reset();
+            document.getElementById('announcementDate').value = today;
+            document.getElementById('announcementModal').classList.add('active');
+        }
+
+        function closeAnnouncementModal() {
+            document.getElementById('announcementModal').classList.remove('active');
+        }
+
+        async function handleAnnouncementSubmit(event) {
+            event.preventDefault();
+            alert('⚠️ Fitur ini memerlukan Google Sheets API dengan OAuth.\n\nSilakan buka halaman Surplus Kas untuk authenticate terlebih dahulu, lalu kembali ke dashboard untuk menambah pengumuman.');
+            closeAnnouncementModal();
+        }
+
+        // Load announcements on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (sessionStorage.getItem('announcementsClosed') !== 'true') {
+                await displayAnnouncements();
+            }
+            
+            // Show admin button only for admin role
+            const authData = getAuthData();
+            if (authData?.role && authData.role.toLowerCase() === 'admin') {
+                document.getElementById('adminAnnouncementBtn').style.display = 'flex';
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('announcementModal');
+            if (event.target === modal) {
+                closeAnnouncementModal();
+            }
+        });
+        
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
