@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari - Dashboard</title>
-    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -1178,6 +1178,7 @@
 
         // ============ GOOGLE API INITIALIZATION ============
         function gapiLoaded() {
+            console.log('📦 GAPI script loaded');
             gapi.load('client', initializeGapiClient);
         }
 
@@ -1196,6 +1197,7 @@
         }
 
         function gisLoaded() {
+            console.log('📦 GIS script loaded');
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.CLIENT_ID,
                 scope: CONFIG.SCOPES,
@@ -1208,11 +1210,43 @@
 
         function maybeEnableButtons() {
             if (gapiInited && gisInited) {
+                console.log('✅ Both Google APIs ready');
                 restoreOAuthToken();
                 if (currentUserRole && currentUserRole.toLowerCase() === 'admin') {
                     updateUIBasedOnRole(currentUserRole);
                 }
+            } else {
+                console.log('⏳ Waiting for APIs... GAPI:', gapiInited, 'GIS:', gisInited);
             }
+        }
+
+        // Polling function to check if Google APIs are loaded
+        function waitForGoogleAPIs() {
+            let attempts = 0;
+            const maxAttempts = 50; // 10 seconds total (50 * 200ms)
+            
+            const checkInterval = setInterval(() => {
+                attempts++;
+                
+                // Check if gapi is available
+                if (typeof gapi !== 'undefined' && !gapiInited) {
+                    gapiLoaded();
+                }
+                
+                // Check if google.accounts is available
+                if (typeof google !== 'undefined' && typeof google.accounts !== 'undefined' && !gisInited) {
+                    gisLoaded();
+                }
+                
+                // Stop checking if both are initialized or max attempts reached
+                if ((gapiInited && gisInited) || attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    if (attempts >= maxAttempts && (!gapiInited || !gisInited)) {
+                        console.error('❌ Google APIs failed to load after 10 seconds');
+                        console.log('GAPI loaded:', gapiInited, 'GIS loaded:', gisInited);
+                    }
+                }
+            }, 200);
         }
 
         function handleAuth() {
@@ -1222,7 +1256,11 @@
             }
             
             if (!gapiInited || !gisInited) {
-                alert('⏳ Tunggu sebentar, Google API belum selesai diinisialisasi.');
+                alert('⏳ Tunggu sebentar, Google API masih memuat...\n\nSilakan coba lagi dalam beberapa detik.');
+                console.warn('Auth attempted but APIs not ready. GAPI:', gapiInited, 'GIS:', gisInited);
+                
+                // Try to initialize again
+                waitForGoogleAPIs();
                 return;
             }
             
@@ -1250,10 +1288,15 @@
                 console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
             };
 
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
+            try {
+                if (gapi.client.getToken() === null) {
+                    tokenClient.requestAccessToken({prompt: 'consent'});
+                } else {
+                    tokenClient.requestAccessToken({prompt: ''});
+                }
+            } catch (error) {
+                console.error('Error requesting access token:', error);
+                alert('❌ Terjadi kesalahan saat meminta akses. Silakan refresh halaman dan coba lagi.');
             }
         }
 
