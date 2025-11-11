@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari - Dashboard</title>
     <style>
-        /* ... All your existing CSS ... */
-        /* I will add the new styles for the Auth button */
-        
         * {
             margin: 0;
             padding: 0;
@@ -968,13 +965,62 @@
         </div>
         
         <div class="stats-preview">
+            <div class="stat-mini">
+                <div class="icon">🏪</div>
+                <div class="value">4</div>
+                <div class="label">Modul Aktif</div>
             </div>
+            <div class="stat-mini">
+                <div class="icon">📊</div>
+                <div class="value">Real-time</div>
+                <div class="label">Update Data</div>
+            </div>
+            <div class="stat-mini">
+                <div class="icon">🔒</div>
+                <div class="value">Secure</div>
+                <div class="label">Authentication</div>
+            </div>
+            <div class="stat-mini">
+                <div class="icon">☁️</div>
+                <div class="value">Cloud</div>
+                <div class="label">Based System</div>
+            </div>
+        </div>
         
         <div class="menu-grid">
-            </div>
+            <a href="surkas2025.html" class="menu-card">
+                <span class="menu-icon">💰</span>
+                <h2>Surplus Kas</h2>
+                <p>Monitoring dan pelaporan pembagian surplus kas Toko Carang Sari</p>
+                <span class="badge">Keuangan</span>
+            </a>
+            
+            <a href="listrik2025.html" class="menu-card">
+                <span class="menu-icon">⚡</span>
+                <h2>Pembayaran Listrik Toko</h2>
+                <p>Monitoring tagihan dan pembayaran listrik bulanan Toko Carang Sari</p>
+                <span class="badge">Utilitas</span>
+            </a>
+            
+            <a href="checklistbulanan.html" class="menu-card">
+                <span class="menu-icon">✅</span>
+                <h2>Checklist Kondisi Toko</h2>
+                <p>Kondisi Terkini Toko Carang Sari</p>
+                <span class="badge">Maintenance</span>
+            </a>
+            
+            <a href="datakaryawan.html" class="menu-card">
+                <span class="menu-icon">👥</span>
+                <h2>Data Karyawan Toko</h2>
+                <p>Informasi karyawan toko Carang Sari aktif</p>
+                <span class="badge">SDM</span>
+            </a>
+        </div>
         
         <div class="footer">
-            </div>
+            <p>© 2025 SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari. All rights reserved.</p>
+            <p>Dikembangkan dengan ❤️ untuk efisiensi bisnis yang lebih baik</p>
+        </div>
     </div>
 
     <button class="admin-announcement-btn" id="adminAnnouncementBtn" onclick="openAnnouncementModal()">
@@ -1312,7 +1358,38 @@
         }
 
         // ============ MENU INTERACTIONS ============
-        // ... (no changes to menu interactions) ...
+        // Animasi smooth dan feedback visual
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                this.style.opacity = '0.7';
+                setTimeout(() => {
+                    this.style.opacity = '1';
+                }, 200);
+            });
+        });
+
+        // Log klik untuk analytics
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const menuName = this.querySelector('h2').textContent;
+                console.log('Menu diklik:', menuName);
+                // Bisa ditambahkan Google Analytics atau tracking lainnya
+            });
+        });
+
+        // Auto-update timestamp (opsional)
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            console.log('Dashboard loaded at:', timeString);
+        }
 
         // ============ ANNOUNCEMENT FUNCTIONS ============
         
@@ -1358,8 +1435,19 @@
 
             announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            const typeIcons = { /* ... icons ... */ };
-            const typeBadges = { /* ... badges ... */ };
+            const typeIcons = {
+                surplus: '💰',
+                employee: '👥',
+                maintenance: '✅',
+                utility: '⚡'
+            };
+
+            const typeBadges = {
+                surplus: 'Keuangan',
+                employee: 'SDM',
+                maintenance: 'Maintenance',
+                utility: 'Utilitas'
+            };
 
             const isAdmin = CURRENT_AUTH_DATA?.role && CURRENT_AUTH_DATA.role.toLowerCase() === 'admin';
             
@@ -1380,7 +1468,12 @@
                     ${adminButtons}
                     <div class="announcement-icon">${typeIcons[ann.type] || '📢'}</div>
                     <div class="announcement-content">
+                        <div class="announcement-text">${ann.text}</div>
+                        <div class="announcement-date">
+                            <span>🗓️</span>
+                            <span>${formatAnnouncementDate(ann.date)}</span>
                         </div>
+                    </div>
                     <div class="announcement-badge">${typeBadges[ann.type] || 'Info'}</div>
                 </div>
             `}).join('');
@@ -1390,7 +1483,12 @@
         }
 
         function formatAnnouncementDate(dateString) {
-            // ... (no changes) ...
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
         }
 
         function openAnnouncementModal() {
@@ -1398,13 +1496,12 @@
                 alert('❌ Harap "Otentikasi Google" terlebih dahulu sebelum menambah data.');
                 return;
             }
-            // ... (rest of the function is fine) ...
             document.getElementById('modalTitle').innerHTML = '<span>📢</span> <span>Tambah Pengumuman Baru</span>';
             document.getElementById('announcementSubmitBtn').textContent = 'Publikasikan';
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('announcementForm').reset();
             document.getElementById('announcementRowIndex').value = '';
-            document.getElementById('announcementDate').value = today;
+D           document.getElementById('announcementDate').value = today;
             document.getElementById('announcementModal').classList.add('active');
         }
         
@@ -1413,7 +1510,7 @@
                 alert('❌ Harap "Otentikasi Google" terlebih dahulu sebelum mengedit data.');
                 return;
             }
-            // ... (rest of the function is fine) ...
+            
             const data = RAW_ANNOUNCEMENTS_DATA[dataIndex];
             if (!data) return;
             const sheetRowIndex = dataIndex + 2;
@@ -1495,7 +1592,7 @@
                 formData.type,
                 formData.text,
                 formData.date,
-                formData.createdAt // You might want to update the "last edited" time
+                new Date().toISOString() // Update 'createdAt' to 'lastEdited'
             ];
             
             try {
