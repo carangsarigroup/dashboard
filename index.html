@@ -1397,7 +1397,7 @@
 
             board.style.display = 'block';
 
-            const isAdminAuthenticated = accessToken !== null;
+           const isAdminAuthenticated = accessToken !== null && authData?.role?.toLowerCase() === 'admin';
             
             announcements.forEach((item, index) => {
                 // RowIndex in sheet is 1-indexed and starts from row 2 (after header row)
@@ -1557,5 +1557,6 @@
     </script>
 </body>
 </html>
+
 
 
