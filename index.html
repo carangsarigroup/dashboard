@@ -478,6 +478,26 @@
             z-index: 1;
         }
 
+        .no-announcements {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .no-announcements .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .no-announcements p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
         .announcement-item {
             background: rgba(255,255,255,0.95);
             padding: 18px 22px;
@@ -1481,15 +1501,24 @@
             
             if (listContainer) listContainer.innerHTML = '';
 
-            if (announcements.length === 0) {
-                if (board) board.style.display = 'none';
-                return;
-            }
-
+            // Always show the board (don't hide it)
             if (board) board.style.display = 'block';
 
             const isAdminAuthenticated = accessToken !== null && currentUserRole?.toLowerCase() === 'admin';
             
+            // If no announcements, show empty state
+            if (announcements.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'no-announcements';
+                emptyDiv.innerHTML = `
+                    <div class="icon">📭</div>
+                    <p>Tidak ada pengumuman baru</p>
+                `;
+                if (listContainer) listContainer.appendChild(emptyDiv);
+                return;
+            }
+
+            // Display all announcements
             announcements.forEach((item, index) => {
                 const rowIndex = index + 2;
 
@@ -1621,6 +1650,10 @@
 
             // Start inactivity timer for logged-in users
             startInactivityTimer();
+
+            // Start polling for Google APIs
+            console.log('📡 Starting Google API initialization...');
+            waitForGoogleAPIs();
 
             // Load announcements if not closed previously
             if (sessionStorage.getItem('announcementsClosed') !== 'true') {
