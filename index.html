@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari - Dashboard</title>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
     <style>
         * {
             margin: 0;
@@ -128,12 +128,14 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
             white-space: nowrap;
-            /* Tambahkan display: none secara default. JS akan menampilkannya hanya untuk Admin */
-            display: none; 
+        }
+
+        .auth-btn.show {
+            display: flex;
         }
 
         .auth-btn:hover {
@@ -191,7 +193,7 @@
             gap: 20px;
             margin-bottom: 40px;
             position: relative;
-            z-index: 100; /* Penting untuk visibilitas di atas elemen lain */
+            z-index: 100;
         }
         
         .stat-mini {
@@ -229,7 +231,6 @@
             color: #666;
             font-weight: 500;
         }
-        /* End Stats Preview CSS */
 
         .menu-grid {
             display: grid;
@@ -361,430 +362,465 @@
             font-size: 0.85em;
         }
 
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #FF69B4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Announcement Board */
-.announcement-board {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    border-radius: 20px;
-    padding: 25px 30px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3);
-    border: 3px solid rgba(255, 255, 255, 0.5);
-    animation: fadeInUp 0.8s ease-out 0.2s both;
-    position: relative;
-    overflow: hidden;
-}
+        .announcement-board {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
 
-.announcement-board::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: rotate(45deg);
-    animation: shimmer 3s infinite;
-}
+        .announcement-board::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
 
-@keyframes shimmer {
-    0% { transform: translateX(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) rotate(45deg); }
-}
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
 
-.announcement-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
-}
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-.announcement-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.3em;
-    font-weight: 700;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-}
+        .announcement-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
 
-.announcement-title .icon {
-    font-size: 1.4em;
-    animation: ring 2s ease-in-out infinite;
-}
+        .announcement-title .icon {
+            font-size: 1.4em;
+            animation: ring 2s ease-in-out infinite;
+        }
 
-@keyframes ring {
-    0%, 100% { transform: rotate(0deg); }
-    10%, 30% { transform: rotate(-10deg); }
-    20%, 40% { transform: rotate(10deg); }
-}
+        @keyframes ring {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
+        }
 
-.close-announcements {
-    background: rgba(255,255,255,0.9);
-    border: none;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
+        .close-announcements {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
 
-.close-announcements:hover {
-    background: white;
-    transform: rotate(90deg) scale(1.1);
-}
+        .close-announcements:hover {
+            background: white;
+            transform: rotate(90deg) scale(1.1);
+        }
 
-.announcements-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    position: relative;
-    z-index: 1;
-}
+        .announcements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
 
-.announcement-item {
-    background: rgba(255,255,255,0.95);
-    padding: 18px 22px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    border-left: 5px solid #FFD700;
-}
+        .announcement-item {
+            background: rgba(255,255,255,0.95);
+            padding: 18px 22px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #FFD700;
+        }
 
-.announcement-item:hover {
-    background: white;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
+        .announcement-item:hover {
+            background: white;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
 
-.announcement-content {
-    flex-grow: 1;
-}
+        .announcement-content {
+            flex-grow: 1;
+        }
 
-.announcement-type {
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #FFA500;
-    display: inline-block;
-    margin-bottom: 5px;
-    background: #fff8e1;
-    padding: 4px 10px;
-    border-radius: 8px;
-}
+        .announcement-type {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #FFA500;
+            display: inline-block;
+            margin-bottom: 5px;
+            background: #fff8e1;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
 
-.announcement-title-text {
-    font-size: 1.1em;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 5px;
-    line-height: 1.4;
-}
+        .announcement-title-text {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
 
-.announcement-date {
-    font-size: 0.8em;
-    color: #999;
-}
+        .announcement-date {
+            font-size: 0.8em;
+            color: #999;
+        }
 
-.announcement-actions {
-    display: none; /* Only show when admin is authenticated */
-    white-space: nowrap;
-}
+        .announcement-actions {
+            display: none;
+            white-space: nowrap;
+        }
 
-.btn-edit, .btn-delete {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 0.9em;
-    cursor: pointer;
-    margin-left: 5px;
-    transition: all 0.2s ease;
-    font-weight: 600;
-}
+        .announcement-actions.show {
+            display: block;
+        }
 
-.btn-edit {
-    background: #4A90E2;
-    color: white;
-}
+        .btn-edit, .btn-delete {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
 
-.btn-edit:hover {
-    background: #357ABD;
-    transform: translateY(-1px);
-}
+        .btn-edit {
+            background: #4A90E2;
+            color: white;
+        }
 
-.btn-delete {
-    background: #dc3545;
-    color: white;
-}
+        .btn-edit:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
 
-.btn-delete:hover {
-    background: #c82333;
-    transform: translateY(-1px);
-}
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
 
-.add-btn {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    font-size: 0.9em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
 
-.add-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-}
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            white-space: nowrap;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
 
-/* Modal Styles for Announcement CRUD */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 2000;
-    animation: fadeIn 0.3s ease;
-}
+        .add-btn.show {
+            display: flex;
+        }
 
-.modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
 
-.announcement-modal-content {
-    background: white;
-    border-radius: 20px;
-    padding: 35px;
-    max-width: 550px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    animation: fadeInUp 0.3s ease-out;
-}
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
 
-.announcement-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 3px solid #FFD700;
-}
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.announcement-modal-header h2 {
-    color: #FFA500;
-    font-size: 1.6em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+        .announcement-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.3s ease-out;
+        }
 
-.close-announcement-modal {
-    background: none;
-    border: none;
-    font-size: 2em;
-    color: #999;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1;
-}
+        .announcement-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #FFD700;
+        }
 
-.close-announcement-modal:hover {
-    color: #FFA500;
-    transform: rotate(90deg);
-}
+        .announcement-modal-header h2 {
+            color: #FFA500;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.announcement-form-group {
-    margin-bottom: 20px;
-}
+        .close-announcement-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
 
-.announcement-form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
-    font-size: 0.95em;
-}
+        .close-announcement-modal:hover {
+            color: #FFA500;
+            transform: rotate(90deg);
+        }
 
-.announcement-form-group input, .announcement-form-group textarea, .announcement-form-group select {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
+        .announcement-form-group {
+            margin-bottom: 20px;
+        }
 
-.announcement-form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-}
+        .announcement-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
 
-.announcement-form-group input:focus, .announcement-form-group textarea:focus, .announcement-form-group select:focus {
-    outline: none;
-    border-color: #FFA500;
-    box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.2);
-}
+        .announcement-form-group input, .announcement-form-group textarea, .announcement-form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
 
-.form-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
+        .announcement-form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
-.btn-submit {
-    flex: 1;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1em;
-    font-weight: 700;
-    cursor: pointer;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
-    transition: all 0.3s ease;
-}
+        .announcement-form-group input:focus, .announcement-form-group textarea:focus, .announcement-form-group select:focus {
+            outline: none;
+            border-color: #FFA500;
+            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.2);
+        }
 
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-}
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
 
-.btn-cancel {
-    flex: 1;
-    padding: 12px 30px;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    background: white;
-    color: #666;
-    transition: all 0.3s ease;
-}
+        .btn-submit {
+            flex: 1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
 
-.btn-cancel:hover {
-    border-color: #FFA500;
-    color: #FFA500;
-}
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
 
-/* Logout Warning Modal */
-.logout-warning {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 3000;
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.3s ease;
-}
+        .btn-cancel {
+            flex: 1;
+            padding: 12px 30px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #666;
+            transition: all 0.3s ease;
+        }
 
-.logout-warning.show {
-    display: flex;
-}
+        .btn-cancel:hover {
+            border-color: #FFA500;
+            color: #FFA500;
+        }
 
-.warning-content {
-    background: white;
-    padding: 30px 40px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    max-width: 400px;
-    animation: slideUp 0.3s ease;
-}
+        /* Logout Warning Modal */
+        .logout-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
 
-.warning-content h3 {
-    color: #FF69B4;
-    font-size: 1.5em;
-    margin-bottom: 15px;
-}
+        .logout-warning.show {
+            display: flex;
+        }
 
-.warning-content p {
-    color: #666;
-    margin-bottom: 25px;
-    font-size: 1.1em;
-}
+        .warning-content {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            animation: slideUp 0.3s ease;
+        }
 
-.warning-content button {
-    background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        .warning-content h3 {
+            color: #FF69B4;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
 
-.warning-content button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-}
+        .warning-content p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+        .warning-content button {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-/* Responsive for mobile */
-@media (max-width: 768px) {
-    .user-bar { 
-        top: 10px; 
-        right: 10px; 
-        flex-direction: column; 
-        align-items: flex-end; 
-        gap: 10px; 
-    }
-    .user-info, .logout-btn, .auth-btn { 
-        padding: 10px 20px; 
-        font-size: 0.85em; 
-    }
-    .user-name { max-width: 100px; }
-    .header { margin-bottom: 30px; padding: 30px 15px; }
-    .header h1 { font-size: 2em; }
-    .header p { font-size: 1.1em; }
-    .menu-grid { grid-template-columns: 1fr; gap: 20px; }
-    .announcement-board { padding: 20px; }
-    .announcement-title { font-size: 1.2em; }
-    .add-btn { padding: 8px 15px; font-size: 0.8em; }
-    .announcement-item { flex-direction: column; align-items: flex-start; }
-    .announcement-actions { margin-top: 10px; }
-    .stats-preview { grid-template-columns: 1fr; }
-}
+        .warning-content button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive for mobile */
+        @media (max-width: 768px) {
+            .user-bar { 
+                top: 10px; 
+                right: 10px; 
+                flex-direction: column; 
+                align-items: flex-end; 
+                gap: 10px; 
+            }
+            .user-info, .logout-btn, .auth-btn { 
+                padding: 10px 20px; 
+                font-size: 0.85em; 
+            }
+            .user-name { max-width: 100px; }
+            .header { margin-bottom: 30px; padding: 30px 15px; }
+            .header h1 { font-size: 2em; }
+            .header p { font-size: 1.1em; }
+            .menu-grid { grid-template-columns: 1fr; gap: 20px; }
+            .announcement-board { padding: 20px; }
+            .announcement-title { font-size: 1.2em; }
+            .add-btn { padding: 8px 15px; font-size: 0.8em; }
+            .announcement-item { flex-direction: column; align-items: flex-start; }
+            .announcement-actions { margin-top: 10px; }
+            .stats-preview { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -816,18 +852,23 @@
             <div class="year-badge">📅 Tahun 2025</div>
         </div>
 
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+            <p>Memuat pengumuman...</p>
+        </div>
+
         <div class="announcement-board" id="announcementBoard" style="display: none;">
             <div class="announcement-header">
                 <div class="announcement-title">
                     <span class="icon">📢</span> <span>Pengumuman Terbaru</span>
                 </div>
-                <button id="adminAnnouncementBtn" class="add-btn" onclick="openAnnouncementModal('add')" style="display: none;">
+                <button id="adminAnnouncementBtn" class="add-btn" onclick="openAnnouncementModal('add')">
                     <span>➕ Tambah Pengumuman</span>
                 </button>
                 <button class="close-announcements" onclick="closeAnnouncements()" title="Tutup pengumuman">✕</button>
             </div>
-            <div class="announcements-list">
-                </div>
+            <div class="announcements-list" id="announcementsList">
+            </div>
         </div>
 
         <div class="stats-preview">
@@ -855,22 +896,26 @@
 
         <div class="menu-grid">
             <a href="surkas2025.html" class="menu-card">
-                <span class="menu-icon">💰</span> <h2>Surplus Kas</h2>
+                <span class="menu-icon">💰</span>
+                <h2>Surplus Kas</h2>
                 <p>Monitoring dan pelaporan pembagian surplus kas Toko Carang Sari</p>
                 <span class="badge">Keuangan</span>
             </a>
             <a href="listrik2025.html" class="menu-card">
-                <span class="menu-icon">⚡</span> <h2>Pembayaran Listrik Toko</h2>
+                <span class="menu-icon">⚡</span>
+                <h2>Pembayaran Listrik Toko</h2>
                 <p>Monitoring tagihan dan pembayaran listrik bulanan Toko Carang Sari</p>
                 <span class="badge">Utilitas</span>
             </a>
             <a href="checklistbulanan.html" class="menu-card">
-                <span class="menu-icon">✅</span> <h2>Checklist Kondisi Toko</h2>
+                <span class="menu-icon">✅</span>
+                <h2>Checklist Kondisi Toko</h2>
                 <p>Kondisi Terkini Toko Carang Sari</p>
                 <span class="badge">Maintenance</span>
             </a>
             <a href="datakaryawan.html" class="menu-card">
-                <span class="menu-icon">👥</span> <h2>Data Karyawan</h2>
+                <span class="menu-icon">👥</span>
+                <h2>Data Karyawan</h2>
                 <p>Manajemen dan rekapitulasi data karyawan Toko Carang Sari</p>
                 <span class="badge">SDM</span>
             </a>
@@ -920,6 +965,23 @@
     </div>
 
     <script>
+        // ============ CONFIG ============
+        const CONFIG = {
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+            SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg',
+            SHEET_NAME: 'Pengumuman',
+        };
+
+        // ============ GLOBAL STATE ============
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
+        let announcementData = [];
+        let currentUserRole = null;
+
         // ============ AUTH & UTILITY FUNCTIONS ============
         function getCookie(name) {
             const nameEQ = name + "=";
@@ -947,72 +1009,74 @@
         }
 
         function logout(message) {
-            // Clear Google Auth token (if gapi is loaded)
-            if (typeof gapi !== 'undefined' && gapi.client.getToken() !== null) {
-                google.accounts.oauth2.revoke(gapi.client.getToken().access_token, () => {
-                    console.log('OAuth token revoked');
-                });
-                gapi.client.setToken(null);
+            // Clear Google Auth token
+            if (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken() !== null) {
+                try {
+                    google.accounts.oauth2.revoke(gapi.client.getToken().access_token, () => {
+                        console.log('OAuth token revoked');
+                    });
+                    gapi.client.setToken(null);
+                } catch (e) {
+                    console.warn('Error revoking token:', e);
+                }
             }
-            clearStoredToken(); // Clear local storage token
-            deleteCookie('userAuth'); // Clear user cookie
-            updateAuthButton(false); // Update UI
+            clearStoredToken();
+            deleteCookie('userAuth');
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
-        // --- Perbaikan: Menyembunyikan tombol Auth dari Non-Admin ---
-        function updateUIBasedOnRole(role) {
-            const isAdmin = role && role.toLowerCase() === 'admin';
-            const addBtn = document.getElementById('adminAnnouncementBtn');
-            const authBtn = document.getElementById('authBtn');
-
-            // 1. Tampilkan tombol Tambah Pengumuman hanya untuk Admin
-            if (addBtn) {
-                addBtn.style.display = isAdmin ? 'flex' : 'none';
-            }
-
-            // 2. Tampilkan tombol Google Auth hanya untuk Admin
-            if (authBtn) {
-                authBtn.style.display = isAdmin ? 'flex' : 'none';
-                // Jika sudah auth, panggil updateAuthButton untuk mengupdate tampilannya
-                if (accessToken) { 
-                     updateAuthButton(true);
-                } else {
-                     updateAuthButton(false);
-                }
-            }
-            
-            // Re-display announcements to show/hide action buttons
-            displayAnnouncements();
-        }
-
-        // --- Perbaikan: Redirect Wajib Login ---
         function checkAuth() {
             const authData = getAuthData();
             if (!authData) {
-                // REDIRECT WAJIB LOGIN
+                // REDIRECT TO LOGIN - User must be logged in
                 window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
                 return false;
             }
+            
+            // Check if session expired
             if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
                 deleteCookie('userAuth');
-                // REDIRECT WAJIB LOGIN (Session expired)
                 window.location.href = 'login.html?message=' + encodeURIComponent('Session expired') + '&redirect=' + encodeURIComponent(window.location.pathname);
                 return false;
             }
             
             // Update UI
             document.getElementById('displayUsername').textContent = authData.username;
+            currentUserRole = authData.role;
             updateUIBasedOnRole(authData.role);
             return true;
+        }
+
+        function updateUIBasedOnRole(role) {
+            const isAdmin = role && role.toLowerCase() === 'admin';
+            const addBtn = document.getElementById('adminAnnouncementBtn');
+            const authBtn = document.getElementById('authBtn');
+
+            // Show buttons only for Admin
+            if (addBtn) {
+                if (isAdmin) {
+                    addBtn.classList.add('show');
+                } else {
+                    addBtn.classList.remove('show');
+                }
+            }
+
+            // Show Google Auth button only for Admin
+            if (authBtn) {
+                if (isAdmin) {
+                    authBtn.classList.add('show');
+                } else {
+                    authBtn.classList.remove('show');
+                }
+            }
         }
 
         // ============ AUTO-LOGOUT INACTIVITY TIMER ============
         let inactivityTimer;
         let warningTimer;
         let countdownInterval;
-        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
+        const WARNING_TIME = 60 * 1000; // 60 seconds warning
 
         function startInactivityTimer() {
             clearTimeout(inactivityTimer);
@@ -1052,23 +1116,7 @@
             window.addEventListener(event, resetInactivityTimer);
         });
 
-        // ============ CONFIG ============
-        const CONFIG = {
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com', 
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
-            
-            SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg', 
-            SHEET_NAME: 'Pengumuman',
-        };
-
-        // ============ OAUTH STATE & INITIALIZATION ============
-        let tokenClient;
-        let accessToken = null;
-        let gapiInited = false;
-        let gisInited = false;
-        let announcementData = []; 
-
+        // ============ OAUTH TOKEN MANAGEMENT ============
         function storeOAuthToken(token, expiresIn) {
             try {
                 const expiryTime = Date.now() + (expiresIn * 1000);
@@ -1087,13 +1135,19 @@
 
                 if (token && expiry && Date.now() < parseInt(expiry)) {
                     accessToken = token;
-                    gapi.client.setToken({ access_token: accessToken });
+                    if (typeof gapi !== 'undefined' && gapi.client) {
+                        gapi.client.setToken({ access_token: accessToken });
+                    }
                     updateAuthButton(true);
                     return true;
+                } else {
+                    clearStoredToken();
+                    updateAuthButton(false);
+                    return false;
                 }
-                return false;
             } catch (e) {
                 console.warn('Error restoring token:', e);
+                clearStoredToken();
                 return false;
             }
         }
@@ -1105,85 +1159,6 @@
                 accessToken = null;
             } catch (e) {
                 console.warn('Error clearing token:', e);
-            }
-        }
-
-        function maybeEnableButtons() {
-            if (gapiInited && gisInited) {
-                restoreOAuthToken();
-                // Panggil updateUIBasedOnRole lagi untuk memastikan tombol Auth diperbarui jika token berhasil direstore
-                const authData = getAuthData();
-                if (authData) {
-                    updateUIBasedOnRole(authData.role);
-                }
-            }
-        }
-
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        async function initializeGapiClient() {
-            try {
-                await gapi.client.init({
-                    apiKey: CONFIG.API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                });
-                gapiInited = true;
-                maybeEnableButtons();
-                console.log('GAPI client initialized');
-            } catch (error) {
-                console.error('Error initializing GAPI client:', error);
-            }
-        }
-
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CONFIG.CLIENT_ID,
-                scope: CONFIG.SCOPES,
-                callback: '', // defined in handleAuth
-            });
-            gisInited = true;
-            maybeEnableButtons();
-            console.log('GIS client initialized');
-        }
-
-        function handleAuth() {
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
-                alert('❌ Akses Ditolak. Hanya Admin yang dapat melakukan Google Sheets Authentication.');
-                return;
-            }
-            if (!gapiInited || !gisInited) {
-                alert('Tunggu sebentar, Google API belum selesai diinisialisasi.');
-                return;
-            }
-            if (accessToken) {
-                alert('Sudah terauthentikasi!');
-                return;
-            }
-
-            tokenClient.callback = async (response) => {
-                if (response.error !== undefined) {
-                    console.error('Auth error:', response);
-                    alert('Gagal authenticate: ' + response.error);
-                    clearStoredToken();
-                    return;
-                }
-                accessToken = response.access_token;
-                const expiresIn = response.expires_in || 3600;
-                storeOAuthToken(accessToken, expiresIn);
-                gapi.client.setToken({ access_token: accessToken });
-                updateAuthButton(true);
-                await displayAnnouncements(); 
-                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus Pengumuman.');
-                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
-            };
-
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
             }
         }
 
@@ -1201,22 +1176,103 @@
             }
         }
 
-        // ============ GOOGLE SHEETS CRUD FUNCTIONS (Hanya untuk Admin) ============
+        // ============ GOOGLE API INITIALIZATION ============
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
 
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+                console.log('✓ GAPI client initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI client:', error);
+            }
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                callback: '',
+            });
+            gisInited = true;
+            maybeEnableButtons();
+            console.log('✓ GIS client initialized');
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                restoreOAuthToken();
+                if (currentUserRole && currentUserRole.toLowerCase() === 'admin') {
+                    updateUIBasedOnRole(currentUserRole);
+                }
+            }
+        }
+
+        function handleAuth() {
+            if (currentUserRole?.toLowerCase() !== 'admin') {
+                alert('❌ Akses Ditolak. Hanya Admin yang dapat melakukan Google Sheets Authentication.');
+                return;
+            }
+            
+            if (!gapiInited || !gisInited) {
+                alert('⏳ Tunggu sebentar, Google API belum selesai diinisialisasi.');
+                return;
+            }
+            
+            if (accessToken) {
+                alert('✅ Sudah terauthentikasi!');
+                return;
+            }
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    console.error('Auth error:', response);
+                    alert('❌ Gagal authenticate: ' + response.error);
+                    clearStoredToken();
+                    return;
+                }
+                
+                accessToken = response.access_token;
+                const expiresIn = response.expires_in || 3600;
+                storeOAuthToken(accessToken, expiresIn);
+                gapi.client.setToken({ access_token: accessToken });
+                updateAuthButton(true);
+                
+                await displayAnnouncements();
+                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus Pengumuman.');
+                console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        // ============ GOOGLE SHEETS CRUD FUNCTIONS ============
         async function addRow(rowData) {
             if (!accessToken) {
                 alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
                 return;
             }
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
+            
+            if (currentUserRole?.toLowerCase() !== 'admin') {
                 alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menambah pengumuman.');
                 return;
             }
+
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.append({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:D`, 
+                    range: `${CONFIG.SHEET_NAME}!A:D`,
                     valueInputOption: 'USER_ENTERED',
                     insertDataOption: 'INSERT_ROWS',
                     resource: {
@@ -1224,26 +1280,27 @@
                     }
                 });
                 console.log('Row added:', response);
-                await loadAnnouncements(); 
+                await loadAnnouncements();
                 alert('✅ Pengumuman berhasil ditambahkan!');
                 return response;
             } catch (error) {
                 console.error('Error adding row:', error);
-                alert('❌ Gagal menambahkan pengumuman: ' + error.result.error.message);
+                alert('❌ Gagal menambahkan pengumuman: ' + (error.result?.error?.message || error.message));
                 throw error;
             }
         }
 
         async function updateRow(rowIndex, rowData) {
             if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                alert('❌ Harap authenticate terlebih dahulu!');
                 return;
             }
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
+            
+            if (currentUserRole?.toLowerCase() !== 'admin') {
                 alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat mengupdate pengumuman.');
                 return;
             }
+
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.update({
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
@@ -1254,27 +1311,28 @@
                     }
                 });
                 console.log('Row updated:', response);
-                await loadAnnouncements(); 
+                await loadAnnouncements();
                 alert('✅ Pengumuman berhasil diupdate!');
                 return response;
             } catch (error) {
                 console.error('Error updating row:', error);
-                alert('❌ Gagal mengupdate pengumuman: ' + error.result.error.message);
+                alert('❌ Gagal mengupdate pengumuman: ' + (error.result?.error?.message || error.message));
                 throw error;
             }
         }
 
         async function deleteRow(rowIndex) {
             if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                alert('❌ Harap authenticate terlebih dahulu!');
                 return;
             }
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
+            
+            if (currentUserRole?.toLowerCase() !== 'admin') {
                 alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menghapus pengumuman.');
                 return;
             }
-            if (!confirm(`Anda yakin ingin menghapus pengumuman pada baris ke-${rowIndex}?`)) {
+            
+            if (!confirm(`⚠️ Anda yakin ingin menghapus pengumuman pada baris ke-${rowIndex}?`)) {
                 return;
             }
 
@@ -1297,7 +1355,7 @@
                             range: {
                                 sheetId: sheetId,
                                 dimension: 'ROWS',
-                                startIndex: rowIndex - 1, 
+                                startIndex: rowIndex - 1,
                                 endIndex: rowIndex
                             }
                         }
@@ -1310,37 +1368,50 @@
                 });
 
                 console.log('Row deleted:', response);
-                await loadAnnouncements(); 
+                await loadAnnouncements();
                 alert('🗑️ Pengumuman berhasil dihapus!');
                 return response;
             } catch (error) {
                 console.error('Error deleting row:', error);
-                alert('❌ Gagal menghapus pengumuman: ' + error.result.error.message);
+                alert('❌ Gagal menghapus pengumuman: ' + (error.result?.error?.message || error.message));
                 throw error;
             }
         }
 
         // ============ ANNOUNCEMENT FUNCTIONS ============
         async function loadAnnouncements() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
             try {
+                if (loadingSpinner) loadingSpinner.classList.add('show');
+                
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.error || !data.values || data.values.length <= 1) {
+                if (loadingSpinner) loadingSpinner.classList.remove('show');
+                
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    announcementData = [];
+                    return [];
+                }
+                
+                if (!data.values || data.values.length <= 1) {
                     announcementData = [];
                     return [];
                 }
 
-                announcementData = data.values; 
+                announcementData = data.values;
 
                 return data.values.slice(1).map(row => ({
-                    type: row[0],
-                    title: row[1],
-                    content: row[2],
-                    date: row[3] 
+                    type: row[0] || 'UMUM',
+                    title: row[1] || 'Judul Pengumuman',
+                    content: row[2] || 'Isi pengumuman tidak tersedia.',
+                    date: row[3] || ''
                 }));
             } catch (error) {
+                if (loadingSpinner) loadingSpinner.classList.remove('show');
                 console.error('Error loading announcements:', error);
                 return [];
             }
@@ -1350,68 +1421,67 @@
             if (!isoDate) return 'Tanggal tidak diketahui';
             try {
                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                // Handle potential date format issues from Sheets
                 const dateParts = isoDate.split('-');
                 if (dateParts.length === 3) {
                     return new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).toLocaleDateString('id-ID', options);
                 }
                 return new Date(isoDate).toLocaleDateString('id-ID', options);
             } catch (e) {
-                return isoDate; 
+                return isoDate;
             }
         }
 
         async function displayAnnouncements() {
-            const listContainer = document.querySelector('.announcements-list');
+            const listContainer = document.getElementById('announcementsList');
             const board = document.getElementById('announcementBoard');
             const announcements = await loadAnnouncements();
-            listContainer.innerHTML = ''; 
+            
+            if (listContainer) listContainer.innerHTML = '';
 
             if (announcements.length === 0) {
-                board.style.display = 'none';
+                if (board) board.style.display = 'none';
                 return;
             }
 
-            board.style.display = 'block';
+            if (board) board.style.display = 'block';
 
-            // --- Perbaikan: Pengecekan Peran Admin untuk Tombol CRUD ---
-            const authData = getAuthData();
-            const isAdminAuthenticated = accessToken !== null && authData?.role?.toLowerCase() === 'admin';
+            const isAdminAuthenticated = accessToken !== null && currentUserRole?.toLowerCase() === 'admin';
             
             announcements.forEach((item, index) => {
-                const rowIndex = index + 2; 
+                const rowIndex = index + 2;
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'announcement-item';
                 itemDiv.innerHTML = `
                     <div class="announcement-content">
-                        <span class="announcement-type">${item.type || 'UMUM'}</span>
-                        <div class="announcement-title-text">${item.title || 'Judul Pengumuman'}</div>
-                        <p>${item.content || 'Isi pengumuman tidak tersedia.'}</p>
+                        <span class="announcement-type">${item.type}</span>
+                        <div class="announcement-title-text">${item.title}</div>
+                        <p>${item.content}</p>
                         <span class="announcement-date">Publikasi: ${formatAnnouncementDate(item.date)}</span>
                     </div>
-                    <div class="announcement-actions" style="display: ${isAdminAuthenticated ? 'block' : 'none'};">
+                    <div class="announcement-actions ${isAdminAuthenticated ? 'show' : ''}">
                         <button class="btn-edit" onclick="openAnnouncementModal('edit', ${rowIndex})">✏️ Edit</button>
                         <button class="btn-delete" onclick="deleteRow(${rowIndex})">🗑️ Hapus</button>
                     </div>
                 `;
-                listContainer.appendChild(itemDiv);
+                if (listContainer) listContainer.appendChild(itemDiv);
             });
         }
 
         function closeAnnouncements() {
-            document.getElementById('announcementBoard').style.display = 'none';
+            const board = document.getElementById('announcementBoard');
+            if (board) board.style.display = 'none';
             sessionStorage.setItem('announcementsClosed', 'true');
         }
 
         function openAnnouncementModal(mode, rowIndex = null) {
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
+            if (currentUserRole?.toLowerCase() !== 'admin') {
                 alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat menambah/mengedit pengumuman.');
                 return;
             }
+            
             if (mode !== 'add' && !accessToken) {
-                 alert('❌ Harap authenticate Google Sheets API terlebih dahulu!');
+                alert('❌ Harap authenticate Google Sheets API terlebih dahulu!');
                 return;
             }
 
@@ -1421,43 +1491,55 @@
             const submitBtnText = document.getElementById('submitBtnText');
             const editRowIndexInput = document.getElementById('editRowIndex');
             
-            form.reset();
-            editRowIndexInput.value = '';
+            if (form) form.reset();
+            if (editRowIndexInput) editRowIndexInput.value = '';
 
             if (mode === 'add') {
-                modalTitle.textContent = 'Tambah Pengumuman Baru';
-                submitBtnText.textContent = 'Simpan';
+                if (modalTitle) modalTitle.textContent = 'Tambah Pengumuman Baru';
+                if (submitBtnText) submitBtnText.textContent = 'Simpan';
                 const today = new Date().toISOString().split('T')[0];
-                document.getElementById('date').value = today;
+                const dateInput = document.getElementById('date');
+                if (dateInput) dateInput.value = today;
             } else if (mode === 'edit' && rowIndex !== null) {
                 if (announcementData.length < rowIndex) {
-                    alert('Data pengumuman tidak ditemukan!');
+                    alert('❌ Data pengumuman tidak ditemukan!');
                     return;
                 }
-                const row = announcementData[rowIndex - 1]; 
+                const row = announcementData[rowIndex - 1];
                 
-                modalTitle.textContent = 'Edit Pengumuman';
-                submitBtnText.textContent = 'Update';
-                editRowIndexInput.value = rowIndex;
+                if (modalTitle) modalTitle.textContent = 'Edit Pengumuman';
+                if (submitBtnText) submitBtnText.textContent = 'Update';
+                if (editRowIndexInput) editRowIndexInput.value = rowIndex;
                 
-                document.getElementById('type').value = row[0] || 'UMUM';
-                document.getElementById('title').value = row[1] || '';
-                document.getElementById('content').value = row[2] || '';
-                document.getElementById('date').value = row[3] ? new Date(row[3]).toISOString().split('T')[0] : '';
+                const typeInput = document.getElementById('type');
+                const titleInput = document.getElementById('title');
+                const contentInput = document.getElementById('content');
+                const dateInput = document.getElementById('date');
+                
+                if (typeInput) typeInput.value = row[0] || 'UMUM';
+                if (titleInput) titleInput.value = row[1] || '';
+                if (contentInput) contentInput.value = row[2] || '';
+                if (dateInput && row[3]) {
+                    try {
+                        dateInput.value = new Date(row[3]).toISOString().split('T')[0];
+                    } catch (e) {
+                        dateInput.value = row[3];
+                    }
+                }
             }
 
-            modal.classList.add('active');
+            if (modal) modal.classList.add('active');
         }
 
         function closeAnnouncementModal() {
-            document.getElementById('announcementModal').classList.remove('active');
+            const modal = document.getElementById('announcementModal');
+            if (modal) modal.classList.remove('active');
         }
 
         async function handleAnnouncementSubmit(event) {
             event.preventDefault();
             
-            const authData = getAuthData();
-            if (authData?.role?.toLowerCase() !== 'admin') {
+            if (currentUserRole?.toLowerCase() !== 'admin') {
                 alert('❌ Akses Ditolak. Hanya pengguna Admin yang dapat memproses pengumuman.');
                 closeAnnouncementModal();
                 return;
@@ -1468,13 +1550,7 @@
             const content = document.getElementById('content').value;
             const date = document.getElementById('date').value;
 
-            const rowData = [
-                type,
-                title,
-                content,
-                date
-            ];
-
+            const rowData = [type, title, content, date];
             const editRowIndex = document.getElementById('editRowIndex').value;
             
             try {
@@ -1491,37 +1567,29 @@
         }
 
         // ============ INITIALIZATION ============
-        document.getElementById('announcementForm').addEventListener('submit', handleAnnouncementSubmit);
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            console.log('Dashboard loaded, checking authentication and loading Google APIs...');
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Dashboard loading...');
             
-            // --- Perbaikan: Panggil checkAuth() terlebih dahulu untuk redirect jika belum login ---
+            // Check authentication FIRST - redirect if not logged in
             const isAuthenticated = checkAuth();
-
-            if (isAuthenticated) {
-                startInactivityTimer();
+            if (!isAuthenticated) {
+                return; // Stop execution if redirected
             }
 
-            // Load Google APIs
-            setTimeout(() => {
-                if (typeof gapi !== 'undefined') {
-                    gapiLoaded();
-                } else {
-                    console.error('GAPI not loaded after delay.');
-                }
-                if (typeof google !== 'undefined') {
-                    gisLoaded();
-                } else {
-                    console.error('GIS not loaded after delay.');
-                }
-            }, 500);
+            // Start inactivity timer for logged-in users
+            startInactivityTimer();
 
             // Load announcements if not closed previously
             if (sessionStorage.getItem('announcementsClosed') !== 'true') {
                 await displayAnnouncements();
             }
         });
+
+        // Form submission handler
+        const announcementForm = document.getElementById('announcementForm');
+        if (announcementForm) {
+            announcementForm.addEventListener('submit', handleAnnouncementSubmit);
+        }
 
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
@@ -1530,7 +1598,6 @@
                 closeAnnouncementModal();
             }
         });
-        
     </script>
 </body>
 </html>
