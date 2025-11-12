@@ -871,22 +871,27 @@
     </div>
 
     <!-- Table 2 Fields -->
-    <div id="table2Fields" style="display: none;">
-        <div class="form-group">
-            <label for="bulan2">Bulan *</label>
-            <input type="text" id="bulan2" placeholder="Contoh: Januari 2025">
-        </div>
-
-        <div class="form-group">
-            <label for="nominalPenggunaanSurkas">Nominal Penggunaan Surkas *</label>
-            <input type="number" id="nominalPenggunaanSurkas" placeholder="0">
-        </div>
-
-        <div class="form-group">
-            <label for="tujuanPenggunaanSurkas">Tujuan Penggunaan Surkas *</label>
-            <input type="text" id="tujuanPenggunaanSurkas" placeholder="Pembentukan Cadangan Renovasi...">
-        </div>
+<div id="table2Fields" style="display: none;">
+    <div class="form-group">
+        <label for="no2">No *</label>
+        <input type="text" id="no2" placeholder="Contoh: 1">
     </div>
+
+    <div class="form-group">
+        <label for="bulan2">Bulan *</label>
+        <input type="text" id="bulan2" placeholder="Contoh: Januari 2025">
+    </div>
+
+    <div class="form-group">
+        <label for="nominalPenggunaanSurkas">Nominal Penggunaan Surkas *</label>
+        <input type="number" id="nominalPenggunaanSurkas" placeholder="0">
+    </div>
+
+    <div class="form-group">
+        <label for="tujuanPenggunaanSurkas">Tujuan Penggunaan Surkas *</label>
+        <input type="text" id="tujuanPenggunaanSurkas" placeholder="Pembentukan Cadangan Renovasi...">
+    </div>
+</div>
 
     <div class="form-actions">
         <button type="submit" class="btn-submit">
@@ -1442,11 +1447,19 @@
         }
 
         function processRowDataTable2(row) {
-    const bulan = row[0] || ''; // Column I
-    const nominalPenggunaanSurkas = parseNumber(row[1]); // Column J
-    const tujuanPenggunaanSurkas = row[2] || ''; // Column K
+    // The actual data structure from your sheet:
+    // Column I (index 0): No. - but this is just numbering, skip it
+    // Column J (index 1): Bulan 
+    // Column K (index 2): Nominal
+    // Column L (index 3): Tujuan
+    
+    const no = row[0] || ''; // Column I - we'll use this for NO column
+    const bulan = row[1] || ''; // Column J
+    const nominalPenggunaanSurkas = parseNumber(row[2]); // Column K
+    const tujuanPenggunaanSurkas = row[3] || ''; // Column L
     
     return {
+        no,
         bulan,
         nominalPenggunaanSurkas,
         tujuanPenggunaanSurkas
@@ -1654,26 +1667,26 @@
             <tbody>
     `;
     
-    // Table 2 rows
-    dataRows2.forEach((row, index) => {
-        const data = processRowDataTable2(row);
-        const rowIndex = index + 2; // +2 because row 1 is header
+// Table 2 rows
+dataRows2.forEach((row, index) => {
+    const data = processRowDataTable2(row);
+    const rowIndex = index + 2; // +2 because row 1 is header
 
-        html += `
-            <tr>
-                <td class="triwulan">${index + 1}</td>
-                <td class="month">${data.bulan}</td>
-                <td class="currency">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
-                <td>${data.tujuanPenggunaanSurkas}</td>
-                ${accessToken ? `
-                <td class="actions">
-                    <button class="btn-edit" onclick="openEditModal(${rowIndex}, 2)">✏️ Edit</button>
-                    <button class="btn-delete" onclick="handleDelete(${rowIndex}, 2)">🗑️ Hapus</button>
-                </td>
-                ` : ''}
-            </tr>
-        `;
-    });
+    html += `
+        <tr>
+            <td class="triwulan">${data.no || (index + 1)}</td>
+            <td class="month">${data.bulan}</td>
+            <td class="currency">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
+            <td>${data.tujuanPenggunaanSurkas}</td>
+            ${accessToken ? `
+            <td class="actions">
+                <button class="btn-edit" onclick="openEditModal(${rowIndex}, 2)">✏️ Edit</button>
+                <button class="btn-delete" onclick="handleDelete(${rowIndex}, 2)">🗑️ Hapus</button>
+            </td>
+            ` : ''}
+        </tr>
+    `;
+});
 
     html += `
             </tbody>
@@ -1716,19 +1729,20 @@
         document.getElementById('nominalPenggunaanSurkas').required = false;
         document.getElementById('tujuanPenggunaanSurkas').required = false;
     } else {
-        document.getElementById('table1Fields').style.display = 'none';
-        document.getElementById('table2Fields').style.display = 'block';
-        // Make Table 2 fields required
-        document.getElementById('bulan2').required = true;
-        document.getElementById('nominalPenggunaanSurkas').required = true;
-        document.getElementById('tujuanPenggunaanSurkas').required = true;
-        // Remove required from Table 1
-        document.getElementById('triwulan').required = false;
-        document.getElementById('bulan').required = false;
-        document.getElementById('ebitdaLR').required = false;
-        document.getElementById('penggunaanLabaKas').required = false;
-        document.getElementById('bayarListrik').required = false;
-    }
+    document.getElementById('table1Fields').style.display = 'none';
+    document.getElementById('table2Fields').style.display = 'block';
+    // Make Table 2 fields required
+    document.getElementById('no2').required = true;
+    document.getElementById('bulan2').required = true;
+    document.getElementById('nominalPenggunaanSurkas').required = true;
+    document.getElementById('tujuanPenggunaanSurkas').required = true;
+    // Remove required from Table 1
+    document.getElementById('triwulan').required = false;
+    document.getElementById('bulan').required = false;
+    document.getElementById('ebitdaLR').required = false;
+    document.getElementById('penggunaanLabaKas').required = false;
+    document.getElementById('bayarListrik').required = false;
+}
     
     document.getElementById('dataModal').classList.add('active');
 }
@@ -1760,27 +1774,28 @@
         
         calculateValues();
     } else if (tableNumber === 2) {
-        if (!appState.currentData2 || appState.currentData2.length < rowIndex) {
-            alert('Data tidak ditemukan!');
-            return;
-        }
-
-        const row = appState.currentData2[rowIndex - 1];
-        const data = processRowDataTable2(row);
-
-        document.getElementById('modalTitle').textContent = 'Edit Data - Penggunaan Surkas';
-        document.getElementById('submitBtnText').textContent = 'Update';
-        document.getElementById('editRowIndex').value = rowIndex;
-        document.getElementById('editTableNumber').value = tableNumber;
-        
-        // Show Table 2 fields
-        document.getElementById('table1Fields').style.display = 'none';
-        document.getElementById('table2Fields').style.display = 'block';
-        
-        document.getElementById('bulan2').value = data.bulan;
-        document.getElementById('nominalPenggunaanSurkas').value = data.nominalPenggunaanSurkas;
-        document.getElementById('tujuanPenggunaanSurkas').value = data.tujuanPenggunaanSurkas;
+    if (!appState.currentData2 || appState.currentData2.length < rowIndex) {
+        alert('Data tidak ditemukan!');
+        return;
     }
+
+    const row = appState.currentData2[rowIndex - 1];
+    const data = processRowDataTable2(row);
+
+    document.getElementById('modalTitle').textContent = 'Edit Data - Penggunaan Surkas';
+    document.getElementById('submitBtnText').textContent = 'Update';
+    document.getElementById('editRowIndex').value = rowIndex;
+    document.getElementById('editTableNumber').value = tableNumber;
+    
+    // Show Table 2 fields
+    document.getElementById('table1Fields').style.display = 'none';
+    document.getElementById('table2Fields').style.display = 'block';
+    
+    document.getElementById('no2').value = data.no;
+    document.getElementById('bulan2').value = data.bulan;
+    document.getElementById('nominalPenggunaanSurkas').value = data.nominalPenggunaanSurkas;
+    document.getElementById('tujuanPenggunaanSurkas').value = data.tujuanPenggunaanSurkas;
+}
 
     document.getElementById('dataModal').classList.add('active');
 }
@@ -1983,13 +1998,14 @@
         rowData = [triwulan, bulan, ebitdaLR, penggunaanLabaKas, labaNetDitransfer, bayarListrik, sisaSurkas];
         range = 'A:G';
     } else {
-        const bulan = document.getElementById('bulan2').value;
-        const nominalPenggunaanSurkas = parseNumber(document.getElementById('nominalPenggunaanSurkas').value);
-        const tujuanPenggunaanSurkas = document.getElementById('tujuanPenggunaanSurkas').value;
+    const no = document.getElementById('no2').value;
+    const bulan = document.getElementById('bulan2').value;
+    const nominalPenggunaanSurkas = parseNumber(document.getElementById('nominalPenggunaanSurkas').value);
+    const tujuanPenggunaanSurkas = document.getElementById('tujuanPenggunaanSurkas').value;
 
-        rowData = [bulan, nominalPenggunaanSurkas, tujuanPenggunaanSurkas];
-        range = 'I:L';
-    }
+    rowData = [no, bulan, nominalPenggunaanSurkas, tujuanPenggunaanSurkas];  // ✅ CORRECT!
+    range = 'I:L';
+}
 
     if (editRowIndex) {
         await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData, range, tableNumber);
@@ -2023,3 +2039,4 @@
     </script>
 </body>
 </html>
+
