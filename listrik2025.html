@@ -331,6 +331,35 @@
             transition: all 0.2s ease;
         }
 
+        .btn-copy {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-copy.copied {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .btn-edit {
             background: #4A90E2;
             color: white;
@@ -421,6 +450,28 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
             }
         }
 
@@ -736,71 +787,72 @@
         
         /* Auto-logout warning modal */
         .logout-warning {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 10000;
-        justify-content: center;
-        align-items: center;
-    }
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
 
         .logout-warning.show {
-        display: flex;
-    }
+            display: flex;
+        }
 
         .warning-content {
-        background: white;
-        padding: 40px;
-        border-radius: 20px;
-        text-align: center;
-        max-width: 400px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        animation: fadeInUp 0.3s ease-out;
-    }
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.3s ease-out;
+        }
 
         .warning-content h3 {
-        color: #FF69B4;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
+            color: #FF69B4;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
 
         .warning-content p {
-        color: #666;
-        margin-bottom: 25px;
-        font-size: 1.1em;
-    }
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
 
         .warning-content button {
-        background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
-        font-size: 1em;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
         .warning-content button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-    }
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
     </style>
 </head>
 
 <body>
     <div class="logout-warning" id="logoutWarning">
-    <div class="warning-content">
-        <h3>⚠️ Peringatan Inaktivitas</h3>
-        <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
-        <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        <div class="warning-content">
+            <h3>⚠️ Peringatan Inaktivitas</h3>
+            <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+            <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        </div>
     </div>
-    </div>
+    
     <div class="user-bar">
         <div class="user-info">
             <span>👤</span>
@@ -857,53 +909,6 @@
         
         <div class="content" id="content">
             <div class="empty-state">
-                <div class="empty-state-icon">⚡</div>
-                <h2>Pilih Bulan untuk Melihat Data</h2>
-                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Modal -->
-    <div id="dataModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Tambah Data Baru</h2>
-                <button class="close-modal" onclick="closeModal()">&times;</button>
-            </div>
-            <form id="dataForm" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="editRowIndex" value="">
-
-                <div class="form-group">
-                    <label for="nomor">No *</label>
-                    <input type="number" id="nomor" placeholder="Nomor urut" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="namaToko">Nama Toko *</label>
-                    <input type="text" id="namaToko" placeholder="Nama toko" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="idPelanggan">ID Pelanggan</label>
-                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan PLN">
-                </div>
-
-                <div class="form-group">
-                    <label for="standAwal">Stand Awal *</label>
-                    <input type="number" id="standAwal" placeholder="0" required oninput="calculateUsage()">
-                </div>
-
-                <div class="form-group">
-                    <label for="standAkhir">Stand Akhir *</label>
-                    <input type="number" id="standAkhir" placeholder="0" required oninput="calculateUsage()">
-                </div>
-
-                <div class="form-group">
-                    <label for="penggunaan">Penggunaan (kWh) - Auto</label>
-                    <input type="number" id="penggunaan" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
-                </div>
-
                 <div class="form-group">
                     <label for="biaya">Biaya Listrik *</label>
                     <input type="number" id="biaya" placeholder="0" required>
@@ -971,56 +976,51 @@
         let inactivityTimer;
         let warningTimer;
         let countdownInterval;
-        const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+        const INACTIVITY_LIMIT = 5 * 60 * 1000;
+        const WARNING_TIME = 60 * 1000;
 
         function startInactivityTimer() {
-        clearTimeout(inactivityTimer);
-        clearTimeout(warningTimer);
-        clearInterval(countdownInterval);
-    
-        // Hide warning if shown
-        document.getElementById('logoutWarning').classList.remove('show');
-    
-        // Set warning timer (4 minutes)
-        warningTimer = setTimeout(() => {
-        showLogoutWarning();
-        }, INACTIVITY_LIMIT - WARNING_TIME);
-    
-        // Set logout timer (5 minutes)
-        inactivityTimer = setTimeout(() => {
-        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
-        }, INACTIVITY_LIMIT);
-    }
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            clearInterval(countdownInterval);
+            
+            document.getElementById('logoutWarning').classList.remove('show');
+            
+            warningTimer = setTimeout(() => {
+                showLogoutWarning();
+            }, INACTIVITY_LIMIT - WARNING_TIME);
+            
+            inactivityTimer = setTimeout(() => {
+                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+            }, INACTIVITY_LIMIT);
+        }
 
         function showLogoutWarning() {
-        document.getElementById('logoutWarning').classList.add('show');
-        let countdown = 60;
-        document.getElementById('warningCountdown').textContent = countdown;
-    
-        countdownInterval = setInterval(() => {
-        countdown--;
-        document.getElementById('warningCountdown').textContent = countdown;
-        if (countdown <= 0) {
-            clearInterval(countdownInterval);
+            document.getElementById('logoutWarning').classList.add('show');
+            let countdown = 60;
+            document.getElementById('warningCountdown').textContent = countdown;
+            
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('warningCountdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
         function resetInactivityTimer() {
-        startInactivityTimer();
-    }
+            startInactivityTimer();
+        }
 
-        // Listen for user activity
         const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
         activityEvents.forEach(event => {
-        document.addEventListener(event, resetInactivityTimer, true);
-    });
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
 
-        // Start timer when page loads
         window.addEventListener('DOMContentLoaded', () => {
-        startInactivityTimer();
-    });
+            startInactivityTimer();
+        });
         
         function updateUIBasedOnRole(role) {
             const authBtn = document.getElementById('authBtn');
@@ -1045,7 +1045,6 @@
             window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
         }
 
-        // Initialize auth
         if (checkAuth()) {
             const authData = getAuthData();
             if (authData?.username) {
@@ -1377,11 +1376,11 @@
 
         // ============ DISPLAY FUNCTIONS ============
         function displayData(values, sheetName) {
-            // Check if this is the Informasi_Umum sheet
             if (sheetName === 'Informasi_Umum') {
-            displayInformasiUmum(values, sheetName);
-            return;
+                displayInformasiUmum(values, sheetName);
+                return;
             }
+            
             const headers = values[0];
             const dataRows = values.slice(1).filter(row => row[1]);
             
@@ -1518,208 +1517,285 @@
 
         // ============ INFORMASI UMUM DISPLAY ============
         function displayInformasiUmum(values, sheetName) {
-        const headers = values[0];
-        const dataRows = values.slice(1).filter(row => row[1]); // Filter rows with Nama Toko
-    
-        if (dataRows.length === 0) {
-        showError('Data Kosong', 'Tidak ada data di Informasi Umum');
-        return;
+            const headers = values[0];
+            const dataRows = values.slice(1).filter(row => row[1]);
+            
+            if (dataRows.length === 0) {
+                showError('Data Kosong', 'Tidak ada data di Informasi Umum');
+                return;
+            }
+
+            const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            let html = `
+                <div class="month-badge">📋 Informasi Umum Toko</div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>${dataRows.length}</h3>
+                        <p>Total Toko Terdaftar</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${dataRows.filter(row => row[2]).length}</h3>
+                        <p>Toko dengan Daya Listrik</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${dataRows.filter(row => row[3]).length}</h3>
+                        <p>Toko dengan ID Pelanggan</p>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Toko</th>
+                                <th>Daya Listrik (Watt)</th>
+                                <th>ID Pelanggan PLN</th>
+                                <th>Alas Nama</th>
+                                <th>Cek Tagihan</th>
+                                ${accessToken ? '<th>AKSI</th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            dataRows.forEach((row, index) => {
+                const nomor = row[0] || (index + 1);
+                const namaToko = row[1] || '-';
+                const dayaListrik = row[2] ? formatNumber(row[2]) + ' W' : '-';
+                const idPelanggan = row[3] || '-';
+                const alasNama = row[4] || '-';
+
+                const rowIndex = index + 2;
+
+                html += `
+                    <tr>
+                        <td>${nomor}</td>
+                        <td class="toko-name">${namaToko}</td>
+                        <td class="number">${dayaListrik}</td>
+                        <td>${idPelanggan}</td>
+                        <td>${alasNama}</td>
+                        <td class="actions">
+                            ${idPelanggan && idPelanggan !== '-' ? 
+                                `<button class="btn-copy" onclick="handleCopyAndNavigate('${idPelanggan}', this)" data-copied="false">
+                                    📋 Salin ID
+                                </button>` 
+                                : '<span style="color: #999;">-</span>'}
+                        </td>
+                        ${accessToken ? `
+                        <td class="actions">
+                            <button class="btn-edit" onclick="openEditModalInfo(${rowIndex})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                        </td>
+                        ` : ''}
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-section">
+                    <h3>📊 Ringkasan Informasi Umum</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="label">Total Toko Terdaftar</div>
+                            <div class="value">${dataRows.length} Toko</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Toko dengan Daya Listrik</div>
+                            <div class="value">${dataRows.filter(row => row[2]).length} Toko</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Toko dengan ID Pelanggan</div>
+                            <div class="value">${dataRows.filter(row => row[3]).length} Toko</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Toko dengan Alas Nama</div>
+                            <div class="value">${dataRows.filter(row => row[4]).length} Toko</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="last-update">
+                    ⏱️ Terakhir diperbarui: ${updateTime}
+                </div>
+            `;
+            
+            document.getElementById('content').innerHTML = html;
         }
 
-        const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-        });
-
-        let html = `
-        <div class="month-badge">📋 Informasi Umum Toko</div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <h3>${dataRows.length}</h3>
-                <p>Total Toko Terdaftar</p>
-            </div>
-            <div class="stat-card">
-                <h3>${dataRows.filter(row => row[2]).length}</h3>
-                <p>Toko dengan Daya Listrik</p>
-            </div>
-            <div class="stat-card">
-                <h3>${dataRows.filter(row => row[3]).length}</h3>
-                <p>Toko dengan ID Pelanggan</p>
-            </div>
-        </div>
-        
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Toko</th>
-                        <th>Daya Listrik (Watt)</th>
-                        <th>ID Pelanggan PLN</th>
-                        <th>Alas Nama</th>
-                        ${accessToken ? '<th>AKSI</th>' : ''}
-                    </tr>
-                </thead>
-                <tbody>
-    `    ;
-    
-        dataRows.forEach((row, index) => {
-        const nomor = row[0] || (index + 1);
-        const namaToko = row[1] || '-';
-        const dayaListrik = row[2] ? formatNumber(row[2]) + ' W' : '-';
-        const idPelanggan = row[3] || '-';
-        const alasNama = row[4] || '-';
-
-        const rowIndex = index + 2;
-
-        html += `
-            <tr>
-                <td>${nomor}</td>
-                <td class="toko-name">${namaToko}</td>
-                <td class="number">${dayaListrik}</td>
-                <td>${idPelanggan}</td>
-                <td>${alasNama}</td>
-                ${accessToken ? `
-                <td class="actions">
-                    <button class="btn-edit" onclick="openEditModalInfo(${rowIndex})">✏️ Edit</button>
-                    <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
-                </td>
-                ` : ''}
-            </tr>
-        `;
-    });
-
-        html += `
-                </tbody>
-            </table>
-        </div>
-
-        <div class="summary-section">
-            <h3>📊 Ringkasan Informasi Umum</h3>
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="label">Total Toko Terdaftar</div>
-                    <div class="value">${dataRows.length} Toko</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Toko dengan Daya Listrik</div>
-                    <div class="value">${dataRows.filter(row => row[2]).length} Toko</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Toko dengan ID Pelanggan</div>
-                    <div class="value">${dataRows.filter(row => row[3]).length} Toko</div>
-                </div>
-                <div class="summary-item">
-                    <div class="label">Toko dengan Alas Nama</div>
-                    <div class="value">${dataRows.filter(row => row[4]).length} Toko</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="last-update">
-            ⏱️ Terakhir diperbarui: ${updateTime}
-        </div>
-    `;
-    
-    document.getElementById('content').innerHTML = html;
-}
+        // ============ COPY AND NAVIGATE FUNCTION ============
+        async function handleCopyAndNavigate(idPelanggan, button) {
+            const isCopied = button.getAttribute('data-copied') === 'true';
+            
+            if (!isCopied) {
+                try {
+                    await navigator.clipboard.writeText(idPelanggan);
+                    
+                    button.setAttribute('data-copied', 'true');
+                    button.classList.add('copied');
+                    button.innerHTML = '✓ ID Tersalin';
+                    
+                    const notification = document.createElement('div');
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 100px;
+                        right: 20px;
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        color: white;
+                        padding: 15px 25px;
+                        border-radius: 10px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        z-index: 9999;
+                        font-weight: 600;
+                        animation: slideInRight 0.3s ease-out;
+                    `;
+                    notification.textContent = `✓ ID ${idPelanggan} tersalin! Klik lagi untuk cek tagihan`;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.style.animation = 'slideOutRight 0.3s ease-out';
+                        setTimeout(() => notification.remove(), 300);
+                    }, 3000);
+                    
+                    setTimeout(() => {
+                        button.setAttribute('data-copied', 'false');
+                        button.classList.remove('copied');
+                        button.innerHTML = '📋 Salin ID';
+                    }, 5000);
+                    
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    alert('❌ Gagal menyalin ID Pelanggan');
+                }
+            } else {
+                const url = 'https://member.speedcash.co.id/pln/cek-tagihan-listrik';
+                window.open(url, '_blank');
+                
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                    z-index: 9999;
+                    font-weight: 600;
+                    animation: slideInRight 0.3s ease-out;
+                `;
+                notification.textContent = '🔗 Membuka halaman cek tagihan...';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+                
+                button.setAttribute('data-copied', 'false');
+                button.classList.remove('copied');
+                button.innerHTML = '📋 Salin ID';
+            }
+        }
         
         // ============ MODAL FUNCTIONS ============
         function openAddModal() {
-        if (!appState.currentMonth) {
-        alert('Pilih bulan terlebih dahulu!');
-        return;
-        }
+            if (!appState.currentMonth) {
+                alert('Pilih bulan terlebih dahulu!');
+                return;
+            }
 
-        // Check if we're in Informasi_Umum sheet
-        if (appState.currentMonth === 'Informasi_Umum') {
-        openAddModalInfo();
-        return;
-        }
+            if (appState.currentMonth === 'Informasi_Umum') {
+                openAddModalInfo();
+                return;
+            }
 
-        document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
-        document.getElementById('submitBtnText').textContent = 'Simpan';
-        document.getElementById('dataForm').reset();
-        document.getElementById('editRowIndex').value = '';
-        document.getElementById('dataModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+            document.getElementById('submitBtnText').textContent = 'Simpan';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('dataModal').classList.add('active');
         }
 
         function openAddModalInfo() {
-        // For Informasi_Umum - show simplified form
-        const modal = document.getElementById('dataModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const form = document.getElementById('dataForm');
-    
-        modalTitle.textContent = 'Tambah Data Toko';
-        document.getElementById('submitBtnText').textContent = 'Simpan';
-        document.getElementById('editRowIndex').value = '';
-    
-        // Hide billing-specific fields
-        form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
-    
-        // Update labels for Informasi_Umum
-        form.querySelector('label[for="idPelanggan"]').textContent = 'ID Pelanggan PLN';
-        form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
-    
-        form.reset();
-        modal.classList.add('active');
-    }
+            const modal = document.getElementById('dataModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('dataForm');
+            
+            modalTitle.textContent = 'Tambah Data Toko';
+            document.getElementById('submitBtnText').textContent = 'Simpan';
+            document.getElementById('editRowIndex').value = '';
+            
+            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
+            
+            form.querySelector('label[for="idPelanggan"]').textContent = 'ID Pelanggan PLN';
+            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+            
+            form.reset();
+            modal.classList.add('active');
+        }
 
         function openEditModalInfo(rowIndex) {
-        if (!appState.currentData || appState.currentData.length < rowIndex) {
-        alert('Data tidak ditemukan!');
-        return;
-    }
+            if (!appState.currentData || appState.currentData.length < rowIndex) {
+                alert('Data tidak ditemukan!');
+                return;
+            }
 
-        const row = appState.currentData[rowIndex - 1];
-        const modal = document.getElementById('dataModal');
-        const form = document.getElementById('dataForm');
+            const row = appState.currentData[rowIndex - 1];
+            const modal = document.getElementById('dataModal');
+            const form = document.getElementById('dataForm');
 
-        document.getElementById('modalTitle').textContent = 'Edit Data Toko';
-        document.getElementById('submitBtnText').textContent = 'Update';
-        document.getElementById('editRowIndex').value = rowIndex;
-    
-        // Hide billing-specific fields
-        form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
-        form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
-    
-        // Fill data
-        document.getElementById('nomor').value = row[0] || '';
-        document.getElementById('namaToko').value = row[1] || '';
-        document.getElementById('idPelanggan').value = row[3] || '';
-    
-        modal.classList.add('active');
-    }
+            document.getElementById('modalTitle').textContent = 'Edit Data Toko';
+            document.getElementById('submitBtnText').textContent = 'Update';
+            document.getElementById('editRowIndex').value = rowIndex;
+            
+            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
+            form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
+            
+            document.getElementById('nomor').value = row[0] || '';
+            document.getElementById('namaToko').value = row[1] || '';
+            document.getElementById('idPelanggan').value = row[3] || '';
+            
+            modal.classList.add('active');
+        }
         
         function openEditModal(rowIndex) {
             if (!appState.currentData || appState.currentData.length < rowIndex) {
-            alert('Data tidak ditemukan!');
-            return;
-        }
+                alert('Data tidak ditemukan!');
+                return;
+            }
 
-        const row = appState.currentData[rowIndex - 1];
-const form = document.getElementById('dataForm');
+            const row = appState.currentData[rowIndex - 1];
+            const form = document.getElementById('dataForm');
 
-// Show all fields for monthly data
-form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
-form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
-form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
-form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
-form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
 
-document.getElementById('modalTitle').textContent = 'Edit Data';
-document.getElementById('submitBtnText').textContent = 'Update';
-document.getElementById('editRowIndex').value = rowIndex;
+            document.getElementById('modalTitle').textContent = 'Edit Data';
+            document.getElementById('submitBtnText').textContent = 'Update';
+            document.getElementById('editRowIndex').value = rowIndex;
             
             document.getElementById('nomor').value = row[0] || '';
             document.getElementById('namaToko').value = row[1] || '';
@@ -1734,19 +1810,18 @@ document.getElementById('editRowIndex').value = rowIndex;
         }
 
         function closeModal() {
-    const modal = document.getElementById('dataModal');
-    const form = document.getElementById('dataForm');
-    
-    // Reset form display
-    form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
-    form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
-    form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
-    form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
-    form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
-    
-    modal.classList.remove('active');
-    form.reset();
-}
+            const modal = document.getElementById('dataModal');
+            const form = document.getElementById('dataForm');
+            
+            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
+            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+            
+            modal.classList.remove('active');
+            form.reset();
+        }
 
         // ============ AUTO CALCULATION ============
         function calculateUsage() {
@@ -1904,61 +1979,57 @@ document.getElementById('editRowIndex').value = rowIndex;
         }
 
         async function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const nomor = document.getElementById('nomor').value;
-    const namaToko = document.getElementById('namaToko').value;
-    const idPelanggan = document.getElementById('idPelanggan').value;
-    const editRowIndex = document.getElementById('editRowIndex').value;
+            event.preventDefault();
+            
+            const nomor = document.getElementById('nomor').value;
+            const namaToko = document.getElementById('namaToko').value;
+            const idPelanggan = document.getElementById('idPelanggan').value;
+            const editRowIndex = document.getElementById('editRowIndex').value;
 
-    let rowData;
+            let rowData;
 
-    // Check if this is Informasi_Umum sheet
-    if (appState.currentMonth === 'Informasi_Umum') {
-        // For Informasi_Umum: No, Nama Toko, Daya Listrik, ID Pelanggan, Alas Nama
-        // We'll keep existing daya listrik and alas nama if editing
-        let dayaListrik = '';
-        let alasNama = '';
-        
-        if (editRowIndex && appState.currentData[editRowIndex - 1]) {
-            const existingRow = appState.currentData[editRowIndex - 1];
-            dayaListrik = existingRow[2] || '';
-            alasNama = existingRow[4] || '';
+            if (appState.currentMonth === 'Informasi_Umum') {
+                let dayaListrik = '';
+                let alasNama = '';
+                
+                if (editRowIndex && appState.currentData[editRowIndex - 1]) {
+                    const existingRow = appState.currentData[editRowIndex - 1];
+                    dayaListrik = existingRow[2] || '';
+                    alasNama = existingRow[4] || '';
+                }
+                
+                rowData = [
+                    nomor,
+                    namaToko,
+                    dayaListrik,
+                    idPelanggan,
+                    alasNama
+                ];
+            } else {
+                const standAwal = parseNumber(document.getElementById('standAwal').value);
+                const standAkhir = parseNumber(document.getElementById('standAkhir').value);
+                const penggunaan = parseNumber(document.getElementById('penggunaan').value);
+                const biaya = parseNumber(document.getElementById('biaya').value);
+
+                rowData = [
+                    nomor,
+                    namaToko,
+                    idPelanggan,
+                    standAwal,
+                    standAkhir,
+                    penggunaan,
+                    biaya
+                ];
+            }
+            
+            if (editRowIndex) {
+                await updateRow(appState.currentMonth, parseInt(editRowIndex), rowData);
+            } else {
+                await addRow(appState.currentMonth, rowData);
+            }
+            
+            closeModal();
         }
-        
-        rowData = [
-            nomor,
-            namaToko,
-            dayaListrik,
-            idPelanggan,
-            alasNama
-        ];
-    } else {
-        // For monthly billing data
-        const standAwal = parseNumber(document.getElementById('standAwal').value);
-        const standAkhir = parseNumber(document.getElementById('standAkhir').value);
-        const penggunaan = parseNumber(document.getElementById('penggunaan').value);
-        const biaya = parseNumber(document.getElementById('biaya').value);
-
-        rowData = [
-            nomor,
-            namaToko,
-            idPelanggan,
-            standAwal,
-            standAkhir,
-            penggunaan,
-            biaya
-        ];
-    }
-    
-    if (editRowIndex) {
-        await updateRow(appState.currentMonth, parseInt(editRowIndex), rowData);
-    } else {
-        await addRow(appState.currentMonth, rowData);
-    }
-    
-    closeModal();
-}
 
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
@@ -1997,4 +2068,51 @@ document.getElementById('editRowIndex').value = rowIndex;
         }
     </script>
 </body>
-</html>
+</html>empty-state-icon">⚡</div>
+                <h2>Pilih Bulan untuk Melihat Data</h2>
+                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+
+                <div class="form-group">
+                    <label for="nomor">No *</label>
+                    <input type="number" id="nomor" placeholder="Nomor urut" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="namaToko">Nama Toko *</label>
+                    <input type="text" id="namaToko" placeholder="Nama toko" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idPelanggan">ID Pelanggan</label>
+                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan PLN">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAwal">Stand Awal *</label>
+                    <input type="number" id="standAwal" placeholder="0" required oninput="calculateUsage()">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAkhir">Stand Akhir *</label>
+                    <input type="number" id="standAkhir" placeholder="0" required oninput="calculateUsage()">
+                </div>
+
+                <div class="form-group">
+                    <label for="penggunaan">Penggunaan (kWh) - Auto</label>
+                    <input type="number" id="penggunaan" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                </div>
+
+                <div class="
