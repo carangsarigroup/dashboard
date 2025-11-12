@@ -648,48 +648,60 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+    body {
+        padding: 10px;
+    }
 
-            .user-bar {
-                top: 10px;
-                right: 10px;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-            }
+    .user-bar {
+        top: 10px;
+        right: 10px;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
 
-            .header h1 {
-                font-size: 1.8em;
-            }
+    .header h1 {
+        font-size: 1.8em;
+    }
 
-            .controls {
-                padding: 20px;
-                flex-direction: column;
-            }
+    .controls {
+        padding: 20px;
+        flex-direction: column;
+    }
 
-            .select-wrapper {
-                min-width: 100%;
-            }
+    .select-wrapper {
+        min-width: 100%;
+    }
 
-            .back-btn, .refresh-btn, .add-btn {
-                width: 100%;
-                justify-content: center;
-            }
+    .back-btn, .refresh-btn, .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
 
-            .content {
-                padding: 20px;
-            }
+    .content {
+        padding: 20px;
+    }
 
-            .modal-content {
-                padding: 20px;
-            }
+    .modal-content {
+        padding: 20px;
+    }
 
-            .form-actions {
-                flex-direction: column;
-            }
-        }
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    /* 👇 ADD THE NEW RULES HERE, BEFORE THE CLOSING BRACE */
+    .content h2 + .add-btn,
+    div > .add-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    div[style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+}
         /* Auto-logout warning modal */
         .logout-warning {
         display: none;
@@ -797,10 +809,7 @@
             <option value="4">TW4 (Q4)</option>
                 </select>
             </div>
-            <button class="add-btn" onclick="openAddModal()" id="addBtn" style="display: none;">
-                <span>➕</span>
-                <span>Tambah Data</span>
-            </button>
+            
             <button class="refresh-btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
@@ -1210,20 +1219,19 @@
         }
 
         function updateAuthButton(isAuthenticated) {
-            const authBtn = document.getElementById('authBtn');
-            const authBtnText = document.getElementById('authBtnText');
-            const addBtn = document.getElementById('addBtn');
-            
-            if (isAuthenticated) {
-                authBtn.classList.add('authenticated');
-                authBtnText.textContent = '✓ Terotentikasi';
-                if (addBtn) addBtn.style.display = 'inline-flex';
-            } else {
-                authBtn.classList.remove('authenticated');
-                authBtnText.textContent = 'Authenticate';
-                if (addBtn) addBtn.style.display = 'none';
-            }
-        }
+    const authBtn = document.getElementById('authBtn');
+    const authBtnText = document.getElementById('authBtnText');
+    
+    if (isAuthenticated) {
+        authBtn.classList.add('authenticated');
+        authBtnText.textContent = '✓ Terotentikasi';
+        // Removed the addBtn code - buttons are now in the tables
+    } else {
+        authBtn.classList.remove('authenticated');
+        authBtnText.textContent = 'Authenticate';
+        // Removed the addBtn code - buttons are now in the tables
+    }
+}
 
         // ============ UTILITY FUNCTIONS ============
         function formatRupiah(value) {
@@ -1565,7 +1573,15 @@
     ${filterBadge}
     
     <!-- TABLE 1: Surplus Kas Toko -->
-    <h2 style="color: #FF69B4; margin-bottom: 20px; font-size: 1.5em;">💰 Surplus Kas Toko</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">💰 Surplus Kas Toko</h2>
+        ${accessToken ? `
+        <button class="add-btn" onclick="openAddModal(1)" style="display: inline-flex;">
+            <span>➕</span>
+            <span>Tambah Data Surplus Kas</span>
+        </button>
+        ` : ''}
+    </div>
     
     <div class="stats">
         <div class="stat-card">
@@ -1640,7 +1656,15 @@
     </div>
     
     <!-- TABLE 2: Penggunaan Surkas -->
-    <h2 style="color: #FF69B4; margin: 40px 0 20px 0; font-size: 1.5em;">📋 Penggunaan Surkas</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px 0;">
+        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">📋 Penggunaan Surkas</h2>
+        ${accessToken ? `
+        <button class="add-btn" onclick="openAddModal(2)" style="display: inline-flex;">
+            <span>➕</span>
+            <span>Tambah Data Penggunaan Surkas</span>
+        </button>
+        ` : ''}
+    </div>
     
     <div class="stats">
         <div class="stat-card">
@@ -1667,26 +1691,26 @@
             <tbody>
     `;
     
-// Table 2 rows
-dataRows2.forEach((row, index) => {
-    const data = processRowDataTable2(row);
-    const rowIndex = index + 2; // +2 because row 1 is header
+    // Table 2 rows
+    dataRows2.forEach((row, index) => {
+        const data = processRowDataTable2(row);
+        const rowIndex = index + 2; // +2 because row 1 is header
 
-    html += `
-        <tr>
-            <td class="triwulan">${data.no || (index + 1)}</td>
-            <td class="month">${data.bulan}</td>
-            <td class="currency">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
-            <td>${data.tujuanPenggunaanSurkas}</td>
-            ${accessToken ? `
-            <td class="actions">
-                <button class="btn-edit" onclick="openEditModal(${rowIndex}, 2)">✏️ Edit</button>
-                <button class="btn-delete" onclick="handleDelete(${rowIndex}, 2)">🗑️ Hapus</button>
-            </td>
-            ` : ''}
-        </tr>
-    `;
-});
+        html += `
+            <tr>
+                <td class="triwulan">${data.no || (index + 1)}</td>
+                <td class="month">${data.bulan}</td>
+                <td class="currency">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
+                <td>${data.tujuanPenggunaanSurkas}</td>
+                ${accessToken ? `
+                <td class="actions">
+                    <button class="btn-edit" onclick="openEditModal(${rowIndex}, 2)">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex}, 2)">🗑️ Hapus</button>
+                </td>
+                ` : ''}
+            </tr>
+        `;
+    });
 
     html += `
             </tbody>
@@ -1698,16 +1722,13 @@ dataRows2.forEach((row, index) => {
 }
 
         // ============ MODAL FUNCTIONS ============
-        function openAddModal() {
+        function openAddModal(tableNumber) {
     if (!appState.currentSheet) {
         alert('Pilih toko terlebih dahulu!');
         return;
     }
 
-    // Ask which table to add to
-    const choice = confirm('Pilih tabel untuk menambah data:\n\nOK = Surplus Kas Toko (A:G)\nCancel = Penggunaan Surkas (I:L)');
-    const tableNumber = choice ? 1 : 2;
-
+    // Use the tableNumber parameter directly (no more confirm dialog)
     document.getElementById('modalTitle').textContent = tableNumber === 1 ? 'Tambah Data - Surplus Kas' : 'Tambah Data - Penggunaan Surkas';
     document.getElementById('submitBtnText').textContent = 'Simpan';
     document.getElementById('dataForm').reset();
@@ -1725,24 +1746,25 @@ dataRows2.forEach((row, index) => {
         document.getElementById('penggunaanLabaKas').required = true;
         document.getElementById('bayarListrik').required = true;
         // Remove required from Table 2
+        document.getElementById('no2').required = false;
         document.getElementById('bulan2').required = false;
         document.getElementById('nominalPenggunaanSurkas').required = false;
         document.getElementById('tujuanPenggunaanSurkas').required = false;
     } else {
-    document.getElementById('table1Fields').style.display = 'none';
-    document.getElementById('table2Fields').style.display = 'block';
-    // Make Table 2 fields required
-    document.getElementById('no2').required = true;
-    document.getElementById('bulan2').required = true;
-    document.getElementById('nominalPenggunaanSurkas').required = true;
-    document.getElementById('tujuanPenggunaanSurkas').required = true;
-    // Remove required from Table 1
-    document.getElementById('triwulan').required = false;
-    document.getElementById('bulan').required = false;
-    document.getElementById('ebitdaLR').required = false;
-    document.getElementById('penggunaanLabaKas').required = false;
-    document.getElementById('bayarListrik').required = false;
-}
+        document.getElementById('table1Fields').style.display = 'none';
+        document.getElementById('table2Fields').style.display = 'block';
+        // Make Table 2 fields required
+        document.getElementById('no2').required = true;
+        document.getElementById('bulan2').required = true;
+        document.getElementById('nominalPenggunaanSurkas').required = true;
+        document.getElementById('tujuanPenggunaanSurkas').required = true;
+        // Remove required from Table 1
+        document.getElementById('triwulan').required = false;
+        document.getElementById('bulan').required = false;
+        document.getElementById('ebitdaLR').required = false;
+        document.getElementById('penggunaanLabaKas').required = false;
+        document.getElementById('bayarListrik').required = false;
+    }
     
     document.getElementById('dataModal').classList.add('active');
 }
@@ -2039,4 +2061,5 @@ dataRows2.forEach((row, index) => {
     </script>
 </body>
 </html>
+
 
