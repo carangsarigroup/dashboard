@@ -823,56 +823,78 @@
                 <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
             <form id="dataForm" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="editRowIndex" value="">
+    <input type="hidden" id="editRowIndex" value="">
+    <input type="hidden" id="editTableNumber" value="">
 
-                <div class="form-group">
-                    <label for="triwulan">Triwulan *</label>
-                    <select id="triwulan" required>
-                        <option value="">Pilih Triwulan</option>
-                        <option value="1">TW1 (Q1)</option>
-                        <option value="2">TW2 (Q2)</option>
-                        <option value="3">TW3 (Q3)</option>
-                        <option value="4">TW4 (Q4)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                <label for="bulan">Bulan *</label>
-                <input type="text" id="bulan" placeholder="Contoh: Januari" required>
-                </div>
+    <!-- Table 1 Fields -->
+    <div id="table1Fields">
+        <div class="form-group">
+            <label for="triwulan">Triwulan *</label>
+            <select id="triwulan" required>
+                <option value="">Pilih Triwulan</option>
+                <option value="1">TW1 (Q1)</option>
+                <option value="2">TW2 (Q2)</option>
+                <option value="3">TW3 (Q3)</option>
+                <option value="4">TW4 (Q4)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="bulan">Bulan *</label>
+            <input type="text" id="bulan" placeholder="Contoh: Januari" required>
+        </div>
 
-                <div class="form-group">
-                    <label for="ebitdaLR">EBITDA LR *</label>
-                    <input type="number" id="ebitdaLR" placeholder="0" required oninput="calculateValues()">
-                </div>
+        <div class="form-group">
+            <label for="ebitdaLR">EBITDA LR *</label>
+            <input type="number" id="ebitdaLR" placeholder="0" required oninput="calculateValues()">
+        </div>
 
-                <div class="form-group">
-                    <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
-                    <input type="number" id="penggunaanLabaKas" placeholder="0" required oninput="calculateValues()">
-                </div>
+        <div class="form-group">
+            <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
+            <input type="number" id="penggunaanLabaKas" placeholder="0" required oninput="calculateValues()">
+        </div>
 
-                <div class="form-group">
-                    <label for="labaNetDitransfer">Laba Net Ditransfer (Auto)</label>
-                    <input type="number" id="labaNetDitransfer" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
-                </div>
+        <div class="form-group">
+            <label for="labaNetDitransfer">Laba Net Ditransfer (Auto)</label>
+            <input type="number" id="labaNetDitransfer" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+        </div>
 
-                <div class="form-group">
-                    <label for="bayarListrik">Bayar Listrik *</label>
-                    <input type="number" id="bayarListrik" placeholder="0" required oninput="calculateValues()">
-                </div>
+        <div class="form-group">
+            <label for="bayarListrik">Bayar Listrik *</label>
+            <input type="number" id="bayarListrik" placeholder="0" required oninput="calculateValues()">
+        </div>
 
-                <div class="form-group">
-                    <label for="sisaSurkas">Sisa Surplus Kas (Auto)</label>
-                    <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
-                </div>
+        <div class="form-group">
+            <label for="sisaSurkas">Sisa Surplus Kas (Auto)</label>
+            <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+        </div>
+    </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">
-                        <span id="submitBtnText">Simpan</span>
-                    </button>
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-                </div>
-            </form>
+    <!-- Table 2 Fields -->
+    <div id="table2Fields" style="display: none;">
+        <div class="form-group">
+            <label for="bulan2">Bulan *</label>
+            <input type="text" id="bulan2" placeholder="Contoh: Januari 2025">
+        </div>
+
+        <div class="form-group">
+            <label for="nominalPenggunaanSurkas">Nominal Penggunaan Surkas *</label>
+            <input type="number" id="nominalPenggunaanSurkas" placeholder="0">
+        </div>
+
+        <div class="form-group">
+            <label for="tujuanPenggunaanSurkas">Tujuan Penggunaan Surkas *</label>
+            <input type="text" id="tujuanPenggunaanSurkas" placeholder="Pembentukan Cadangan Renovasi...">
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-submit">
+            <span id="submitBtnText">Simpan</span>
+        </button>
+        <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+    </div>
+</form>
         </div>
     </div>
 
@@ -1266,11 +1288,11 @@
         }
 
         function setCachedData(sheetName, data) {
-            appState.cache[sheetName] = {
-                data: data,
-                timestamp: Date.now()
-            };
-        }
+    appState.cache[sheetName] = {
+        data: data, // Now stores both table1 and table2
+        timestamp: Date.now()
+    };
+}
 
         // ============ LOCAL STORAGE ============
         function saveLastSheet(sheetName) {
@@ -1338,52 +1360,61 @@
         }
 
         async function loadSheetData(sheetName, forceRefresh = false) {
-            if (!sheetName) {
-                showEmptyState();
-                return;
-            }
+    if (!sheetName) {
+        showEmptyState();
+        return;
+    }
 
-            if (!forceRefresh) {
-                const cached = getCachedData(sheetName);
-                if (cached) {
-                    console.log('Using cached data for:', sheetName);
-                    displayData(cached, sheetName);
-                    return;
-                }
-            }
-            
-            showLoading(`Memuat data: ${sheetName}`);
-            appState.currentSheet = sheetName;
-            
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                if (!data.values || data.values.length === 0) {
-                    showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
-                    return;
-                }
-                
-                setCachedData(sheetName, data.values);
-                appState.lastUpdate = new Date();
-                appState.currentData = data.values;
-                
-                displayData(data.values, sheetName);
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showError('Gagal Memuat Data', `
-                    ${error.message}
-                    <br><br>
-                    <strong>Sheet:</strong> "${sheetName}"
-                `);
-            }
+    if (!forceRefresh) {
+        const cached = getCachedData(sheetName);
+        if (cached) {
+            console.log('Using cached data for:', sheetName);
+            displayData(cached.table1, cached.table2, sheetName);
+            return;
         }
+    }
+    
+    showLoading(`Memuat data: ${sheetName}`);
+    appState.currentSheet = sheetName;
+    
+    try {
+        // Fetch both tables in parallel
+        const [response1, response2] = await Promise.all([
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!A:G?key=${CONFIG.API_KEY}`),
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!I:L?key=${CONFIG.API_KEY}`)
+        ]);
+        
+        const data1 = await response1.json();
+        const data2 = await response2.json();
+        
+        if (data1.error || data2.error) {
+            throw new Error(data1.error?.message || data2.error?.message);
+        }
+        
+        const table1Data = data1.values || [];
+        const table2Data = data2.values || [];
+        
+        if (table1Data.length === 0 && table2Data.length === 0) {
+            showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
+            return;
+        }
+        
+        setCachedData(sheetName, { table1: table1Data, table2: table2Data });
+        appState.lastUpdate = new Date();
+        appState.currentData = table1Data; // Keep for backwards compatibility
+        appState.currentData2 = table2Data; // Store second table data
+        
+        displayData(table1Data, table2Data, sheetName);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showError('Gagal Memuat Data', `
+            ${error.message}
+            <br><br>
+            <strong>Sheet:</strong> "${sheetName}"
+        `);
+    }
+}
 
         // ============ DATA PROCESSING ============
         function processRowData(row) {
@@ -1410,6 +1441,18 @@
             };
         }
 
+        function processRowDataTable2(row) {
+    const bulan = row[0] || ''; // Column I
+    const nominalPenggunaanSurkas = parseNumber(row[1]); // Column J
+    const tujuanPenggunaanSurkas = row[2] || ''; // Column K
+    
+    return {
+        bulan,
+        nominalPenggunaanSurkas,
+        tujuanPenggunaanSurkas
+    };
+}
+
         function calculateTotals(rows) {
             return rows.reduce((totals, row) => {
                 const data = processRowData(row);
@@ -1429,24 +1472,35 @@
             });
         }
 
+        function calculateTotalsTable2(rows) {
+    return rows.reduce((totals, row) => {
+        const data = processRowDataTable2(row);
+        return {
+            nominalPenggunaanSurkas: totals.nominalPenggunaanSurkas + data.nominalPenggunaanSurkas
+        };
+    }, {
+        nominalPenggunaanSurkas: 0
+    });
+}
+        
         // ============ FILTER FUNCTIONS ============
         function handleTriwulanFilter() {
-        const filterSelect = document.getElementById('triwulanFilter');
-        const selectedFilter = filterSelect.value;
-        appState.currentFilter = selectedFilter;
-    
-        // Add visual feedback
-        if (selectedFilter !== 'all') {
+    const filterSelect = document.getElementById('triwulanFilter');
+    const selectedFilter = filterSelect.value;
+    appState.currentFilter = selectedFilter;
+
+    // Add visual feedback
+    if (selectedFilter !== 'all') {
         filterSelect.classList.add('filtered');
-        } else {
+    } else {
         filterSelect.classList.remove('filtered');
-        }
-    
-        // Reload display with filter
-        if (appState.currentSheet && appState.currentData.length > 0) {
-        displayData(appState.currentData, appState.currentSheet);
-        }
     }
+
+    // Reload display with filter
+    if (appState.currentSheet && appState.currentData.length > 0) {
+        displayData(appState.currentData, appState.currentData2 || [], appState.currentSheet);  // ✅ CORRECT!
+    }
+}
 
         function filterDataByTriwulan(dataRows) {
         if (appState.currentFilter === 'all') {
@@ -1471,80 +1525,79 @@
     }
         
         // ============ DISPLAY FUNCTIONS ============
-        function displayData(values, sheetName) {
-        const headers = values[0];
-        const allDataRows = values.slice(1).filter(row => row[1]);
+        function displayData(values1, values2, sheetName) {
+    // ========== TABLE 1 (A:G) ==========
+    const headers1 = values1[0];
+    const allDataRows1 = values1.slice(1).filter(row => row[1]);
+    const dataRows1 = filterDataByTriwulan(allDataRows1);
     
-        // APPLY FILTER
-        const dataRows = filterDataByTriwulan(allDataRows);
+    // ========== TABLE 2 (I:L) ==========
+    const headers2 = values2.length > 0 ? values2[0] : [];
+    const dataRows2 = values2.length > 1 ? values2.slice(1).filter(row => row[0]) : [];
     
-        if (dataRows.length === 0) {
+    if (dataRows1.length === 0 && dataRows2.length === 0) {
         const filterLabel = getTriwulanLabel(appState.currentFilter);
         showError('Data Kosong', `Tidak ada data untuk ${filterLabel} di sheet "${sheetName}"`);
         return;
-        }
+    }
 
-        const totals = calculateTotals(dataRows);
-        const updateTime = appState.lastUpdate.toLocaleString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-        });
+    const totals1 = calculateTotals(dataRows1);
+    const totals2 = calculateTotalsTable2(dataRows2);
     
-        // TAMBAHKAN FILTER BADGE
-        const filterBadge = appState.currentFilter !== 'all' 
+    const filterBadge = appState.currentFilter !== 'all' 
         ? `<div class="filter-badge">📊 Menampilkan: ${getTriwulanLabel(appState.currentFilter)}</div>`
         : '';
     
-        let html = `
-        ${filterBadge}
-        <div class="stats">
-            <div class="stat-card">
-                <h3>${formatRupiah(totals.ebitdaLR)}</h3>
-                <p>Total EBITDA LR${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
-            </div>
-            <div class="stat-card">
-                <h3>${formatRupiah(totals.labaNetDitransfer)}</h3>
-                <p>Total Laba Net Ditransfer${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
-            </div>
-            <div class="stat-card">
-                <h3>${formatRupiah(totals.bayarListrik)}</h3>
-                <p>Total Bayar Listrik${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
-            </div>
-            <div class="stat-card-finale">
-                <h3>${formatRupiah(totals.sisaSurkas)}</h3>
-                <p>Total Sisa Surplus Kas${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
-            </div>
+    let html = `
+    ${filterBadge}
+    
+    <!-- TABLE 1: Surplus Kas Toko -->
+    <h2 style="color: #FF69B4; margin-bottom: 20px; font-size: 1.5em;">💰 Surplus Kas Toko</h2>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <h3>${formatRupiah(totals1.ebitdaLR)}</h3>
+            <p>Total EBITDA LR${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
         </div>
-        
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>TRIWULAN</th>
-                        <th>BULAN</th>
-                        <th>EBITDA LR</th>
-                        <th>PENGGUNAAN LABA KAS</th>
-                        <th>LABA NET DITRANSFER</th>
-                        <th>BAYAR LISTRIK</th>
-                       <th>SISA SURKAS</th>
-                        ${accessToken ? '<th>AKSI</th>' : ''}
-                    </tr>
-                </thead>
-                <tbody>
+        <div class="stat-card">
+            <h3>${formatRupiah(totals1.labaNetDitransfer)}</h3>
+            <p>Total Laba Net Ditransfer${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+        </div>
+        <div class="stat-card">
+            <h3>${formatRupiah(totals1.bayarListrik)}</h3>
+            <p>Total Bayar Listrik${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+        </div>
+        <div class="stat-card-finale">
+            <h3>${formatRupiah(totals1.sisaSurkas)}</h3>
+            <p>Total Sisa Surplus Kas${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TRIWULAN</th>
+                    <th>BULAN</th>
+                    <th>EBITDA LR</th>
+                    <th>PENGGUNAAN LABA KAS</th>
+                    <th>LABA NET DITRANSFER</th>
+                    <th>BAYAR LISTRIK</th>
+                    <th>SISA SURKAS</th>
+                    ${accessToken ? '<th>AKSI</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>
     `;
     
-    dataRows.forEach((row, index) => {
+    // Table 1 rows
+    dataRows1.forEach((row, index) => {
         const data = processRowData(row);
         let colorClass = 'zero';
         if (data.sisaSurkas > 0) colorClass = 'positive';
         else if (data.sisaSurkas < 0) colorClass = 'negative';
         
-        // Find original row index in allDataRows for proper edit/delete
-        const originalIndex = allDataRows.findIndex(r => 
+        const originalIndex = allDataRows1.findIndex(r => 
             r[0] === row[0] && r[1] === row[1] && r[2] === row[2]
         );
         const rowIndex = originalIndex + 2;
@@ -1560,8 +1613,8 @@
                 <td class="currency ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
                 ${accessToken ? `
                 <td class="actions">
-                    <button class="btn-edit" onclick="openEditModal(${rowIndex})">✏️ Edit</button>
-                    <button class="btn-delete" onclick="handleDelete(${rowIndex})">🗑️ Hapus</button>
+                    <button class="btn-edit" onclick="openEditModal(${rowIndex}, 1)">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex}, 1)">🗑️ Hapus</button>
                 </td>
                 ` : ''}
             </tr>
@@ -1569,9 +1622,63 @@
     });
 
     html += `
-                </tbody>
-            </table>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- TABLE 2: Penggunaan Surkas -->
+    <h2 style="color: #FF69B4; margin: 40px 0 20px 0; font-size: 1.5em;">📋 Penggunaan Surkas</h2>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <h3>${formatRupiah(totals2.nominalPenggunaanSurkas)}</h3>
+            <p>Total Nominal Penggunaan Surkas</p>
         </div>
+        <div class="stat-card">
+            <h3>${dataRows2.length}</h3>
+            <p>Total Transaksi</p>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>BULAN</th>
+                    <th>NOMINAL PENGGUNAAN SURKAS</th>
+                    <th>TUJUAN PENGGUNAAN SURKAS</th>
+                    ${accessToken ? '<th>AKSI</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    // Table 2 rows
+    dataRows2.forEach((row, index) => {
+        const data = processRowDataTable2(row);
+        const rowIndex = index + 2; // +2 because row 1 is header
+
+        html += `
+            <tr>
+                <td class="triwulan">${index + 1}</td>
+                <td class="month">${data.bulan}</td>
+                <td class="currency">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
+                <td>${data.tujuanPenggunaanSurkas}</td>
+                ${accessToken ? `
+                <td class="actions">
+                    <button class="btn-edit" onclick="openEditModal(${rowIndex}, 2)">✏️ Edit</button>
+                    <button class="btn-delete" onclick="handleDelete(${rowIndex}, 2)">🗑️ Hapus</button>
+                </td>
+                ` : ''}
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    </div>
     `;
     
     document.getElementById('content').innerHTML = html;
@@ -1579,42 +1686,104 @@
 
         // ============ MODAL FUNCTIONS ============
         function openAddModal() {
-            if (!appState.currentSheet) {
-                alert('Pilih toko terlebih dahulu!');
-                return;
-            }
+    if (!appState.currentSheet) {
+        alert('Pilih toko terlebih dahulu!');
+        return;
+    }
 
-            document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
-            document.getElementById('submitBtnText').textContent = 'Simpan';
-            document.getElementById('dataForm').reset();
-            document.getElementById('editRowIndex').value = '';
-            document.getElementById('dataModal').classList.add('active');
+    // Ask which table to add to
+    const choice = confirm('Pilih tabel untuk menambah data:\n\nOK = Surplus Kas Toko (A:G)\nCancel = Penggunaan Surkas (I:L)');
+    const tableNumber = choice ? 1 : 2;
+
+    document.getElementById('modalTitle').textContent = tableNumber === 1 ? 'Tambah Data - Surplus Kas' : 'Tambah Data - Penggunaan Surkas';
+    document.getElementById('submitBtnText').textContent = 'Simpan';
+    document.getElementById('dataForm').reset();
+    document.getElementById('editRowIndex').value = '';
+    document.getElementById('editTableNumber').value = tableNumber;
+    
+    // Show appropriate fields
+    if (tableNumber === 1) {
+        document.getElementById('table1Fields').style.display = 'block';
+        document.getElementById('table2Fields').style.display = 'none';
+        // Make Table 1 fields required
+        document.getElementById('triwulan').required = true;
+        document.getElementById('bulan').required = true;
+        document.getElementById('ebitdaLR').required = true;
+        document.getElementById('penggunaanLabaKas').required = true;
+        document.getElementById('bayarListrik').required = true;
+        // Remove required from Table 2
+        document.getElementById('bulan2').required = false;
+        document.getElementById('nominalPenggunaanSurkas').required = false;
+        document.getElementById('tujuanPenggunaanSurkas').required = false;
+    } else {
+        document.getElementById('table1Fields').style.display = 'none';
+        document.getElementById('table2Fields').style.display = 'block';
+        // Make Table 2 fields required
+        document.getElementById('bulan2').required = true;
+        document.getElementById('nominalPenggunaanSurkas').required = true;
+        document.getElementById('tujuanPenggunaanSurkas').required = true;
+        // Remove required from Table 1
+        document.getElementById('triwulan').required = false;
+        document.getElementById('bulan').required = false;
+        document.getElementById('ebitdaLR').required = false;
+        document.getElementById('penggunaanLabaKas').required = false;
+        document.getElementById('bayarListrik').required = false;
+    }
+    
+    document.getElementById('dataModal').classList.add('active');
+}
+
+        function openEditModal(rowIndex, tableNumber) {
+    if (tableNumber === 1) {
+        if (!appState.currentData || appState.currentData.length < rowIndex) {
+            alert('Data tidak ditemukan!');
+            return;
         }
 
-        function openEditModal(rowIndex) {
-            if (!appState.currentData || appState.currentData.length < rowIndex) {
-                alert('Data tidak ditemukan!');
-                return;
-            }
+        const row = appState.currentData[rowIndex - 1];
+        const data = processRowData(row);
 
-            const row = appState.currentData[rowIndex - 1];
-            const data = processRowData(row);
-
-            document.getElementById('modalTitle').textContent = 'Edit Data';
-            document.getElementById('submitBtnText').textContent = 'Update';
-            document.getElementById('editRowIndex').value = rowIndex;
-            
-            document.getElementById('triwulan').value = data.triwulan;
-            document.getElementById('bulan').value = data.bulan;
-            document.getElementById('ebitdaLR').value = data.ebitdaLR;
-            document.getElementById('penggunaanLabaKas').value = data.penggunaanLabaKas;
-            document.getElementById('bayarListrik').value = data.bayarListrik;
-            
-            // Trigger calculation to populate auto fields
-            calculateValues();
-
-            document.getElementById('dataModal').classList.add('active');
+        document.getElementById('modalTitle').textContent = 'Edit Data - Surplus Kas';
+        document.getElementById('submitBtnText').textContent = 'Update';
+        document.getElementById('editRowIndex').value = rowIndex;
+        document.getElementById('editTableNumber').value = tableNumber;
+        
+        // Show Table 1 fields
+        document.getElementById('table1Fields').style.display = 'block';
+        document.getElementById('table2Fields').style.display = 'none';
+        
+        document.getElementById('triwulan').value = data.triwulan;
+        document.getElementById('bulan').value = data.bulan;
+        document.getElementById('ebitdaLR').value = data.ebitdaLR;
+        document.getElementById('penggunaanLabaKas').value = data.penggunaanLabaKas;
+        document.getElementById('bayarListrik').value = data.bayarListrik;
+        
+        calculateValues();
+    } else if (tableNumber === 2) {
+        if (!appState.currentData2 || appState.currentData2.length < rowIndex) {
+            alert('Data tidak ditemukan!');
+            return;
         }
+
+        const row = appState.currentData2[rowIndex - 1];
+        const data = processRowDataTable2(row);
+
+        document.getElementById('modalTitle').textContent = 'Edit Data - Penggunaan Surkas';
+        document.getElementById('submitBtnText').textContent = 'Update';
+        document.getElementById('editRowIndex').value = rowIndex;
+        document.getElementById('editTableNumber').value = tableNumber;
+        
+        // Show Table 2 fields
+        document.getElementById('table1Fields').style.display = 'none';
+        document.getElementById('table2Fields').style.display = 'block';
+        
+        document.getElementById('bulan2').value = data.bulan;
+        document.getElementById('nominalPenggunaanSurkas').value = data.nominalPenggunaanSurkas;
+        document.getElementById('tujuanPenggunaanSurkas').value = data.tujuanPenggunaanSurkas;
+    }
+
+    document.getElementById('dataModal').classList.add('active');
+}
 
         function closeModal() {
             document.getElementById('dataModal').classList.remove('active');
@@ -1639,118 +1808,119 @@
         }
 
         // ============ CRUD FUNCTIONS ============
-        async function addRow(sheetName, rowData) {
-            if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
-                return;
+        async function addRow(sheetName, rowData, range, tableNumber) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+        return;
+    }
+    
+    try {
+        const response = await gapi.client.sheets.spreadsheets.values.append({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${sheetName}!${range}`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: [rowData]
             }
-            
-            try {
-                const response = await gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${sheetName}!A:G`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('Row added:', response);
-                
-                delete appState.cache[sheetName];
-                await loadSheetData(sheetName, true);
-                
-                alert('✅ Data berhasil ditambahkan!');
-                return response;
-            } catch (error) {
-                console.error('Error adding row:', error);
-                alert('❌ Gagal menambahkan data: ' + error.message);
-                throw error;
-            }
-        }
+        });
+        
+        console.log('Row added:', response);
+        
+        delete appState.cache[sheetName];
+        await loadSheetData(sheetName, true);
+        
+        alert('✅ Data berhasil ditambahkan!');
+        return response;
+    } catch (error) {
+        console.error('Error adding row:', error);
+        alert('❌ Gagal menambahkan data: ' + error.message);
+        throw error;
+    }
+}
 
-        async function updateRow(sheetName, rowIndex, rowData) {
-            if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
-                return;
+        async function updateRow(sheetName, rowIndex, rowData, range, tableNumber) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+        return;
+    }
+    
+    try {
+        const startCol = range.split(':')[0];
+        const endCol = range.split(':')[1];
+        
+        const response = await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${sheetName}!${startCol}${rowIndex}:${endCol}${rowIndex}`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: [rowData]
             }
-            
-            try {
-                const response = await gapi.client.sheets.spreadsheets.values.update({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${sheetName}!A${rowIndex}:G${rowIndex}`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('Row updated:', response);
-                
-                delete appState.cache[sheetName];
-                await loadSheetData(sheetName, true);
-                
-                alert('✅ Data berhasil diupdate!');
-                return response;
-            } catch (error) {
-                console.error('Error updating row:', error);
-                alert('❌ Gagal mengupdate data: ' + error.message);
-                throw error;
-            }
-        }
+        });
+        
+        console.log('Row updated:', response);
+        
+        delete appState.cache[sheetName];
+        await loadSheetData(sheetName, true);
+        
+        alert('✅ Data berhasil diupdate!');
+        return response;
+    } catch (error) {
+        console.error('Error updating row:', error);
+        alert('❌ Gagal mengupdate data: ' + error.message);
+        throw error;
+    }
+}
 
-        async function deleteRow(sheetName, rowIndex) {
-            if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
-                return;
-            }
-            
-            try {
-                // Get the sheet ID first
-                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID
-                });
-                
-                const sheet = spreadsheet.result.sheets.find(
-                    s => s.properties.title === sheetName
-                );
-                
-                if (!sheet) {
-                    throw new Error('Sheet not found');
-                }
-                
-                const sheetId = sheet.properties.sheetId;
-                
-                // Delete the entire row using batchUpdate
-                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    resource: {
-                        requests: [{
-                            deleteDimension: {
-                                range: {
-                                    sheetId: sheetId,
-                                    dimension: 'ROWS',
-                                    startIndex: rowIndex - 1, // 0-based index
-                                    endIndex: rowIndex // exclusive
-                                }
-                            }
-                        }]
-                    }
-                });
-                
-                console.log('Row deleted:', response);
-                
-                delete appState.cache[sheetName];
-                await loadSheetData(sheetName, true);
-                
-                alert('✅ Baris berhasil dihapus sepenuhnya!');
-                return response;
-            } catch (error) {
-                console.error('Error deleting row:', error);
-                alert('❌ Gagal menghapus baris: ' + error.message);
-                throw error;
-            }
+        async function deleteRow(sheetName, rowIndex, tableNumber) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+        return;
+    }
+    
+    try {
+        const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+            spreadsheetId: CONFIG.SPREADSHEET_ID
+        });
+        
+        const sheet = spreadsheet.result.sheets.find(
+            s => s.properties.title === sheetName
+        );
+        
+        if (!sheet) {
+            throw new Error('Sheet not found');
         }
+        
+        const sheetId = sheet.properties.sheetId;
+        
+        const response = await gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            resource: {
+                requests: [{
+                    deleteDimension: {
+                        range: {
+                            sheetId: sheetId,
+                            dimension: 'ROWS',
+                            startIndex: rowIndex - 1,
+                            endIndex: rowIndex
+                        }
+                    }
+                }]
+            }
+        });
+        
+        console.log('Row deleted:', response);
+        
+        delete appState.cache[sheetName];
+        await loadSheetData(sheetName, true);
+        
+        alert('✅ Baris berhasil dihapus sepenuhnya!');
+        return response;
+    } catch (error) {
+        console.error('Error deleting row:', error);
+        alert('❌ Gagal menghapus baris: ' + error.message);
+        throw error;
+    }
+}
 
         // ============ EVENT HANDLERS ============
         function handleSheetChange() {
@@ -1785,47 +1955,50 @@
             loadSheetData(selectedSheet, true);
         }
 
-        function handleDelete(rowIndex) {
-            if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
-                return;
-            }
-            
-            deleteRow(appState.currentSheet, rowIndex);
-        }
+        function handleDelete(rowIndex, tableNumber) {
+    if (!confirm('⚠️ Yakin ingin menghapus data ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+        return;
+    }
+    
+    deleteRow(appState.currentSheet, rowIndex, tableNumber);
+}
 
         async function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            const triwulan = document.getElementById('triwulan').value;
-            const bulan = document.getElementById('bulan').value;
-            const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
-            const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value);
-            const bayarListrik = parseNumber(document.getElementById('bayarListrik').value);
-            
-            // Get calculated values
-            const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
-            const sisaSurkas = parseNumber(document.getElementById('sisaSurkas').value);
+    event.preventDefault();
+    
+    const editRowIndex = document.getElementById('editRowIndex').value;
+    const tableNumber = parseInt(document.getElementById('editTableNumber').value) || 1;
+    
+    let rowData, range;
+    
+    if (tableNumber === 1) {
+        const triwulan = document.getElementById('triwulan').value;
+        const bulan = document.getElementById('bulan').value;
+        const ebitdaLR = parseNumber(document.getElementById('ebitdaLR').value);
+        const penggunaanLabaKas = parseNumber(document.getElementById('penggunaanLabaKas').value);
+        const bayarListrik = parseNumber(document.getElementById('bayarListrik').value);
+        const labaNetDitransfer = parseNumber(document.getElementById('labaNetDitransfer').value);
+        const sisaSurkas = parseNumber(document.getElementById('sisaSurkas').value);
 
-            const rowData = [
-                triwulan,
-                bulan,
-                ebitdaLR,
-                penggunaanLabaKas,
-                labaNetDitransfer,
-                bayarListrik,
-                sisaSurkas
-            ];
+        rowData = [triwulan, bulan, ebitdaLR, penggunaanLabaKas, labaNetDitransfer, bayarListrik, sisaSurkas];
+        range = 'A:G';
+    } else {
+        const bulan = document.getElementById('bulan2').value;
+        const nominalPenggunaanSurkas = parseNumber(document.getElementById('nominalPenggunaanSurkas').value);
+        const tujuanPenggunaanSurkas = document.getElementById('tujuanPenggunaanSurkas').value;
 
-            const editRowIndex = document.getElementById('editRowIndex').value;
-            
-            if (editRowIndex) {
-                await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData);
-            } else {
-                await addRow(appState.currentSheet, rowData);
-            }
-            
-            closeModal();
-        }
+        rowData = [bulan, nominalPenggunaanSurkas, tujuanPenggunaanSurkas];
+        range = 'I:L';
+    }
+
+    if (editRowIndex) {
+        await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData, range, tableNumber);
+    } else {
+        await addRow(appState.currentSheet, rowData, range, tableNumber);
+    }
+    
+    closeModal();
+}
 
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
@@ -1850,7 +2023,3 @@
     </script>
 </body>
 </html>
-
-
-
-
