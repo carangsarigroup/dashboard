@@ -338,6 +338,27 @@
             min-width: 150px;
         }
 
+        /* Specific column widths */
+th:nth-child(1) {
+    min-width: 120px;  /* Area - smaller */
+    max-width: 150px;
+}
+
+th:nth-child(2) {
+    min-width: 250px;  /* Item Pemeriksaan - medium */
+    max-width: 350px;
+}
+
+th:nth-child(3) {
+    min-width: 150px;  /* Status - smaller */
+    max-width: 180px;
+}
+
+th:nth-child(4) {
+    min-width: 300px;  /* Keterangan - wider */
+    width: 40%;        /* Take more space */
+}
+        
         th:first-child {
             text-align: left;
             min-width: 200px;
@@ -355,6 +376,27 @@
             vertical-align: top;
         }
 
+        /* Match column widths for table cells */
+td:nth-child(1) {
+    min-width: 120px;
+    max-width: 150px;
+}
+
+td:nth-child(2) {
+    min-width: 250px;
+    max-width: 350px;
+}
+
+td:nth-child(3) {
+    min-width: 150px;
+    max-width: 180px;
+}
+
+td:nth-child(4) {
+    min-width: 300px;
+    width: 40%;
+}
+        
         td:last-child {
             border-right: none;
         }
@@ -1582,6 +1624,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
 
