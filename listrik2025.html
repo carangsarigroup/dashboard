@@ -909,6 +909,53 @@
         
         <div class="content" id="content">
             <div class="empty-state">
+                <div class="empty-state-icon">⚡</div>
+                <h2>Pilih Bulan untuk Melihat Data</h2>
+                <p>Gunakan dropdown di atas untuk memilih bulan yang ingin ditampilkan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Modal -->
+    <div class="modal" id="dataModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+                
+                <div class="form-group">
+                    <label for="nomor">Nomor *</label>
+                    <input type="text" id="nomor" placeholder="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="namaToko">Nama Toko *</label>
+                    <input type="text" id="namaToko" placeholder="Nama Toko" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idPelanggan">ID Pelanggan PLN</label>
+                    <input type="text" id="idPelanggan" placeholder="ID Pelanggan">
+                </div>
+
+                <div class="form-group">
+                    <label for="standAwal">Stand Awal *</label>
+                    <input type="number" id="standAwal" placeholder="0" oninput="calculateUsage()" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="standAkhir">Stand Akhir *</label>
+                    <input type="number" id="standAkhir" placeholder="0" oninput="calculateUsage()" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="penggunaan">Penggunaan (kWh) - Auto Calculate</label>
+                    <input type="number" id="penggunaan" placeholder="0" readonly style="background-color: #f0f0f0;">
+                </div>
+
                 <div class="form-group">
                     <label for="biaya">Biaya Listrik *</label>
                     <input type="number" id="biaya" placeholder="0" required>
@@ -1728,6 +1775,13 @@
             document.getElementById('submitBtnText').textContent = 'Simpan';
             document.getElementById('dataForm').reset();
             document.getElementById('editRowIndex').value = '';
+            
+            // Show all fields for regular data entry
+            const form = document.getElementById('dataForm');
+            form.querySelectorAll('.form-group').forEach(group => {
+                group.style.display = 'block';
+            });
+            
             document.getElementById('dataModal').classList.add('active');
         }
 
@@ -1740,13 +1794,11 @@
             document.getElementById('submitBtnText').textContent = 'Simpan';
             document.getElementById('editRowIndex').value = '';
             
+            // Hide fields not needed for Informasi_Umum
             form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
             form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
             form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
             form.querySelector('label[for="biaya"]').parentElement.style.display = 'none';
-            
-            form.querySelector('label[for="idPelanggan"]').textContent = 'ID Pelanggan PLN';
-            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
             
             form.reset();
             modal.classList.add('active');
@@ -1766,6 +1818,7 @@
             document.getElementById('submitBtnText').textContent = 'Update';
             document.getElementById('editRowIndex').value = rowIndex;
             
+            // Hide fields not needed for Informasi_Umum
             form.querySelector('label[for="standAwal"]').parentElement.style.display = 'none';
             form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'none';
             form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'none';
@@ -1787,11 +1840,10 @@
             const row = appState.currentData[rowIndex - 1];
             const form = document.getElementById('dataForm');
 
-            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
+            // Show all fields for regular data entry
+            form.querySelectorAll('.form-group').forEach(group => {
+                group.style.display = 'block';
+            });
 
             document.getElementById('modalTitle').textContent = 'Edit Data';
             document.getElementById('submitBtnText').textContent = 'Update';
@@ -1812,12 +1864,6 @@
         function closeModal() {
             const modal = document.getElementById('dataModal');
             const form = document.getElementById('dataForm');
-            
-            form.querySelector('label[for="standAwal"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="standAkhir"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="penggunaan"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="biaya"]').parentElement.style.display = 'block';
-            form.querySelector('label[for="idPelanggan"]').parentElement.style.display = 'block';
             
             modal.classList.remove('active');
             form.reset();
@@ -2069,5 +2115,3 @@
     </script>
 </body>
 </html>
-
-
