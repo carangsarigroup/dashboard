@@ -1540,26 +1540,24 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
         }
 
         async function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            const bagian = document.getElementById('bagian').value;
-            const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
-            const dasarPWR = document.getElementById('dasarPWR').value;
-            const status = document.getElementById('status').value;
-            const keterangan = document.getElementById('keterangan').value;
+       event.preventDefault();
+       
+       const area = document.getElementById('area').value;
+       const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
+       const status = document.getElementById('status').value;
+       const keterangan = document.getElementById('keterangan').value;
 
-            // Create row data matching the column structure
-            const rowData = [
-                bagian,
-                itemPemeriksaan,
-                dasarPWR,
-                status,
-                keterangan
-            ];
+       // Create row data matching the column structure (4 columns now)
+       const rowData = [
+           area,
+           itemPemeriksaan,
+           status,
+           keterangan
+       ];
 
-            await addColumn(rowData);
-            closeModal();
-        }
+       await addColumn(rowData);
+       closeModal();
+   }
 
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
@@ -1584,6 +1582,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
 
