@@ -758,70 +758,6 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
         }
-
-        /* Download Banner */
-.download-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px 30px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-    transition: all 0.3s ease;
-    animation: fadeInUp 0.5s ease-out;
-}
-
-.download-banner:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.download-banner-content h3 {
-    font-size: 1.3em;
-    margin-bottom: 5px;
-    font-weight: 700;
-}
-
-.download-banner-content p {
-    opacity: 0.95;
-    font-size: 0.95em;
-}
-
-.download-banner-btn {
-    background: white;
-    color: #667eea;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-weight: 600;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-}
-
-.download-banner-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-}
-
-@media (max-width: 768px) {
-    .download-banner {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-    
-    .download-banner-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
     </style>
 </head>
 
@@ -1641,21 +1577,9 @@ const dataRows2 = appState.currentFilter !== 'all'
         ? `<div class="filter-badge">📊 Menampilkan: ${getTriwulanLabel(appState.currentFilter)}</div>`
         : '';
     
-   let html = `
+    let html = `
     ${filterBadge}
     
-    <!-- DOWNLOAD BANNER -->
-    <div class="download-banner">
-        <div class="download-banner-content">
-            <h3>📥 Unduh Laporan Keuangan</h3>
-            <p>Akses dan download semua file laporan keuangan bulanan dalam format PDF</p>
-        </div>
-        <a href="archived.html" class="download-banner-btn">
-            <span>📄</span>
-            <span>Lihat Semua Laporan</span>
-        </a>
-    </div>
-        
     <!-- TABLE 1: Surplus Kas Toko -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">💰 Surplus Kas Toko</h2>
@@ -2147,8 +2071,4 @@ const dataRows2 = appState.currentFilter !== 'all'
     </script>
 </body>
 </html>
-
-
-
-
 
