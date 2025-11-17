@@ -1291,10 +1291,11 @@
             console.log('✓ GIS client initialized');
         }
 
-        function maybeEnableButtons() {
+        async function maybeEnableButtons() {
             if (gapiInited && gisInited) {
                 console.log('✅ Both Google APIs ready');
                 restoreOAuthToken();
+                await displayAnnouncements()
                 if (currentUserRole && currentUserRole.toLowerCase() === 'admin') {
                     updateUIBasedOnRole(currentUserRole);
                 }
@@ -1731,9 +1732,10 @@
             waitForGoogleAPIs();
 
             // Load announcements if not closed previously
-            if (sessionStorage.getItem('announcementsClosed') !== 'true') {
-                await displayAnnouncements();
-            }
+if (sessionStorage.getItem('announcementsClosed') !== 'true') {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await displayAnnouncements();
+}
         });
 
         // Form submission handler
@@ -1752,6 +1754,7 @@
     </script>
 </body>
 </html>
+
 
 
 
