@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMTOCS - Download Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1581224463294-908316338239?w=1920');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .user-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #FF69B4;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+            padding: 12px 30px;
+            border: 2px solid #FF69B4;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover {
+            background: #FF69B4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 0.95em;
+        }
+
+        .folder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .folder-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .folder-item.expanded {
+            border-color: #FF69B4;
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.2);
+        }
+
+        .folder-header {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.05) 0%, rgba(74, 144, 226, 0.05) 100%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .folder-header:hover {
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
+        }
+
+        .folder-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .folder-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .folder-item.expanded .folder-icon {
+            transform: scale(1.1);
+        }
+
+        .folder-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .folder-details {
+            flex: 1;
+        }
+
+        .folder-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .folder-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .expand-icon {
+            font-size: 1.5em;
+            color: #FF69B4;
+            transition: transform 0.3s ease;
+        }
+
+        .folder-item.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .files-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .folder-item.expanded .files-container {
+            max-height: 2000px;
+        }
+
+        .files-list {
+            padding: 20px 25px;
+            background: #f8f9fa;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #FF69B4;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .pdf-icon {
+            width: 40px;
+            height: 40px;
+            background: #dc3545;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75em;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .download-file-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .download-file-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .download-all-btn {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .logout-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logout-warning.show {
+            display: flex;
+        }
+
+        .warning-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .warning-content h3 {
+            color: #FF69B4;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .warning-content p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+
+        .warning-content button {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .warning-content button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .user-bar {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .folder-header {
+                padding: 15px 20px;
+            }
+
+            .folder-name {
+                font-size: 1.1em;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .download-file-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-warning" id="logoutWarning">
+        <div class="warning-content">
+            <h3>⚠️ Peringatan Inaktivitas</h3>
+            <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+            <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        </div>
+    </div>
+
+    <div class="user-bar">
+        <div class="user-info">
+            <span>👤</span>
+            <span id="displayUsername">Guest</span>
+        </div>
+        <button onclick="logout()" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>📁 Download Files</h1>
+            <p>Akses dan unduh file-file penting - Klik folder untuk melihat isinya</p>
+        </div>
+        
+        <div class="controls">
+            <a href="index.html" class="back-btn">
+                <span>🏠</span>
+                <span>Kembali ke Dashboard</span>
+            </a>
+        </div>
+        
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="totalFolders">8</h3>
+                    <p>Total Folders</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalFiles">0</h3>
+                    <p>Total Files</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📅</h3>
+                    <p>Updated: Nov 12</p>
+                </div>
+            </div>
+
+            <div class="folder-list" id="folderList">
+                <!-- Folders will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ AUTH SYSTEM ============
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+        function getAuthData() {
+            try {
+                const authString = getCookie('userAuth');
+                if (!authString) return null;
+                return JSON.parse(atob(authString));
+            } catch (e) {
+                console.error('Auth parse error:', e);
+                return null;
+            }
+        }
+
+        function checkAuth() {
+            const authData = getAuthData();
+            if (!authData) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            
+            if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+                deleteCookie('userAuth');
+                window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function logout(message = null) {
+            if (!message && !confirm('Yakin ingin logout?')) return;
+            deleteCookie('userAuth');
+            window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+        }
+
+        // ============ AUTO-LOGOUT TIMER ============
+        let inactivityTimer;
+        let warningTimer;
+        let countdownInterval;
+        const INACTIVITY_LIMIT = 5 * 60 * 1000;
+        const WARNING_TIME = 60 * 1000;
+
+        function startInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            clearInterval(countdownInterval);
+            
+            document.getElementById('logoutWarning').classList.remove('show');
+            
+            warningTimer = setTimeout(() => {
+                showLogoutWarning();
+            }, INACTIVITY_LIMIT - WARNING_TIME);
+            
+            inactivityTimer = setTimeout(() => {
+                logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+            }, INACTIVITY_LIMIT);
+        }
+
+        function showLogoutWarning() {
+            document.getElementById('logoutWarning').classList.add('show');
+            let countdown = 60;
+            document.getElementById('warningCountdown').textContent = countdown;
+            
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('warningCountdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        function resetInactivityTimer() {
+            startInactivityTimer();
+        }
+
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        activityEvents.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // ============ FILE DATA STRUCTURE ============
+        // TODO: Replace 'YOUR_FILE_ID_HERE' with actual Google Drive File IDs
+        // Get File ID: Right-click file in Drive → Get link → Copy ID from URL
+        const foldersData = {
+            '1. F4SD': {
+                files: [
+                    { name: 'LK_F4SD_24_12.PDF', modified: 'Mar 19', size: '—', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_01.PDF', modified: 'Feb 11', size: '255 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_02.PDF', modified: 'Mar 24', size: '246 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_03.PDF', modified: 'May 5', size: '264 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_04.PDF', modified: 'May 10', size: '264 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_05.PDF', modified: 'Jun 12', size: '265 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_06.PDF', modified: 'Jul 9', size: '262 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_07.PDF', modified: 'Aug 12', size: '275 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_08.PDF', modified: 'Sep 11', size: '273 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_F4SD_25_09.PDF', modified: 'Oct 14', size: '268 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '2. FKOM': {
+                files: [
+                    { name: 'LK_FKOM_25_01.PDF', modified: 'Feb 11', size: '248 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_02.PDF', modified: 'Mar 24', size: '252 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_03.PDF', modified: 'May 5', size: '250 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_04.PDF', modified: 'May 10', size: '255 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_05.PDF', modified: 'Jun 12', size: '260 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_06.PDF', modified: 'Jul 9', size: '258 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_07.PDF', modified: 'Aug 12', size: '265 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_08.PDF', modified: 'Sep 11', size: '270 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FKOM_25_09.PDF', modified: 'Oct 14', size: '262 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '3. FHEN': {
+                files: [
+                    { name: 'LK_FHEN_25_01.PDF', modified: 'Feb 11', size: '240 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FHEN_25_02.PDF', modified: 'Mar 24', size: '245 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FHEN_25_03.PDF', modified: 'May 5', size: '248 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '4. FEHU': {
+                files: [
+                    { name: 'LK_FEHU_25_01.PDF', modified: 'Feb 11', size: '238 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FEHU_25_02.PDF', modified: 'Mar 24', size: '242 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '5. FIVI': {
+                files: [
+                    { name: 'LK_FIVI_25_01.PDF', modified: 'Feb 11', size: '250 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FIVI_25_02.PDF', modified: 'Mar 24', size: '255 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '6. FZ7Y': {
+                files: [
+                    { name: 'LK_FZ7Y_25_01.PDF', modified: 'Feb 11', size: '245 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_FZ7Y_25_02.PDF', modified: 'Mar 24', size: '250 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '7. 1SFY': {
+                files: [
+                    { name: 'LK_1SFY_25_01.PDF', modified: 'Feb 11', size: '252 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_1SFY_25_02.PDF', modified: 'Mar 24', size: '258 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            },
+            '8. Q789': {
+                files: [
+                    { name: 'LK_Q789_25_01.PDF', modified: 'Feb 11', size: '260 KB', fileId: 'YOUR_FILE_ID_HERE' },
+                    { name: 'LK_Q789_25_02.PDF', modified: 'Mar 24', size: '265 KB', fileId: 'YOUR_FILE_ID_HERE' }
+                ]
+            }
+        };
+
+        // ============ RENDER FUNCTIONS ============
+        function toggleFolder(folderName) {
+            const folderElement = document.querySelector(`[data-folder="${folderName}"]`);
+            if (folderElement) {
+                folderElement.classList.toggle('expanded');
+            }
+        }
+
+        function renderFolders() {
+            const folderList = document.getElementById('folderList');
+            folderList.innerHTML = '';
+            
+            let totalFiles = 0;
+
+            Object.keys(foldersData).forEach(folderName => {
+                const folder = foldersData[folderName];
+                totalFiles += folder.files.length;
+
+                const folderDiv = document.createElement('div');
+                folderDiv.className = 'folder-item';
+                folderDiv.setAttribute('data-folder', folderName);
+
+                folderDiv.innerHTML = `
+                    <div class="folder-header" onclick="toggleFolder('${folderName}')">
+                        <div class="folder-info">
+                            <div class="folder-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="folder-details">
+                                <div class="folder-name">${folderName}</div>
+                                <div class="folder-meta">${folder.files.length} files • Owner: me</div>
+                            </div>
+                        </div>
+                        <button class="download-all-btn" onclick="event.stopPropagation(); downloadAllFiles('${folderName}')">
+                            <span>⬇️</span>
+                            <span>Download All</span>
+                        </button>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="files-container">
+                        <div class="files-list">
+                            ${folder.files.map(file => `
+                                <div class="file-item">
+                                    <div class="file-info">
+                                        <div class="pdf-icon">PDF</div>
+                                        <div class="file-details">
+                                            <div class="file-name">${file.name}</div>
+                                            <div class="file-meta">${file.modified} • ${file.size}</div>
+                                        </div>
+                                    </div>
+                                    <button class="download-file-btn" onclick="downloadFile('${folderName}', '${file.name}')">
+                                        <span>⬇️</span>
+                                        <span>Download</span>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                folderList.appendChild(folderDiv);
+            });
+
+            document.getElementById('totalFolders').textContent = Object.keys(foldersData).length;
+            document.getElementById('totalFiles').textContent = totalFiles;
+        }
+
+        // ============ DOWNLOAD HANDLERS ============
+        function downloadFile(folderName, fileName) {
+            const folder = foldersData[folderName];
+            if (!folder) {
+                alert('❌ Folder tidak ditemukan!');
+                return;
+            }
+
+            const file = folder.files.find(f => f.name === fileName);
+            if (!file || !file.fileId || file.fileId === 'YOUR_FILE_ID_HERE') {
+                alert(`⚠️ File ID belum diatur untuk: ${fileName}\n\nSilakan update fileId di kode untuk file ini.`);
+                return;
+            }
+
+            // Open Google Drive direct download link
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.fileId}`;
+            window.open(downloadUrl, '_blank');
+        }
+
+        function downloadAllFiles(folderName) {
+            const folder = foldersData[folderName];
+            if (!folder) return;
+
+            // Check if all files have valid IDs
+            const missingIds = folder.files.filter(f => !f.fileId || f.fileId === 'YOUR_FILE_ID_HERE');
+            
+            if (missingIds.length > 0) {
+                alert(`⚠️ Beberapa file belum memiliki File ID:\n\n${missingIds.map(f => f.name).join('\n')}\n\nSilakan update fileId untuk file-file tersebut.`);
+                return;
+            }
+
+            // Download all files one by one
+            if (confirm(`📦 Download ${folder.files.length} files dari folder: ${folderName}?\n\nFile akan diunduh satu per satu.`)) {
+                folder.files.forEach((file, index) => {
+                    setTimeout(() => {
+                        const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.fileId}`;
+                        window.open(downloadUrl, '_blank');
+                    }, index * 1000); // Delay 1 second between each download
+                });
+            }
+        }
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                const authData = getAuthData();
+                if (authData?.username) {
+                    document.getElementById('displayUsername').textContent = authData.username;
+                }
+                startInactivityTimer();
+                renderFolders();
+            }
+        });
+    </script>
+</body>
+</html>
