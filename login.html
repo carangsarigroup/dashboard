@@ -139,7 +139,7 @@
             font-size: 1.2em;
         }
         
-        .form-group input, .form-group select {
+        .form-group input {
             width: 100%;
             padding: 15px 18px;
             border: 2px solid #dee2e6;
@@ -149,7 +149,7 @@
             background: #f8f9fa;
         }
         
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #FF69B4;
             background: white;
@@ -157,12 +157,8 @@
             transform: translateY(-2px);
         }
 
-        .form-group input:hover, .form-group select:hover {
+        .form-group input:hover {
             border-color: #FF69B4;
-        }
-
-        .form-group select {
-            cursor: pointer;
         }
         
         .login-btn {
@@ -314,6 +310,7 @@
             color: #FF69B4;
         }
 
+        /* Info banner */
         .info-banner {
             background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
             border: 2px solid rgba(255, 105, 180, 0.3);
@@ -329,6 +326,39 @@
             color: #FF69B4;
         }
 
+        /* Responsif */
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-header {
+                padding: 35px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.8em;
+            }
+
+            .login-header .icon-large {
+                font-size: 3em;
+            }
+
+            .login-body {
+                padding: 30px 25px;
+            }
+
+            .form-group input {
+                padding: 13px 16px;
+            }
+
+            .login-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+
+        /* Loading overlay */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -370,333 +400,9 @@
             color: #495057;
             font-weight: 600;
         }
-
-        /* Admin Panel Styles */
-.admin-panel-link {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.admin-link-btn {
-    background: rgba(108, 117, 125, 0.1);
-    color: #6c757d;
-    border: 1px solid rgba(108, 117, 125, 0.3);
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 0.8em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    opacity: 0.6;
-}
-
-.admin-link-btn:hover {
-    background: rgba(108, 117, 125, 0.2);
-    color: #495057;
-    opacity: 1;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
-}
-
-        /* User Actions - Create Account & Forgot Password */
-.user-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e9ecef;
-}
-
-.user-action-btn {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.5);
-    color: #495057;
-    border: 2px solid #dee2e6;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 0.9em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-align: center;
-}
-
-.user-action-btn:hover {
-    background: white;
-    border-color: #FF69B4;
-    color: #FF69B4;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
-}
-
-.user-action-btn:active {
-    transform: translateY(0);
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    .admin-panel-link {
-        top: 10px;
-        right: 10px;
-    }
-    
-    .admin-link-btn {
-        padding: 6px 12px;
-        font-size: 0.75em;
-    }
-    
-    .user-actions {
-        flex-direction: column;
-    }
-}
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: modalSlideUp 0.3s ease-out;
-        }
-
-        @keyframes modalSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #FF69B4;
-        }
-
-        .modal-header h2 {
-            color: #FF69B4;
-            font-size: 1.5em;
-            margin: 0;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 2em;
-            color: #999;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            line-height: 1;
-        }
-
-        .close-modal:hover {
-            color: #FF69B4;
-            transform: rotate(90deg);
-        }
-
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: #f8f9fa;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #666;
-        }
-
-        .tab-btn:hover {
-            background: rgba(255, 105, 180, 0.1);
-            color: #FF69B4;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .tab-content h3 {
-            color: #FF69B4;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-
-        .refresh-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-        }
-
-        .user-item {
-            background: #f8f9fa;
-            border-left: 4px solid #FF69B4;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-info strong {
-            color: #FF69B4;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .user-role {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        .delete-user-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 0.85em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .delete-user-btn:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                max-width: 100%;
-            }
-
-            .login-header {
-                padding: 35px 20px;
-            }
-
-            .login-header h1 {
-                font-size: 1.8em;
-            }
-
-            .login-header .icon-large {
-                font-size: 3em;
-            }
-
-            .login-body {
-                padding: 30px 25px;
-            }
-
-            .form-group input, .form-group select {
-                padding: 13px 16px;
-            }
-
-            .login-btn {
-                padding: 15px;
-                font-size: 16px;
-            }
-
-            .admin-tabs {
-                flex-direction: column;
-            }
-            
-            .tab-btn {
-                width: 100%;
-            }
-            
-            .user-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Admin Panel Button - Top Right -->
-    <div class="admin-panel-link">
-        <button onclick="openAdminPanel()" class="admin-link-btn">
-            <span>⚙️</span> Admin
-        </button>
-    </div>
-    
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
             <div class="spinner"></div>
@@ -757,224 +463,19 @@
                 </button>
             </form>
 
-            <div class="user-actions">
-    <button onclick="openCreateAccountModal()" class="user-action-btn">
-        <span>✨</span> Buat Akun
-    </button>
-    <button onclick="openForgotPasswordModal()" class="user-action-btn">
-        <span>🔑</span> Lupa Password?
-    </button>
-</div>
-
-<div class="footer-note">
-    <span class="icon">💡</span> Pastikan koneksi internet Anda stabil
-</div>
-        </div>
-    </div>
-
-    <!-- Admin Panel Modal -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="adminModalTitle">⚙️ Panel Admin</h2>
-                <button class="close-modal" onclick="closeAdminModal()">✕</button>
-            </div>
-            
-            <div class="message" id="adminMessage"></div>
-            
-            <!-- Login to Admin Panel -->
-            <div id="adminLoginSection">
-                <p style="margin-bottom: 20px; color: #666;">Masukkan kredensial admin untuk mengakses panel</p>
-                <div class="form-group">
-                    <label for="adminUsername">👤 Username Admin</label>
-                    <input type="text" id="adminUsername" placeholder="Username admin">
-                </div>
-                <div class="form-group">
-                    <label for="adminPassword">🔑 Password Admin</label>
-                    <div class="password-toggle">
-                        <input type="password" id="adminPassword" placeholder="Password admin">
-                        <button type="button" class="password-toggle-btn" onclick="toggleAdminPassword()" title="Tampilkan/Sembunyikan">
-                            👁️
-                        </button>
-                    </div>
-                </div>
-                <button onclick="verifyAdmin()" class="login-btn">
-                    <span>🔓 Verifikasi Admin</span>
-                </button>
-            </div>
-
-            <!-- Admin Panel Content -->
-            <div id="adminPanelContent" style="display: none;">
-                <div class="admin-tabs">
-                    <button class="tab-btn active" onclick="switchTab('addUser')">➕ Tambah User</button>
-                    <button class="tab-btn" onclick="switchTab('changePassword')">🔑 Ubah Password</button>
-                    <button class="tab-btn" onclick="switchTab('userList')">👥 Daftar User</button>
-                </div>
-
-                <!-- Add User Tab -->
-                <div id="addUserTab" class="tab-content active">
-                    <h3>➕ Tambah User Baru</h3>
-                    <form id="addUserForm" onsubmit="handleAddUser(event)">
-                        <div class="form-group">
-                            <label for="newUsername">Username *</label>
-                            <input type="text" id="newUsername" required placeholder="Username baru">
-                        </div>
-                        <div class="form-group">
-                            <label for="newPassword">Password *</label>
-                            <input type="password" id="newPassword" required placeholder="Password baru">
-                        </div>
-                        <div class="form-group">
-                            <label for="newFullName">Nama Lengkap *</label>
-                            <input type="text" id="newFullName" required placeholder="Nama lengkap">
-                        </div>
-                        <div class="form-group">
-                            <label for="newRole">Role *</label>
-                            <select id="newRole" required>
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="login-btn">
-                            <span>💾 Simpan User Baru</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Change Password Tab -->
-                <div id="changePasswordTab" class="tab-content">
-                    <h3>🔑 Ubah Password User</h3>
-                    <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
-                        <div class="form-group">
-                            <label for="targetUsername">Username yang akan diubah *</label>
-                            <input type="text" id="targetUsername" required placeholder="Username">
-                        </div>
-                        <div class="form-group">
-                            <label for="newPasswordChange">Password Baru *</label>
-                            <input type="password" id="newPasswordChange" required placeholder="Password baru">
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Konfirmasi Password Baru *</label>
-                            <input type="password" id="confirmPassword" required placeholder="Konfirmasi password">
-                        </div>
-                        <button type="submit" class="login-btn">
-                            <span>🔄 Update Password</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- User List Tab -->
-                <div id="userListTab" class="tab-content">
-                    <h3>👥 Daftar User</h3>
-                    <button onclick="loadUserList()" class="refresh-btn">🔄 Refresh</button>
-                    <div id="userListContainer" style="margin-top: 20px;">
-                        <p style="color: #666;">Klik refresh untuk memuat daftar user</p>
-                    </div>
-                </div>
+            <div class="footer-note">
+                <span class="icon">💡</span> Pastikan koneksi internet Anda stabil
             </div>
         </div>
     </div>
 
-    <!-- Create Account Modal -->
-    <div id="createAccountModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✨ Buat Akun Baru</h2>
-                <button class="close-modal" onclick="closeCreateAccountModal()">✕</button>
-            </div>
-            
-            <div class="message" id="createAccountMessage"></div>
-            
-            <p style="margin-bottom: 20px; color: #666;">Isi formulir di bawah untuk membuat akun baru</p>
-            
-            <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
-                <div class="form-group">
-                    <label for="createUsername">Username *</label>
-                    <input type="text" id="createUsername" required placeholder="Pilih username Anda" minlength="3">
-                </div>
-                <div class="form-group">
-                    <label for="createPassword">Password *</label>
-                    <div class="password-toggle">
-                        <input type="password" id="createPassword" required placeholder="Buat password" minlength="4">
-                        <button type="button" class="password-toggle-btn" onclick="toggleCreatePassword()" title="Tampilkan/Sembunyikan">
-                            👁️
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="createConfirmPassword">Konfirmasi Password *</label>
-                    <input type="password" id="createConfirmPassword" required placeholder="Ketik ulang password" minlength="4">
-                </div>
-                <div class="form-group">
-                    <label for="createFullName">Nama Lengkap *</label>
-                    <input type="text" id="createFullName" required placeholder="Nama lengkap Anda">
-                </div>
-                <button type="submit" class="login-btn">
-                    <span>🚀 Daftar Sekarang</span>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Forgot Password Modal -->
-    <div id="forgotPasswordModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🔑 Lupa Password</h2>
-                <button class="close-modal" onclick="closeForgotPasswordModal()">✕</button>
-            </div>
-            
-            <div class="message" id="forgotPasswordMessage"></div>
-            
-            <p style="margin-bottom: 20px; color: #666;">Masukkan username Anda untuk reset password</p>
-            
-            <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
-                <div class="form-group">
-                    <label for="forgotUsername">Username *</label>
-                    <input type="text" id="forgotUsername" required placeholder="Username Anda">
-                </div>
-                <div class="form-group">
-                    <label for="forgotNewPassword">Password Baru *</label>
-                    <div class="password-toggle">
-                        <input type="password" id="forgotNewPassword" required placeholder="Password baru" minlength="4">
-                        <button type="button" class="password-toggle-btn" onclick="toggleForgotPassword()" title="Tampilkan/Sembunyikan">
-                            👁️
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="forgotConfirmPassword">Konfirmasi Password Baru *</label>
-                    <input type="password" id="forgotConfirmPassword" required placeholder="Konfirmasi password baru" minlength="4">
-                </div>
-                <button type="submit" class="login-btn">
-                    <span>🔄 Reset Password</span>
-                </button>
-            </form>
-            
-            <div class="info-banner" style="margin-top: 20px;">
-                <strong>⚠️ Catatan:</strong> Anda perlu mengingat username Anda untuk reset password
-            </div>
-        </div>
-    </div>
-   
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
     <script>
         // ============ CONFIG ============
         const CONFIG = {
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
-            SHEET_NAME: 'Users',
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
+            SHEET_NAME: 'Users'
         };
-
-        // ============ GOOGLE API STATE ============
-        let tokenClient;
-        let accessToken = null;
-        let gapiInited = false;
-        let gisInited = false;
-        let allUsers = [];
 
         // ============ COOKIE MANAGEMENT ============
         function setCookie(name, value, days) {
@@ -1000,7 +501,7 @@
         // ============ UI FUNCTIONS ============
         function togglePassword() {
             const passwordInput = document.getElementById('password');
-            const toggleBtn = event.target;
+            const toggleBtn = document.querySelector('.password-toggle-btn');
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -1013,10 +514,8 @@
             }
         }
 
-        function showMessage(message, type = 'error', containerId = 'message') {
-            const messageDiv = document.getElementById(containerId);
-            if (!messageDiv) return;
-            
+        function showMessage(message, type = 'error') {
+            const messageDiv = document.getElementById('message');
             messageDiv.textContent = message;
             messageDiv.className = 'message ' + type + ' show';
             
@@ -1048,6 +547,7 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
+            // Validation
             if (!username || !password) {
                 showMessage('❌ Username dan password harus diisi!', 'error');
                 return;
@@ -1061,7 +561,7 @@
             if (password.length < 4) {
                 showMessage('❌ Password minimal 4 karakter!', 'error');
                 return;
-                }
+            }
             
             setLoading(true);
             
@@ -1084,38 +584,45 @@
                     throw new Error('Database user kosong atau tidak ditemukan.');
                 }
                 
+                // Skip header row
                 const users = data.values.slice(1);
                 
+                // Find matching user
                 const validUser = users.find(user => 
                     user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && 
                     user[1] && user[1].trim() === password
                 );
                 
                 if (validUser) {
+                    // Login successful
                     const authData = {
-                        username: username,
-                        fullName: validUser[2] || username,
-                        role: validUser[3] || 'user', 
-                        loginTime: new Date().toISOString(),
-                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                    username: username,
+                    fullName: validUser[2] || username,
+                    role: validUser[3] || 'user', 
+                    loginTime: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                     };
                     
                     const encoded = btoa(JSON.stringify(authData));
                     setCookie('userAuth', encoded, 1);
                     
+                    // Get redirect URL
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirectTo = urlParams.get('redirect') || 'index.html';
                     
                     showMessage('✅ Login berhasil! Mengalihkan ke dashboard...', 'success');
                     
+                    // Redirect with delay
                     setTimeout(() => {
                         window.location.href = redirectTo;
                     }, 1500);
                     
                 } else {
+                    // Login failed
                     setLoading(false);
                     showMessage('❌ Username atau password salah!', 'error');
                     
+                    // Clear password field
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
                 }
@@ -1127,419 +634,6 @@
             }
         }
 
-        // ============ GOOGLE API INITIALIZATION ============
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        async function initializeGapiClient() {
-            try {
-                await gapi.client.init({
-                    apiKey: CONFIG.API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                });
-                gapiInited = true;
-                console.log('✓ GAPI initialized');
-            } catch (error) {
-                console.error('Error initializing GAPI:', error);
-            }
-        }
-
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CONFIG.CLIENT_ID,
-                scope: CONFIG.SCOPES,
-                callback: ''
-            });
-            gisInited = true;
-            console.log('✓ GIS initialized');
-        }
-
-        function requestOAuthToken(callback) {
-            if (!gapiInited || !gisInited) {
-                showMessage('❌ Google API belum siap. Silakan refresh halaman.', 'error', 'adminMessage');
-                return;
-            }
-
-            tokenClient.callback = async (response) => {
-                if (response.error !== undefined) {
-                    showMessage('❌ Gagal authenticate: ' + response.error, 'error', 'adminMessage');
-                    return;
-                }
-                accessToken = response.access_token;
-                gapi.client.setToken({ access_token: accessToken });
-                callback();
-            };
-            
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
-            }
-        }
-
-        // ============ ADMIN PANEL FUNCTIONS ============
-        function openAdminPanel() {
-            document.getElementById('adminModal').classList.add('active');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('active');
-            document.getElementById('adminLoginSection').style.display = 'block';
-            document.getElementById('adminPanelContent').style.display = 'none';
-            
-            // Reset forms
-            document.getElementById('adminUsername').value = '';
-            document.getElementById('adminPassword').value = '';
-            
-            // Clear message
-            const adminMsg = document.getElementById('adminMessage');
-            if (adminMsg) adminMsg.classList.remove('show');
-        }
-
-        function toggleAdminPassword() {
-            const input = document.getElementById('adminPassword');
-            const btn = event.target;
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                btn.textContent = '👁️';
-            }
-        }
-
-        async function verifyAdmin() {
-            const username = document.getElementById('adminUsername').value.trim();
-            const password = document.getElementById('adminPassword').value;
-            
-            if (!username || !password) {
-                showMessage('❌ Username dan password admin harus diisi!', 'error', 'adminMessage');
-                return;
-            }
-            
-            setLoading(true);
-            
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error('Gagal mengakses database');
-                }
-                
-                const users = data.values.slice(1);
-                allUsers = data.values; // Store all data including header
-                
-                const admin = users.find(user => 
-                    user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && 
-                    user[1] && user[1].trim() === password &&
-                    user[3] && user[3].toLowerCase() === 'admin'
-                );
-                
-                setLoading(false);
-                
-                if (admin) {
-                    showMessage('✅ Verifikasi berhasil! Selamat datang, Admin.', 'success', 'adminMessage');
-                    document.getElementById('adminLoginSection').style.display = 'none';
-                    document.getElementById('adminPanelContent').style.display = 'block';
-                    
-                    // Auto-load user list
-                    loadUserList();
-                } else {
-                    showMessage('❌ Username atau password admin salah, atau Anda bukan admin!', 'error', 'adminMessage');
-                }
-                
-            } catch (error) {
-                console.error('Admin verification error:', error);
-                setLoading(false);
-                showMessage('❌ ' + error.message, 'error', 'adminMessage');
-            }
-        }
-
-        function switchTab(tabName) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to selected tab
-            event.target.classList.add('active');
-            document.getElementById(tabName + 'Tab').classList.add('active');
-        }
-
-        // ============ ADD USER FUNCTION ============
-        async function handleAddUser(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value;
-            const fullName = document.getElementById('newFullName').value.trim();
-            const role = document.getElementById('newRole').value;
-            
-            if (!username || !password || !fullName || !role) {
-                showMessage('❌ Semua field harus diisi!', 'error', 'adminMessage');
-                return;
-            }
-
-            if (username.length < 3) {
-                showMessage('❌ Username minimal 3 karakter!', 'error', 'adminMessage');
-                return;
-            }
-
-            if (password.length < 4) {
-                showMessage('❌ Password minimal 4 karakter!', 'error', 'adminMessage');
-                return;
-            }
-            
-            // Check if username already exists
-            const users = allUsers.slice(1);
-            const existingUser = users.find(user => 
-                user[0] && user[0].trim().toLowerCase() === username.toLowerCase()
-            );
-            
-            if (existingUser) {
-                showMessage('❌ Username sudah digunakan! Pilih username lain.', 'error', 'adminMessage');
-                return;
-            }
-            
-            if (!accessToken) {
-                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
-                requestOAuthToken(() => addUserToSheet(username, password, fullName, role));
-                return;
-            }
-            
-            addUserToSheet(username, password, fullName, role);
-        }
-
-        async function addUserToSheet(username, password, fullName, role) {
-            setLoading(true);
-            
-            try {
-                const rowData = [username, password, fullName, role];
-                
-                const response = await gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:D`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('User added:', response);
-                setLoading(false);
-                
-                showMessage('✅ User baru berhasil ditambahkan!', 'success', 'adminMessage');
-                
-                // Reset form
-                document.getElementById('addUserForm').reset();
-                
-                // Reload user list
-                await loadUserList();
-                
-            } catch (error) {
-                console.error('Error adding user:', error);
-                setLoading(false);
-                showMessage('❌ Gagal menambahkan user: ' + error.message, 'error', 'adminMessage');
-            }
-        }
-
-        // ============ CHANGE PASSWORD FUNCTION ============
-        async function handleChangePassword(event) {
-            event.preventDefault();
-            
-            const targetUsername = document.getElementById('targetUsername').value.trim();
-            const newPassword = document.getElementById('newPasswordChange').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (!targetUsername || !newPassword || !confirmPassword) {
-                showMessage('❌ Semua field harus diisi!', 'error', 'adminMessage');
-                return;
-            }
-
-            if (newPassword.length < 4) {
-                showMessage('❌ Password minimal 4 karakter!', 'error', 'adminMessage');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showMessage('❌ Password dan konfirmasi password tidak cocok!', 'error', 'adminMessage');
-                return;
-            }
-            
-            // Find user
-            const users = allUsers.slice(1);
-            const userIndex = users.findIndex(user => 
-                user[0] && user[0].trim().toLowerCase() === targetUsername.toLowerCase()
-            );
-            
-            if (userIndex === -1) {
-                showMessage('❌ User tidak ditemukan!', 'error', 'adminMessage');
-                return;
-            }
-            
-            const rowIndex = userIndex + 2; // +2 because header is row 1, array starts at 0
-            
-            if (!accessToken) {
-                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
-                requestOAuthToken(() => updatePasswordInSheet(rowIndex, users[userIndex], newPassword));
-                return;
-            }
-            
-            updatePasswordInSheet(rowIndex, users[userIndex], newPassword);
-        }
-
-        async function updatePasswordInSheet(rowIndex, userData, newPassword) {
-            setLoading(true);
-            
-            try {
-                const rowData = [userData[0], newPassword, userData[2], userData[3]];
-                
-                const response = await gapi.client.sheets.spreadsheets.values.update({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A${rowIndex}:D${rowIndex}`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('Password updated:', response);
-                setLoading(false);
-                
-                showMessage('✅ Password berhasil diubah!', 'success', 'adminMessage');
-                
-                // Reset form
-                document.getElementById('changePasswordForm').reset();
-                
-                // Reload user list
-                await loadUserList();
-                
-            } catch (error) {
-                console.error('Error updating password:', error);
-                setLoading(false);
-                showMessage('❌ Gagal mengubah password: ' + error.message, 'error', 'adminMessage');
-            }
-        }
-
-        // ============ LOAD USER LIST ============
-        async function loadUserList() {
-            const container = document.getElementById('userListContainer');
-            container.innerHTML = '<p style="color: #666;">Memuat daftar user...</p>';
-            
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error('Gagal mengakses database');
-                }
-                
-                allUsers = data.values;
-                const users = data.values.slice(1);
-                
-                if (users.length === 0) {
-                    container.innerHTML = '<p style="color: #666;">Tidak ada user.</p>';
-                    return;
-                }
-                
-                let html = '';
-                users.forEach((user, index) => {
-                    const username = user[0] || 'N/A';
-                    const fullName = user[2] || 'N/A';
-                    const role = user[3] || 'user';
-                    const rowIndex = index + 2;
-                    
-                    html += `
-                        <div class="user-item">
-                            <div class="user-info">
-                                <strong>${username}</strong>
-                                <div>${fullName}</div>
-                                <span class="user-role">${role.toUpperCase()}</span>
-                            </div>
-                            <button class="delete-user-btn" onclick="deleteUser(${rowIndex}, '${username}')">
-                                🗑️ Hapus
-                            </button>
-                        </div>
-                    `;
-                });
-                
-                container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading users:', error);
-                container.innerHTML = '<p style="color: #dc3545;">❌ Gagal memuat daftar user</p>';
-            }
-        }
-
-        // ============ DELETE USER FUNCTION ============
-        async function deleteUser(rowIndex, username) {
-            if (!confirm(`⚠️ Yakin ingin menghapus user "${username}"?\n\nTindakan ini tidak dapat dibatalkan!`)) {
-                return;
-            }
-            
-            if (!accessToken) {
-                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
-                requestOAuthToken(() => deleteUserFromSheet(rowIndex, username));
-                return;
-            }
-            
-            deleteUserFromSheet(rowIndex, username);
-        }
-
-        async function deleteUserFromSheet(rowIndex, username) {
-            setLoading(true);
-            
-            try {
-                // Get sheet ID
-                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID
-                });
-                
-                const sheet = spreadsheet.result.sheets.find(
-                    s => s.properties.title === CONFIG.SHEET_NAME
-                );
-                
-                if (!sheet) {
-                    throw new Error('Sheet tidak ditemukan');
-                }
-                
-                const sheetId = sheet.properties.sheetId;
-                
-                // Delete row
-                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    resource: {
-                        requests: [{
-                            deleteDimension: {
-                                range: {
-                                    sheetId: sheetId,
-                                    dimension: 'ROWS',
-                                    startIndex: rowIndex - 1,
-                                    endIndex: rowIndex
-                                }
-                            }
-                        }]
-                    }
-                });
-                
-                console.log('User deleted:', response);
-                setLoading(false);
-                
-                showMessage('✅ User berhasil dihapus!', 'success', 'adminMessage');
-                
-                // Reload user list
-                await loadUserList();
-                
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                setLoading(false);
-                showMessage('❌ Gagal menghapus user: ' + error.message, 'error', 'adminMessage');
-            }
-        }
-
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
             // Check if already logged in
@@ -1548,6 +642,7 @@
                 try {
                     const authData = JSON.parse(atob(authCookie));
                     if (new Date(authData.expiresAt) > new Date()) {
+                        // Still valid, redirect to index
                         const urlParams = new URLSearchParams(window.location.search);
                         const redirectTo = urlParams.get('redirect') || 'index.html';
                         window.location.href = redirectTo;
@@ -1569,15 +664,12 @@
             // Focus on username field
             document.getElementById('username').focus();
 
-            // Initialize Google APIs
-            setTimeout(() => {
-                if (typeof gapi !== 'undefined') {
-                    gapiLoaded();
+            // Add Enter key handler for better UX
+            document.getElementById('password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
                 }
-                if (typeof google !== 'undefined') {
-                    gisLoaded();
-                }
-            }, 500);
+            });
         });
 
         // ============ KEYBOARD SHORTCUTS ============
@@ -1587,293 +679,7 @@
                 e.preventDefault();
                 document.getElementById('username').focus();
             }
-            
-            // ESC to close modal
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('adminModal');
-                if (modal.classList.contains('active')) {
-                    closeAdminModal();
-                }
-            }
         });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const adminModal = document.getElementById('adminModal');
-            const createModal = document.getElementById('createAccountModal');
-            const forgotModal = document.getElementById('forgotPasswordModal');
-            
-            if (event.target === adminModal) {
-                closeAdminModal();
-            }
-            if (event.target === createModal) {
-                closeCreateAccountModal();
-            }
-            if (event.target === forgotModal) {
-                closeForgotPasswordModal();
-            }
-        });
-
-        // ============ CREATE ACCOUNT FUNCTIONS ============
-        function openCreateAccountModal() {
-            document.getElementById('createAccountModal').classList.add('active');
-        }
-
-        function closeCreateAccountModal() {
-            document.getElementById('createAccountModal').classList.remove('active');
-            document.getElementById('createAccountForm').reset();
-            const msg = document.getElementById('createAccountMessage');
-            if (msg) msg.classList.remove('show');
-        }
-
-        function toggleCreatePassword() {
-            const input = document.getElementById('createPassword');
-            const btn = event.target;
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                btn.textContent = '👁️';
-            }
-        }
-
-        async function handleCreateAccount(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('createUsername').value.trim();
-            const password = document.getElementById('createPassword').value;
-            const confirmPassword = document.getElementById('createConfirmPassword').value;
-            const fullName = document.getElementById('createFullName').value.trim();
-            
-            // Validation
-            if (!username || !password || !confirmPassword || !fullName) {
-                showMessage('❌ Semua field harus diisi!', 'error', 'createAccountMessage');
-                return;
-            }
-
-            if (username.length < 3) {
-                showMessage('❌ Username minimal 3 karakter!', 'error', 'createAccountMessage');
-                return;
-            }
-
-            if (password.length < 4) {
-                showMessage('❌ Password minimal 4 karakter!', 'error', 'createAccountMessage');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showMessage('❌ Password dan konfirmasi password tidak cocok!', 'error', 'createAccountMessage');
-                return;
-            }
-            
-            setLoading(true);
-            
-            try {
-                // Check if username exists
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error('Gagal mengakses database');
-                }
-                
-                const users = data.values.slice(1);
-                const existingUser = users.find(user => 
-                    user[0] && user[0].trim().toLowerCase() === username.toLowerCase()
-                );
-                
-                if (existingUser) {
-                    setLoading(false);
-                    showMessage('❌ Username sudah digunakan! Pilih username lain.', 'error', 'createAccountMessage');
-                    return;
-                }
-                
-                // Request OAuth for adding user
-                if (!accessToken) {
-                    setLoading(false);
-                    showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'createAccountMessage');
-                    requestOAuthToken(() => createNewAccount(username, password, fullName));
-                    return;
-                }
-                
-                createNewAccount(username, password, fullName);
-                
-            } catch (error) {
-                console.error('Create account error:', error);
-                setLoading(false);
-                showMessage('❌ ' + error.message, 'error', 'createAccountMessage');
-            }
-        }
-
-        async function createNewAccount(username, password, fullName) {
-            setLoading(true);
-            
-            try {
-                const rowData = [username, password, fullName, 'user']; // Default role: user
-                
-                const response = await gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A:D`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('Account created:', response);
-                setLoading(false);
-                
-                showMessage('✅ Akun berhasil dibuat! Silakan login dengan akun baru Anda.', 'success', 'createAccountMessage');
-                
-                // Reset form
-                document.getElementById('createAccountForm').reset();
-                
-                // Close modal after 2 seconds
-                setTimeout(() => {
-                    closeCreateAccountModal();
-                    // Pre-fill username in login form
-                    document.getElementById('username').value = username;
-                    document.getElementById('password').focus();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error creating account:', error);
-                setLoading(false);
-                showMessage('❌ Gagal membuat akun: ' + error.message, 'error', 'createAccountMessage');
-            }
-        }
-
-        // ============ FORGOT PASSWORD FUNCTIONS ============
-        function openForgotPasswordModal() {
-            document.getElementById('forgotPasswordModal').classList.add('active');
-        }
-
-        function closeForgotPasswordModal() {
-            document.getElementById('forgotPasswordModal').classList.remove('active');
-            document.getElementById('forgotPasswordForm').reset();
-            const msg = document.getElementById('forgotPasswordMessage');
-            if (msg) msg.classList.remove('show');
-        }
-
-        function toggleForgotPassword() {
-            const input = document.getElementById('forgotNewPassword');
-            const btn = event.target;
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                btn.textContent = '👁️';
-            }
-        }
-
-        async function handleForgotPassword(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('forgotUsername').value.trim();
-            const newPassword = document.getElementById('forgotNewPassword').value;
-            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
-            
-            // Validation
-            if (!username || !newPassword || !confirmPassword) {
-                showMessage('❌ Semua field harus diisi!', 'error', 'forgotPasswordMessage');
-                return;
-            }
-
-            if (newPassword.length < 4) {
-                showMessage('❌ Password minimal 4 karakter!', 'error', 'forgotPasswordMessage');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showMessage('❌ Password dan konfirmasi password tidak cocok!', 'error', 'forgotPasswordMessage');
-                return;
-            }
-            
-            setLoading(true);
-            
-            try {
-                // Find user
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error('Gagal mengakses database');
-                }
-                
-                const users = data.values.slice(1);
-                const userIndex = users.findIndex(user => 
-                    user[0] && user[0].trim().toLowerCase() === username.toLowerCase()
-                );
-                
-                if (userIndex === -1) {
-                    setLoading(false);
-                    showMessage('❌ Username tidak ditemukan!', 'error', 'forgotPasswordMessage');
-                    return;
-                }
-                
-                const rowIndex = userIndex + 2;
-                const userData = users[userIndex];
-                
-                // Request OAuth for updating password
-                if (!accessToken) {
-                    setLoading(false);
-                    showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'forgotPasswordMessage');
-                    requestOAuthToken(() => resetPassword(rowIndex, userData, newPassword));
-                    return;
-                }
-                
-                resetPassword(rowIndex, userData, newPassword);
-                
-            } catch (error) {
-                console.error('Forgot password error:', error);
-                setLoading(false);
-                showMessage('❌ ' + error.message, 'error', 'forgotPasswordMessage');
-            }
-        }
-
-        async function resetPassword(rowIndex, userData, newPassword) {
-            setLoading(true);
-            
-            try {
-                const rowData = [userData[0], newPassword, userData[2], userData[3]];
-                
-                const response = await gapi.client.sheets.spreadsheets.values.update({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: `${CONFIG.SHEET_NAME}!A${rowIndex}:D${rowIndex}`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [rowData]
-                    }
-                });
-                
-                console.log('Password reset:', response);
-                setLoading(false);
-                
-                showMessage('✅ Password berhasil direset! Silakan login dengan password baru Anda.', 'success', 'forgotPasswordMessage');
-                
-                // Reset form
-                document.getElementById('forgotPasswordForm').reset();
-                
-                // Close modal after 2 seconds
-                setTimeout(() => {
-                    closeForgotPasswordModal();
-                    // Pre-fill username in login form
-                    document.getElementById('username').value = userData[0];
-                    document.getElementById('password').focus();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error resetting password:', error);
-                setLoading(false);
-                showMessage('❌ Gagal reset password: ' + error.message, 'error', 'forgotPasswordMessage');
-            }
-        }
-        
     </script>
 </body>
 </html>
-
