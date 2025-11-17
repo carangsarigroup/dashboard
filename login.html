@@ -139,7 +139,7 @@
             font-size: 1.2em;
         }
         
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 15px 18px;
             border: 2px solid #dee2e6;
@@ -149,7 +149,7 @@
             background: #f8f9fa;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #FF69B4;
             background: white;
@@ -157,8 +157,12 @@
             transform: translateY(-2px);
         }
 
-        .form-group input:hover {
+        .form-group input:hover, .form-group select:hover {
             border-color: #FF69B4;
+        }
+
+        .form-group select {
+            cursor: pointer;
         }
         
         .login-btn {
@@ -310,7 +314,6 @@
             color: #FF69B4;
         }
 
-        /* Info banner */
         .info-banner {
             background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
             border: 2px solid rgba(255, 105, 180, 0.3);
@@ -326,39 +329,6 @@
             color: #FF69B4;
         }
 
-        /* Responsif */
-        @media (max-width: 480px) {
-            .login-container {
-                max-width: 100%;
-            }
-
-            .login-header {
-                padding: 35px 20px;
-            }
-
-            .login-header h1 {
-                font-size: 1.8em;
-            }
-
-            .login-header .icon-large {
-                font-size: 3em;
-            }
-
-            .login-body {
-                padding: 30px 25px;
-            }
-
-            .form-group input {
-                padding: 13px 16px;
-            }
-
-            .login-btn {
-                padding: 15px;
-                font-size: 16px;
-            }
-        }
-
-        /* Loading overlay */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -399,6 +369,265 @@
         .loading-content p {
             color: #495057;
             font-weight: 600;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .admin-link-btn {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+            border: 2px solid #FF69B4;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-link-btn:hover {
+            background: #FF69B4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #FF69B4;
+        }
+
+        .modal-header h2 {
+            color: #FF69B4;
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #FF69B4;
+            transform: rotate(90deg);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 105, 180, 0.1);
+            color: #FF69B4;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h3 {
+            color: #FF69B4;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .user-item {
+            background: #f8f9fa;
+            border-left: 4px solid #FF69B4;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info strong {
+            color: #FF69B4;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF69B4 0%, #4A90E2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .delete-user-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-user-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-header {
+                padding: 35px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.8em;
+            }
+
+            .login-header .icon-large {
+                font-size: 3em;
+            }
+
+            .login-body {
+                padding: 30px 25px;
+            }
+
+            .form-group input, .form-group select {
+                padding: 13px 16px;
+            }
+
+            .login-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .admin-tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                width: 100%;
+            }
+            
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -463,19 +692,139 @@
                 </button>
             </form>
 
+            <div class="admin-panel-link">
+                <button onclick="openAdminPanel()" class="admin-link-btn">
+                    <span>⚙️</span> Panel Admin
+                </button>
+            </div>
+
             <div class="footer-note">
                 <span class="icon">💡</span> Pastikan koneksi internet Anda stabil
             </div>
         </div>
     </div>
 
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="adminModalTitle">⚙️ Panel Admin</h2>
+                <button class="close-modal" onclick="closeAdminModal()">✕</button>
+            </div>
+            
+            <div class="message" id="adminMessage"></div>
+            
+            <!-- Login to Admin Panel -->
+            <div id="adminLoginSection">
+                <p style="margin-bottom: 20px; color: #666;">Masukkan kredensial admin untuk mengakses panel</p>
+                <div class="form-group">
+                    <label for="adminUsername">👤 Username Admin</label>
+                    <input type="text" id="adminUsername" placeholder="Username admin">
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">🔑 Password Admin</label>
+                    <div class="password-toggle">
+                        <input type="password" id="adminPassword" placeholder="Password admin">
+                        <button type="button" class="password-toggle-btn" onclick="toggleAdminPassword()" title="Tampilkan/Sembunyikan">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                <button onclick="verifyAdmin()" class="login-btn">
+                    <span>🔓 Verifikasi Admin</span>
+                </button>
+            </div>
+
+            <!-- Admin Panel Content -->
+            <div id="adminPanelContent" style="display: none;">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" onclick="switchTab('addUser')">➕ Tambah User</button>
+                    <button class="tab-btn" onclick="switchTab('changePassword')">🔑 Ubah Password</button>
+                    <button class="tab-btn" onclick="switchTab('userList')">👥 Daftar User</button>
+                </div>
+
+                <!-- Add User Tab -->
+                <div id="addUserTab" class="tab-content active">
+                    <h3>➕ Tambah User Baru</h3>
+                    <form id="addUserForm" onsubmit="handleAddUser(event)">
+                        <div class="form-group">
+                            <label for="newUsername">Username *</label>
+                            <input type="text" id="newUsername" required placeholder="Username baru">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Password *</label>
+                            <input type="password" id="newPassword" required placeholder="Password baru">
+                        </div>
+                        <div class="form-group">
+                            <label for="newFullName">Nama Lengkap *</label>
+                            <input type="text" id="newFullName" required placeholder="Nama lengkap">
+                        </div>
+                        <div class="form-group">
+                            <label for="newRole">Role *</label>
+                            <select id="newRole" required>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="login-btn">
+                            <span>💾 Simpan User Baru</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Change Password Tab -->
+                <div id="changePasswordTab" class="tab-content">
+                    <h3>🔑 Ubah Password User</h3>
+                    <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                        <div class="form-group">
+                            <label for="targetUsername">Username yang akan diubah *</label>
+                            <input type="text" id="targetUsername" required placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPasswordChange">Password Baru *</label>
+                            <input type="password" id="newPasswordChange" required placeholder="Password baru">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Konfirmasi Password Baru *</label>
+                            <input type="password" id="confirmPassword" required placeholder="Konfirmasi password">
+                        </div>
+                        <button type="submit" class="login-btn">
+                            <span>🔄 Update Password</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- User List Tab -->
+                <div id="userListTab" class="tab-content">
+                    <h3>👥 Daftar User</h3>
+                    <button onclick="loadUserList()" class="refresh-btn">🔄 Refresh</button>
+                    <div id="userListContainer" style="margin-top: 20px;">
+                        <p style="color: #666;">Klik refresh untuk memuat daftar user</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <script>
         // ============ CONFIG ============
         const CONFIG = {
+            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
             API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
             SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
-            SHEET_NAME: 'Users'
+            SHEET_NAME: 'Users',
+            SCOPES: 'https://www.googleapis.com/auth/spreadsheets'
         };
+
+        // ============ GOOGLE API STATE ============
+        let tokenClient;
+        let accessToken = null;
+        let gapiInited = false;
+        let gisInited = false;
+        let allUsers = [];
 
         // ============ COOKIE MANAGEMENT ============
         function setCookie(name, value, days) {
@@ -501,7 +850,7 @@
         // ============ UI FUNCTIONS ============
         function togglePassword() {
             const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.password-toggle-btn');
+            const toggleBtn = event.target;
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -514,8 +863,10 @@
             }
         }
 
-        function showMessage(message, type = 'error') {
-            const messageDiv = document.getElementById('message');
+        function showMessage(message, type = 'error', containerId = 'message') {
+            const messageDiv = document.getElementById(containerId);
+            if (!messageDiv) return;
+            
             messageDiv.textContent = message;
             messageDiv.className = 'message ' + type + ' show';
             
@@ -547,7 +898,6 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
-            // Validation
             if (!username || !password) {
                 showMessage('❌ Username dan password harus diisi!', 'error');
                 return;
@@ -561,7 +911,7 @@
             if (password.length < 4) {
                 showMessage('❌ Password minimal 4 karakter!', 'error');
                 return;
-            }
+                }
             
             setLoading(true);
             
@@ -584,45 +934,38 @@
                     throw new Error('Database user kosong atau tidak ditemukan.');
                 }
                 
-                // Skip header row
                 const users = data.values.slice(1);
                 
-                // Find matching user
                 const validUser = users.find(user => 
                     user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && 
                     user[1] && user[1].trim() === password
                 );
                 
                 if (validUser) {
-                    // Login successful
                     const authData = {
-                    username: username,
-                    fullName: validUser[2] || username,
-                    role: validUser[3] || 'user', 
-                    loginTime: new Date().toISOString(),
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                        username: username,
+                        fullName: validUser[2] || username,
+                        role: validUser[3] || 'user', 
+                        loginTime: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                     };
                     
                     const encoded = btoa(JSON.stringify(authData));
                     setCookie('userAuth', encoded, 1);
                     
-                    // Get redirect URL
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirectTo = urlParams.get('redirect') || 'index.html';
                     
                     showMessage('✅ Login berhasil! Mengalihkan ke dashboard...', 'success');
                     
-                    // Redirect with delay
                     setTimeout(() => {
                         window.location.href = redirectTo;
                     }, 1500);
                     
                 } else {
-                    // Login failed
                     setLoading(false);
                     showMessage('❌ Username atau password salah!', 'error');
                     
-                    // Clear password field
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
                 }
@@ -634,6 +977,419 @@
             }
         }
 
+        // ============ GOOGLE API INITIALIZATION ============
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: CONFIG.API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                });
+                gapiInited = true;
+                console.log('✓ GAPI initialized');
+            } catch (error) {
+                console.error('Error initializing GAPI:', error);
+            }
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
+                callback: ''
+            });
+            gisInited = true;
+            console.log('✓ GIS initialized');
+        }
+
+        function requestOAuthToken(callback) {
+            if (!gapiInited || !gisInited) {
+                showMessage('❌ Google API belum siap. Silakan refresh halaman.', 'error', 'adminMessage');
+                return;
+            }
+
+            tokenClient.callback = async (response) => {
+                if (response.error !== undefined) {
+                    showMessage('❌ Gagal authenticate: ' + response.error, 'error', 'adminMessage');
+                    return;
+                }
+                accessToken = response.access_token;
+                gapi.client.setToken({ access_token: accessToken });
+                callback();
+            };
+            
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        // ============ ADMIN PANEL FUNCTIONS ============
+        function openAdminPanel() {
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('adminLoginSection').style.display = 'block';
+            document.getElementById('adminPanelContent').style.display = 'none';
+            
+            // Reset forms
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+            
+            // Clear message
+            const adminMsg = document.getElementById('adminMessage');
+            if (adminMsg) adminMsg.classList.remove('show');
+        }
+
+        function toggleAdminPassword() {
+            const input = document.getElementById('adminPassword');
+            const btn = event.target;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        async function verifyAdmin() {
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!username || !password) {
+                showMessage('❌ Username dan password admin harus diisi!', 'error', 'adminMessage');
+                return;
+            }
+            
+            setLoading(true);
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error('Gagal mengakses database');
+                }
+                
+                const users = data.values.slice(1);
+                allUsers = data.values; // Store all data including header
+                
+                const admin = users.find(user => 
+                    user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && 
+                    user[1] && user[1].trim() === password &&
+                    user[3] && user[3].toLowerCase() === 'admin'
+                );
+                
+                setLoading(false);
+                
+                if (admin) {
+                    showMessage('✅ Verifikasi berhasil! Selamat datang, Admin.', 'success', 'adminMessage');
+                    document.getElementById('adminLoginSection').style.display = 'none';
+                    document.getElementById('adminPanelContent').style.display = 'block';
+                    
+                    // Auto-load user list
+                    loadUserList();
+                } else {
+                    showMessage('❌ Username atau password admin salah, atau Anda bukan admin!', 'error', 'adminMessage');
+                }
+                
+            } catch (error) {
+                console.error('Admin verification error:', error);
+                setLoading(false);
+                showMessage('❌ ' + error.message, 'error', 'adminMessage');
+            }
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // ============ ADD USER FUNCTION ============
+        async function handleAddUser(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const fullName = document.getElementById('newFullName').value.trim();
+            const role = document.getElementById('newRole').value;
+            
+            if (!username || !password || !fullName || !role) {
+                showMessage('❌ Semua field harus diisi!', 'error', 'adminMessage');
+                return;
+            }
+
+            if (username.length < 3) {
+                showMessage('❌ Username minimal 3 karakter!', 'error', 'adminMessage');
+                return;
+            }
+
+            if (password.length < 4) {
+                showMessage('❌ Password minimal 4 karakter!', 'error', 'adminMessage');
+                return;
+            }
+            
+            // Check if username already exists
+            const users = allUsers.slice(1);
+            const existingUser = users.find(user => 
+                user[0] && user[0].trim().toLowerCase() === username.toLowerCase()
+            );
+            
+            if (existingUser) {
+                showMessage('❌ Username sudah digunakan! Pilih username lain.', 'error', 'adminMessage');
+                return;
+            }
+            
+            if (!accessToken) {
+                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
+                requestOAuthToken(() => addUserToSheet(username, password, fullName, role));
+                return;
+            }
+            
+            addUserToSheet(username, password, fullName, role);
+        }
+
+        async function addUserToSheet(username, password, fullName, role) {
+            setLoading(true);
+            
+            try {
+                const rowData = [username, password, fullName, role];
+                
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEET_NAME}!A:D`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('User added:', response);
+                setLoading(false);
+                
+                showMessage('✅ User baru berhasil ditambahkan!', 'success', 'adminMessage');
+                
+                // Reset form
+                document.getElementById('addUserForm').reset();
+                
+                // Reload user list
+                await loadUserList();
+                
+            } catch (error) {
+                console.error('Error adding user:', error);
+                setLoading(false);
+                showMessage('❌ Gagal menambahkan user: ' + error.message, 'error', 'adminMessage');
+            }
+        }
+
+        // ============ CHANGE PASSWORD FUNCTION ============
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            
+            const targetUsername = document.getElementById('targetUsername').value.trim();
+            const newPassword = document.getElementById('newPasswordChange').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!targetUsername || !newPassword || !confirmPassword) {
+                showMessage('❌ Semua field harus diisi!', 'error', 'adminMessage');
+                return;
+            }
+
+            if (newPassword.length < 4) {
+                showMessage('❌ Password minimal 4 karakter!', 'error', 'adminMessage');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showMessage('❌ Password dan konfirmasi password tidak cocok!', 'error', 'adminMessage');
+                return;
+            }
+            
+            // Find user
+            const users = allUsers.slice(1);
+            const userIndex = users.findIndex(user => 
+                user[0] && user[0].trim().toLowerCase() === targetUsername.toLowerCase()
+            );
+            
+            if (userIndex === -1) {
+                showMessage('❌ User tidak ditemukan!', 'error', 'adminMessage');
+                return;
+            }
+            
+            const rowIndex = userIndex + 2; // +2 because header is row 1, array starts at 0
+            
+            if (!accessToken) {
+                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
+                requestOAuthToken(() => updatePasswordInSheet(rowIndex, users[userIndex], newPassword));
+                return;
+            }
+            
+            updatePasswordInSheet(rowIndex, users[userIndex], newPassword);
+        }
+
+        async function updatePasswordInSheet(rowIndex, userData, newPassword) {
+            setLoading(true);
+            
+            try {
+                const rowData = [userData[0], newPassword, userData[2], userData[3]];
+                
+                const response = await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEET_NAME}!A${rowIndex}:D${rowIndex}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [rowData]
+                    }
+                });
+                
+                console.log('Password updated:', response);
+                setLoading(false);
+                
+                showMessage('✅ Password berhasil diubah!', 'success', 'adminMessage');
+                
+                // Reset form
+                document.getElementById('changePasswordForm').reset();
+                
+                // Reload user list
+                await loadUserList();
+                
+            } catch (error) {
+                console.error('Error updating password:', error);
+                setLoading(false);
+                showMessage('❌ Gagal mengubah password: ' + error.message, 'error', 'adminMessage');
+            }
+        }
+
+        // ============ LOAD USER LIST ============
+        async function loadUserList() {
+            const container = document.getElementById('userListContainer');
+            container.innerHTML = '<p style="color: #666;">Memuat daftar user...</p>';
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error('Gagal mengakses database');
+                }
+                
+                allUsers = data.values;
+                const users = data.values.slice(1);
+                
+                if (users.length === 0) {
+                    container.innerHTML = '<p style="color: #666;">Tidak ada user.</p>';
+                    return;
+                }
+                
+                let html = '';
+                users.forEach((user, index) => {
+                    const username = user[0] || 'N/A';
+                    const fullName = user[2] || 'N/A';
+                    const role = user[3] || 'user';
+                    const rowIndex = index + 2;
+                    
+                    html += `
+                        <div class="user-item">
+                            <div class="user-info">
+                                <strong>${username}</strong>
+                                <div>${fullName}</div>
+                                <span class="user-role">${role.toUpperCase()}</span>
+                            </div>
+                            <button class="delete-user-btn" onclick="deleteUser(${rowIndex}, '${username}')">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                container.innerHTML = '<p style="color: #dc3545;">❌ Gagal memuat daftar user</p>';
+            }
+        }
+
+        // ============ DELETE USER FUNCTION ============
+        async function deleteUser(rowIndex, username) {
+            if (!confirm(`⚠️ Yakin ingin menghapus user "${username}"?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+                return;
+            }
+            
+            if (!accessToken) {
+                showMessage('🔐 Memerlukan autentikasi Google...', 'error', 'adminMessage');
+                requestOAuthToken(() => deleteUserFromSheet(rowIndex, username));
+                return;
+            }
+            
+            deleteUserFromSheet(rowIndex, username);
+        }
+
+        async function deleteUserFromSheet(rowIndex, username) {
+            setLoading(true);
+            
+            try {
+                // Get sheet ID
+                const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                });
+                
+                const sheet = spreadsheet.result.sheets.find(
+                    s => s.properties.title === CONFIG.SHEET_NAME
+                );
+                
+                if (!sheet) {
+                    throw new Error('Sheet tidak ditemukan');
+                }
+                
+                const sheetId = sheet.properties.sheetId;
+                
+                // Delete row
+                const response = await gapi.client.sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    resource: {
+                        requests: [{
+                            deleteDimension: {
+                                range: {
+                                    sheetId: sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: rowIndex - 1,
+                                    endIndex: rowIndex
+                                }
+                            }
+                        }]
+                    }
+                });
+                
+                console.log('User deleted:', response);
+                setLoading(false);
+                
+                showMessage('✅ User berhasil dihapus!', 'success', 'adminMessage');
+                
+                // Reload user list
+                await loadUserList();
+                
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                setLoading(false);
+                showMessage('❌ Gagal menghapus user: ' + error.message, 'error', 'adminMessage');
+            }
+        }
+
         // ============ INITIALIZATION ============
         window.addEventListener('DOMContentLoaded', () => {
             // Check if already logged in
@@ -642,7 +1398,6 @@
                 try {
                     const authData = JSON.parse(atob(authCookie));
                     if (new Date(authData.expiresAt) > new Date()) {
-                        // Still valid, redirect to index
                         const urlParams = new URLSearchParams(window.location.search);
                         const redirectTo = urlParams.get('redirect') || 'index.html';
                         window.location.href = redirectTo;
@@ -664,12 +1419,15 @@
             // Focus on username field
             document.getElementById('username').focus();
 
-            // Add Enter key handler for better UX
-            document.getElementById('password').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            // Initialize Google APIs
+            setTimeout(() => {
+                if (typeof gapi !== 'undefined') {
+                    gapiLoaded();
                 }
-            });
+                if (typeof google !== 'undefined') {
+                    gisLoaded();
+                }
+            }, 500);
         });
 
         // ============ KEYBOARD SHORTCUTS ============
@@ -679,9 +1437,23 @@
                 e.preventDefault();
                 document.getElementById('username').focus();
             }
+            
+            // ESC to close modal
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('adminModal');
+                if (modal.classList.contains('active')) {
+                    closeAdminModal();
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('adminModal');
+            if (event.target === modal) {
+                closeAdminModal();
+            }
         });
     </script>
 </body>
 </html>
-
-
