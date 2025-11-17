@@ -802,7 +802,7 @@
             </div>
             <div class="select-wrapper">
             <select id="triwulanFilter" onchange="handleTriwulanFilter()">
-            <option value="all">Semua Triwulan</option>
+            <option value="all">Semua Triwulan (Kedua Tabel)</option>
             <option value="1">TW1 (Q1)</option>
             <option value="2">TW2 (Q2)</option>
             <option value="3">TW3 (Q3)</option>
@@ -810,16 +810,6 @@
                 </select>
             </div>
 
-            <div class="select-wrapper">
-    <select id="triwulanFilterTable2" onchange="handleTriwulanFilterTable2()">
-    <option value="all">Semua Triwulan (Penggunaan Surkas)</option>
-    <option value="1">TW1 (Q1) - Penggunaan Surkas</option>
-    <option value="2">TW2 (Q2) - Penggunaan Surkas</option>
-    <option value="3">TW3 (Q3) - Penggunaan Surkas</option>
-    <option value="4">TW4 (Q4) - Penggunaan Surkas</option>
-    </select>
-</div>
-            
             <button class="refresh-btn" onclick="handleRefresh()">
                 <span>🔄</span>
                 <span>Refresh</span>
@@ -1089,7 +1079,6 @@
             lastUpdate: null,
             currentData: [],
             currentFilter: 'all'
-            currentFilterTable2: 'all'
         };
 
         // ============ OAUTH INITIALIZATION ============
@@ -1534,42 +1523,6 @@
     }
 }
 
-        function handleTriwulanFilterTable2() {
-    const filterSelect = document.getElementById('triwulanFilterTable2');
-    const selectedFilter = filterSelect.value;
-    appState.currentFilterTable2 = selectedFilter;
-
-    // Add visual feedback
-    if (selectedFilter !== 'all') {
-        filterSelect.classList.add('filtered');
-    } else {
-        filterSelect.classList.remove('filtered');
-    }
-
-    // Reload display with filter
-    if (appState.currentSheet && appState.currentData.length > 0) {
-        displayData(appState.currentData, appState.currentData2 || [], appState.currentSheet);
-    }
-}
-        
-        function handleTriwulanFilterTable2() {
-    const filterSelect = document.getElementById('triwulanFilterTable2');
-    const selectedFilter = filterSelect.value;
-    appState.currentFilterTable2 = selectedFilter;
-
-    // Add visual feedback
-    if (selectedFilter !== 'all') {
-        filterSelect.classList.add('filtered');
-    } else {
-        filterSelect.classList.remove('filtered');
-    }
-
-    // Reload display with filter
-    if (appState.currentSheet && appState.currentData.length > 0) {
-        displayData(appState.currentData, appState.currentData2 || [], appState.currentSheet);
-    }
-}
-        
         function filterDataByTriwulan(dataRows) {
         if (appState.currentFilter === 'all') {
         return dataRows;
@@ -1603,11 +1556,11 @@
 const headers2 = values2.length > 0 ? values2[0] : [];
 const allDataRows2 = values2.length > 1 ? values2.slice(1).filter(row => row[0]) : [];
 
-// Filter Table 2 by Triwulan
-const dataRows2 = appState.currentFilterTable2 !== 'all' 
+// Filter Table 2 by Triwulan (use same filter as Table 1)
+const dataRows2 = appState.currentFilter !== 'all' 
     ? allDataRows2.filter(row => {
         const triwulan = row[0] ? row[0].toString().trim() : '';
-        return triwulan === appState.currentFilterTable2;
+        return triwulan === appState.currentFilter;
     })
     : allDataRows2;
     
@@ -1724,7 +1677,7 @@ const dataRows2 = appState.currentFilterTable2 !== 'all'
     <div class="stats">
         <div class="stat-card">
             <h3>${formatRupiah(totals2.nominalPenggunaanSurkas)}</h3>
-            <p>Total Nominal Penggunaan Surkas</p>
+            <p>Total Nominal Penggunaan Surkas${appState.currentFilter !== 'all' ? ' - ' + getTriwulanLabel(appState.currentFilter) : ''}</p>
         </div>
         <div class="stat-card">
             <h3>${dataRows2.length}</h3>
@@ -2030,12 +1983,6 @@ const dataRows2 = appState.currentFilterTable2 !== 'all'
             filterSelect.classList.remove('filtered');
         }
         
-        const filterSelect2 = document.getElementById('triwulanFilterTable2');
-        if (filterSelect2) {
-            filterSelect2.value = 'all';
-            filterSelect2.classList.remove('filtered');
-        }
-        
         saveLastSheet(selectedSheet);
         loadSheetData(selectedSheet);
     } else {
@@ -2124,6 +2071,7 @@ const dataRows2 = appState.currentFilterTable2 !== 'all'
     </script>
 </body>
 </html>
+
 
 
 
