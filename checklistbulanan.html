@@ -1697,6 +1697,7 @@ function getCurrentStoreFolderId() {
 }
 
 // Upload image to Google Drive
+// Upload image to Google Drive
 async function uploadImageToDrive(file, rowIdx, colIdx) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu!');
@@ -1763,20 +1764,55 @@ async function uploadImageToDrive(file, rowIdx, colIdx) {
         existingLinks.push(fileLink);
         appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
         
-        markAsChanged();
-        
-        // Restore button
-        if (uploadBtn) {
-            uploadBtn.disabled = false;
-            uploadBtn.innerHTML = '📷 Upload Foto';
+        // AUTO-SAVE: Save immediately to the sheet instead of waiting for manual save
+        try {
+            if (uploadBtn) {
+                uploadBtn.innerHTML = '💾 Menyimpan...';
+            }
+            
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                range: `${appState.currentSheet}!A1`,
+                valueInputOption: 'USER_ENTERED',
+                resource: {
+                    values: appState.currentData
+                }
+            });
+
+            appState.hasChanges = false;
+            
+            // Clear cache and reload
+            delete appState.cache[appState.currentSheet];
+            
+            // Restore button
+            if (uploadBtn) {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '📷 Upload Foto';
+            }
+            
+            alert('✅ Foto berhasil diupload dan disimpan!');
+            
+            // Refresh display to show the new image
+            await loadSheetData(appState.currentSheet, true);
+            
+            return fileLink;
+            
+        } catch (saveError) {
+            console.error('Error saving to sheet:', saveError);
+            alert('⚠️ Foto diupload ke Drive, tapi gagal menyimpan URL ke sheet. Klik "Simpan Semua" untuk menyimpan.');
+            
+            // Mark as changed so user can manually save
+            markAsChanged();
+            
+            // Restore button
+            if (uploadBtn) {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '📷 Upload Foto';
+            }
+            
+            return fileLink;
         }
         
-        alert('✅ Foto berhasil diupload!');
-        
-        // Refresh display
-        await loadSheetData(appState.currentSheet, true);
-        
-        return fileLink;
     } catch (error) {
         console.error('Error uploading image:', error);
         alert('❌ Gagal upload foto: ' + error.message);
@@ -1916,6 +1952,7 @@ function openImageUpload(rowIdx, colIdx) {
     </script>
 </body>
 </html>
+
 
 
 
