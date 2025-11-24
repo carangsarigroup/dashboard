@@ -1156,37 +1156,37 @@ td:nth-child(4) {
         }
 
         function handleAuth() {
-            if (accessToken) {
-                alert('Sudah terauthentikasi!');
-                return;
-            }
+    if (accessToken) {
+        // Clear and re-authenticate
+        accessToken = null;
+        clearStoredToken();
+        gapi.client.setToken(null);
+        updateAuthButton(false);
+    }
 
-            tokenClient.callback = async (response) => {
-                if (response.error !== undefined) {
-                    console.error('Auth error:', response);
-                    alert('Gagal authenticate: ' + response.error);
-                    clearStoredToken();
-                    return;
-                }
-                
-                accessToken = response.access_token;
-                const expiresIn = response.expires_in || 3600;
-                storeOAuthToken(accessToken, expiresIn);
-                gapi.client.setToken({ access_token: accessToken });
-                
-                updateAuthButton(true);
-                if (appState.currentSheet) {
-                    loadSheetData(appState.currentSheet, true);
-                }
-                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah dan menghapus kolom.');
-            };
-
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
-            }
+    tokenClient.callback = async (response) => {
+        if (response.error !== undefined) {
+            console.error('Auth error:', response);
+            alert('Gagal authenticate: ' + response.error);
+            clearStoredToken();
+            return;
         }
+        
+        accessToken = response.access_token;
+        const expiresIn = response.expires_in || 3600;
+        storeOAuthToken(accessToken, expiresIn);
+        gapi.client.setToken({ access_token: accessToken });
+        
+        updateAuthButton(true);
+        if (appState.currentSheet) {
+            loadSheetData(appState.currentSheet, true);
+        }
+        alert('✅ Berhasil authenticate!.');
+    };
+
+    // Always request consent to ensure we get all scopes
+    tokenClient.requestAccessToken({prompt: 'consent'});
+}
 
         function updateAuthButton(isAuthenticated) {
             const authBtn = document.getElementById('authBtn');
@@ -1916,6 +1916,7 @@ function openImageUpload(rowIdx, colIdx) {
     </script>
 </body>
 </html>
+
 
 
 
