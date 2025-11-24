@@ -826,6 +826,39 @@ td:nth-child(4) {
 .image-link:hover {
     text-decoration: underline;
 }
+
+    .delete-image-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: 2px solid white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    line-height: 1;
+    padding: 0;
+}
+
+.delete-image-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.image-preview-container > div {
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
         
     </style>
 </head>
@@ -1439,35 +1472,45 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
 else if (header.toLowerCase().includes('foto') || header.toLowerCase().includes('photo') || header.toLowerCase().includes('gambar')) {
     const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
     
-    if (isAdmin) {
-        html += `<td class="editable">
-            <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
-                📷 Upload Foto
-            </button>`;
-        
-        // Show existing images
-        if (cellValue) {
-            const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
-            if (imageUrls.length > 0) {
-                html += `<div class="image-preview-container">`;
-                imageUrls.forEach(url => {
-                    // Extract Drive file ID for thumbnail
-                    const fileId = url.match(/[-\w]{25,}/);
-                    if (fileId) {
-                        html += `<a href="${url}" target="_blank">
-                            <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
-                                 class="image-preview" 
-                                 alt="Foto"
-                                 onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
-                        </a>`;
-                    }
-                });
-                html += `</div>`;
-            }
+    // In the displayData() function, find the section that displays images (around line 700)
+// Replace the image preview HTML with this:
+
+if (isAdmin) {
+    html += `<td class="editable">
+        <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
+            📷 Upload Foto
+        </button>`;
+    
+    // Show existing images with delete buttons
+    if (cellValue) {
+        const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
+        if (imageUrls.length > 0) {
+            html += `<div class="image-preview-container">`;
+            imageUrls.forEach((url, imgIdx) => {
+                const fileId = url.match(/[-\w]{25,}/);
+                if (fileId) {
+                    html += `
+                        <div style="position: relative; display: inline-block;">
+                            <a href="${url}" target="_blank">
+                                <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
+                                     class="image-preview" 
+                                     alt="Foto"
+                                     onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                            </a>
+                            <button class="delete-image-btn" 
+                                    onclick="event.preventDefault(); deleteImage(${rowIdx}, ${colIdx}, ${imgIdx}, '${fileId[0]}');"
+                                    title="Hapus foto">
+                                ✕
+                            </button>
+                        </div>`;
+                }
+            });
+            html += `</div>`;
         }
-        
-        html += `</td>`;
-    } else {
+    }
+    
+    html += `</td>`;
+} else {
         // Read-only display for non-admin
         html += `<td>`;
         if (cellValue) {
@@ -1697,7 +1740,6 @@ function getCurrentStoreFolderId() {
 }
 
 // Upload image to Google Drive
-// Upload image to Google Drive
 async function uploadImageToDrive(file, rowIdx, colIdx) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu!');
@@ -1828,6 +1870,80 @@ async function uploadImageToDrive(file, rowIdx, colIdx) {
     }
 }
 
+// Delete image from Drive and update spreadsheet
+async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
+
+    if (!confirm('⚠️ Yakin ingin menghapus foto ini?\n\nFoto akan dihapus dari Google Drive dan tidak dapat dikembalikan!')) {
+        return;
+    }
+
+    try {
+        // Show deleting indicator
+        const deleteBtn = event.target;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '⏳';
+
+        // Delete file from Google Drive
+        try {
+            await gapi.client.drive.files.delete({
+                fileId: fileId
+            });
+            console.log('File deleted from Drive:', fileId);
+        } catch (driveError) {
+            console.warn('Could not delete file from Drive (might already be deleted):', driveError);
+            // Continue even if Drive deletion fails - update spreadsheet anyway
+        }
+
+        // Update spreadsheet - remove the image URL
+        if (!appState.currentData[rowIdx]) {
+            appState.currentData[rowIdx] = [];
+        }
+        
+        const existingValue = appState.currentData[rowIdx][colIdx] || '';
+        const existingLinks = existingValue.split(',').map(s => s.trim()).filter(s => s);
+        
+        // Remove the specific image URL
+        existingLinks.splice(imgIdx, 1);
+        
+        // Update the cell value
+        appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
+        
+        // AUTO-SAVE: Save immediately to the sheet
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${appState.currentSheet}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: appState.currentData
+            }
+        });
+
+        appState.hasChanges = false;
+        
+        // Clear cache and reload
+        delete appState.cache[appState.currentSheet];
+        
+        alert('✅ Foto berhasil dihapus!');
+        
+        // Refresh display
+        await loadSheetData(appState.currentSheet, true);
+        
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('❌ Gagal menghapus foto: ' + error.message);
+        
+        // Restore button on error
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '✕';
+        }
+    }
+}
+            
 // Open file picker for image upload
 function openImageUpload(rowIdx, colIdx) {
     if (!accessToken) {
@@ -1952,6 +2068,7 @@ function openImageUpload(rowIdx, colIdx) {
     </script>
 </body>
 </html>
+
 
 
 
