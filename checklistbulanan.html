@@ -765,6 +765,68 @@ td:nth-child(4) {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
         }
+
+        .upload-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.upload-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.upload-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.image-preview-container {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.image-preview {
+    max-width: 80px;
+    max-height: 80px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.image-preview:hover {
+    border-color: #2E7D32;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.image-link {
+    display: inline-block;
+    font-size: 12px;
+    color: #2E7D32;
+    text-decoration: none;
+    margin-top: 5px;
+}
+
+.image-link:hover {
+    text-decoration: underline;
+}
+        
     </style>
 </head>
 
@@ -966,12 +1028,23 @@ td:nth-child(4) {
 
         // ============ CONFIG ============
         const CONFIG = {
-            CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
-            API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-            SPREADSHEET_ID: '1kOKzSSAYlXG33LokTmwRLpzFG-wYlAWUDCjEYvzKKNA',
-            SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
-            CACHE_DURATION: 5 * 60 * 1000
-        };
+    CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+    API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+    SPREADSHEET_ID: '1kOKzSSAYlXG33LokTmwRLpzFG-wYlAWUDCjEYvzKKNA',
+    SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+    CACHE_DURATION: 5 * 60 * 1000,
+    // Store folder mapping - you'll need to create these folders and get their IDs
+    STORE_FOLDERS: {
+        'F4SD - Indomaret SPBU Teras Ayung': '1l-jJd8dNJVYhwUXaxWBmzKKbWX3Xa2Yl',
+        'FKOM - Indomaret Wanagiri': '18AafBvDTFXXEXDKJQ8ZYfuX2tbCs9huV',
+        'FHEN - Indomaret SPBU Cempaga': '1K_F60Geylo2kqK3NCNiiVGBN981pBH2K',
+        'FEHU - Indomaret SPBU Latusari 2 Mambal': '17FWdHTTkFmmmfWaG6xoKeAQnPwRbGvmp',
+        'FIVI - Indomaret Toko Anugrah Ketapang': '1HGEqDAeKLUzIEpLbP1t5Op_UcfCPCU1R',
+        'FZ7Y - Indomaret Pemuda 28 Mataram': '1VQsrHH9WeBVbTUj9f9OKcuBcKWQLMUAh',
+        '1SFY - Alfamart SPBU Mantang': '1CtVrHqICW2EeIGtbEtPmqCnpF7618FW9',
+        'Q789- Alfamart SPBU Dewi Anom Rendang': '1x2__YhRwjPXbEHaAPOrVO0lLUCxkVUEH'
+    }
+};
 
         // ============ OAUTH STATE ============
         let tokenClient;
@@ -995,18 +1068,21 @@ td:nth-child(4) {
         }
 
         async function initializeGapiClient() {
-            try {
-                await gapi.client.init({
-                    apiKey: CONFIG.API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                });
-                gapiInited = true;
-                maybeEnableButtons();
-                console.log('GAPI client initialized');
-            } catch (error) {
-                console.error('Error initializing GAPI client:', error);
-            }
-        }
+    try {
+        await gapi.client.init({
+            apiKey: CONFIG.API_KEY,
+            discoveryDocs: [
+                'https://sheets.googleapis.com/$discovery/rest?version=v4',
+                'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+            ]
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+        console.log('GAPI client initialized with Drive support');
+    } catch (error) {
+        console.error('Error initializing GAPI client:', error);
+    }
+}
 
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1358,6 +1434,68 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
                 html += `<td>${cellValue || '-'}</td>`;
             }
         }
+
+        // Check if this is a Foto/Photo column
+else if (header.toLowerCase().includes('foto') || header.toLowerCase().includes('photo') || header.toLowerCase().includes('gambar')) {
+    const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+    
+    if (isAdmin) {
+        html += `<td class="editable">
+            <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
+                📷 Upload Foto
+            </button>`;
+        
+        // Show existing images
+        if (cellValue) {
+            const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
+            if (imageUrls.length > 0) {
+                html += `<div class="image-preview-container">`;
+                imageUrls.forEach(url => {
+                    // Extract Drive file ID for thumbnail
+                    const fileId = url.match(/[-\w]{25,}/);
+                    if (fileId) {
+                        html += `<a href="${url}" target="_blank">
+                            <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
+                                 class="image-preview" 
+                                 alt="Foto"
+                                 onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                        </a>`;
+                    }
+                });
+                html += `</div>`;
+            }
+        }
+        
+        html += `</td>`;
+    } else {
+        // Read-only display for non-admin
+        html += `<td>`;
+        if (cellValue) {
+            const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
+            if (imageUrls.length > 0) {
+                html += `<div class="image-preview-container">`;
+                imageUrls.forEach(url => {
+                    const fileId = url.match(/[-\w]{25,}/);
+                    if (fileId) {
+                        html += `<a href="${url}" target="_blank">
+                            <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
+                                 class="image-preview" 
+                                 alt="Foto"
+                                 onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                        </a>`;
+                    }
+                });
+                html += `</div>`;
+            } else {
+                html += '-';
+            }
+        } else {
+            html += '-';
+        }
+        html += `</td>`;
+    }
+}
+            
         // Check if this is the first column (Bagian) - make it bold
         else if (colIdx === 0) {
             html += `<td class="row-label">${cellValue}</td>`;
@@ -1542,6 +1680,160 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
             }
         }
 
+        // ============ IMAGE UPLOAD FUNCTIONS ============
+
+// Get folder ID for current store
+function getCurrentStoreFolderId() {
+    if (!appState.currentSheet) {
+        throw new Error('No store sheet selected');
+    }
+    
+    const folderId = CONFIG.STORE_FOLDERS[appState.currentSheet];
+    if (!folderId || folderId.startsWith('FOLDER_ID_')) {
+        throw new Error(`Folder belum dikonfigurasi untuk toko: ${appState.currentSheet}`);
+    }
+    
+    return folderId;
+}
+
+// Upload image to Google Drive
+async function uploadImageToDrive(file, rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return null;
+    }
+
+    try {
+        const folderId = getCurrentStoreFolderId();
+        
+        // Create file metadata
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const storeName = appState.currentSheet.split(' - ')[0]; // Get store code
+        const metadata = {
+            name: `${storeName}_row${rowIdx}_${timestamp}.${file.name.split('.').pop()}`,
+            parents: [folderId]
+        };
+
+        // Show uploading indicator
+        const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
+        if (uploadBtn) {
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '⏳ Uploading...';
+        }
+
+        // Create form data
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+
+        // Upload to Drive
+        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: form
+        });
+
+        const result = await response.json();
+        
+        if (result.error) {
+            throw new Error(result.error.message);
+        }
+
+        // Make file publicly accessible
+        await gapi.client.drive.permissions.create({
+            fileId: result.id,
+            resource: {
+                type: 'anyone',
+                role: 'reader'
+            }
+        });
+
+        // Get shareable link
+        const fileLink = result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
+        
+        // Update spreadsheet with image link (append to existing links)
+        if (!appState.currentData[rowIdx]) {
+            appState.currentData[rowIdx] = [];
+        }
+        
+        const existingValue = appState.currentData[rowIdx][colIdx] || '';
+        const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
+        existingLinks.push(fileLink);
+        appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
+        
+        markAsChanged();
+        
+        // Restore button
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '📷 Upload Foto';
+        }
+        
+        alert('✅ Foto berhasil diupload!');
+        
+        // Refresh display
+        await loadSheetData(appState.currentSheet, true);
+        
+        return fileLink;
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('❌ Gagal upload foto: ' + error.message);
+        
+        // Restore button on error
+        const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '📷 Upload Foto';
+        }
+        
+        return null;
+    }
+}
+
+// Open file picker for image upload
+function openImageUpload(rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk upload foto!');
+        return;
+    }
+
+    try {
+        // Verify folder is configured
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = false;
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('❌ File terlalu besar! Maksimal 10MB');
+                return;
+            }
+            
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('❌ File harus berupa gambar!');
+                return;
+            }
+            
+            await uploadImageToDrive(file, rowIdx, colIdx);
+        }
+    };
+    
+    input.click();
+}
+        
        // ============ EVENT HANDLERS ============
         function handleSheetChange() {
             const sheetSelect = document.getElementById('sheetSelect');
@@ -1624,6 +1916,7 @@ for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
     </script>
 </body>
 </html>
+
 
 
 
