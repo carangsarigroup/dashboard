@@ -874,7 +874,7 @@
 
     <div class="footer">
         <p>© 2025 SIMTOCS. All rights reserved.</p>
-        <p>Created and managed by Carang Sari Group.</p>
+        <p>Developed with ❤️ by Mitra Sejahtera Solusi for Carang Sari Group.</p>
     </div>
 
     <div id="announcementModal" class="modal">
@@ -1131,7 +1131,7 @@
                     authBtnText.textContent = '✓ Terotentikasi';
                 } else {
                     authBtn.classList.remove('authenticated');
-                    authBtnText.textContent = 'Authenticate';
+                    authBtnText.textContent = 'Otentikasi';
                 }
             }
             
@@ -1236,7 +1236,7 @@
             tokenClient.callback = async (response) => {
                 if (response.error !== undefined) {
                     console.error('Auth error:', response);
-                    alert('❌ Gagal authenticate: ' + response.error);
+                    alert('❌ Gagal otentikasi: ' + response.error);
                     clearStoredToken();
                     updateAddAnnouncementButton(); // Hide add button on failure
                     return;
@@ -1249,7 +1249,7 @@
                 updateAuthButton(true); // This will also update add button visibility
                 
                 await displayAnnouncements();
-                alert('✅ Berhasil authenticate! Sekarang Anda bisa menambah, edit, dan hapus Pengumuman.');
+                alert('✅ Berhasil otentikasi!');
                 console.log('Authenticated successfully, token expires in:', expiresIn, 'seconds');
             };
 
@@ -1268,7 +1268,7 @@
         // ============ GOOGLE SHEETS CRUD FUNCTIONS ============
         async function addRow(rowData) {
             if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
+                alert('❌ Harap otentikasi terlebih dahulu!\n\nKlik tombol "Otentikasi" di pojok kanan atas.');
                 return;
             }
             
@@ -1301,7 +1301,7 @@
 
         async function updateRow(rowIndex, rowData) {
             if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!');
+                alert('❌ Harap otentikasi terlebih dahulu!');
                 return;
             }
             
@@ -1333,7 +1333,7 @@
 
         async function deleteRow(rowIndex) {
             if (!accessToken) {
-                alert('❌ Harap authenticate terlebih dahulu!');
+                alert('❌ Harap otentikasi terlebih dahulu!');
                 return;
             }
             
@@ -1512,7 +1512,7 @@
             }
             
             if (mode !== 'add' && !accessToken) {
-                alert('❌ Harap authenticate Google Sheets API terlebih dahulu!');
+                alert('❌ Harap otentikasi GS API terlebih dahulu!');
                 return;
             }
 
@@ -1637,6 +1637,7 @@ if (sessionStorage.getItem('announcementsClosed') !== 'true') {
     </script>
 </body>
 </html>
+
 
 
 
