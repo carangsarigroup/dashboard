@@ -1409,6 +1409,7 @@
                 });
                 console.log('Row added:', response);
                 await loadAnnouncements();
+                await displayAnnouncements();
                 alert('✅ Pengumuman berhasil ditambahkan!');
                 return response;
             } catch (error) {
@@ -1440,6 +1441,7 @@
                 });
                 console.log('Row updated:', response);
                 await loadAnnouncements();
+                await displayAnnouncements();
                 alert('✅ Pengumuman berhasil diupdate!');
                 return response;
             } catch (error) {
@@ -1497,6 +1499,7 @@
 
                 console.log('Row deleted:', response);
                 await loadAnnouncements();
+                await displayAnnouncements();
                 alert('🗑️ Pengumuman berhasil dihapus!');
                 return response;
             } catch (error) {
@@ -1596,7 +1599,7 @@
                     <div class="announcement-content">
                         <span class="announcement-type">${item.type}</span>
                         <div class="announcement-title-text">${item.title}</div>
-                        <p>${item.content}</p>
+                        <p style="white-space: pre-wrap;">${item.content}</p>
                         <span class="announcement-date">Publikasi: ${formatAnnouncementDate(item.date)}</span>
                     </div>
                 `;
@@ -1754,6 +1757,7 @@ if (sessionStorage.getItem('announcementsClosed') !== 'true') {
     </script>
 </body>
 </html>
+
 
 
 
