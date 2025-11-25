@@ -45,13 +45,13 @@ function togglePassword() {
     }
 }
 
-function showMessage(message, type = 'error') {
+function showMessage(message, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = message;
     messageDiv.className = 'message ' + type + ' show';
     console.log('📢 Message:', message, '| Type:', type);
     
-    setTimeout(() => {
+    setTimeout(function() {
         messageDiv.classList.remove('show');
     }, 5000);
 }
@@ -104,7 +104,7 @@ async function handleLogin(event) {
     setLoading(true);
     
     try {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+        const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + CONFIG.SPREADSHEET_ID + '/values/' + CONFIG.SHEET_NAME + '?key=' + CONFIG.API_KEY;
         console.log('📡 Fetching from:', url);
         
         const response = await fetch(url);
@@ -114,7 +114,7 @@ async function handleLogin(event) {
         }
         
         const data = await response.json();
-        console.log('📊 Data received, rows:', data.values?.length);
+        console.log('📊 Data received, rows:', data.values ? data.values.length : 0);
         
         if (data.error) {
             throw new Error('Gagal mengakses database. Periksa konfigurasi API.');
@@ -129,10 +129,9 @@ async function handleLogin(event) {
         console.log('👥 Total users in database:', users.length);
         
         // Find matching user
-        const validUser = users.find(user => 
-            user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && 
-            user[1] && user[1].trim() === password
-        );
+        const validUser = users.find(function(user) {
+            return user[0] && user[0].trim().toLowerCase() === username.toLowerCase() && user[1] && user[1].trim() === password;
+        });
         
         if (validUser) {
             console.log('✅ Valid user found!');
@@ -171,7 +170,7 @@ async function handleLogin(event) {
             showMessage('✅ Login berhasil! Mengalihkan ke dashboard...', 'success');
             
             // Redirect with delay
-            setTimeout(() => {
+            setTimeout(function() {
                 console.log('🚀 Executing redirect now...');
                 window.location.href = redirectTo;
             }, 1500);
@@ -195,7 +194,7 @@ async function handleLogin(event) {
 }
 
 // ============ INITIALIZATION ============
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', function() {
     console.log('🌐 DOM Content Loaded');
     console.log('📍 Current URL:', window.location.href);
     console.log('🏠 Hostname:', window.location.hostname);
@@ -266,7 +265,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Add Enter key handler for password field
     const passwordField = document.getElementById('password');
     if (passwordField) {
-        passwordField.addEventListener('keypress', (e) => {
+        passwordField.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleLogin(e);
             }
@@ -277,7 +276,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============ KEYBOARD SHORTCUTS ============
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + K to focus username
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
