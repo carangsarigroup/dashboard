@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari - Dashboard</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
 </head>
 <body>
 
@@ -14,7 +14,7 @@
         <div class="warning-content">
             <h3>⚠️ Peringatan Inaktivitas</h3>
             <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
-            <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+            <button id="resetInactivityBtn">Saya Masih Di Sini</button>
         </div>
     </div>
 
@@ -22,10 +22,10 @@
         <div class="user-info">
             <span>👤</span> <span class="user-name" id="displayUsername">Guest</span>
         </div>
-        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+        <button id="authBtn" class="auth-btn">
             <span>🔐</span> <span id="authBtnText">Otentikasi</span>
         </button>
-        <button onclick="logout()" class="logout-btn">
+        <button id="logoutBtn" class="logout-btn">
             <span>🚪</span> <span>Logout</span>
         </button>
     </div>
@@ -47,10 +47,10 @@
                 <div class="announcement-title">
                     <span class="icon">📢</span> <span>Pengumuman Terbaru</span>
                 </div>
-                <button id="adminAnnouncementBtn" class="add-btn" onclick="openAnnouncementModal('add')">
+                <button id="adminAnnouncementBtn" class="add-btn">
                     <span>➕ Tambah Pengumuman</span>
                 </button>
-                <button class="close-announcements" onclick="closeAnnouncements()" title="Tutup pengumuman">✕</button>
+                <button class="close-announcements" id="closeAnnouncementsBtn" title="Tutup pengumuman">✕</button>
             </div>
             <div class="announcements-list" id="announcementsList">
             </div>
@@ -93,7 +93,7 @@
         <div class="announcement-modal-content">
             <div class="announcement-modal-header">
                 <h2 id="modalTitle">Tambah Pengumuman Baru</h2>
-                <button class="close-announcement-modal" onclick="closeAnnouncementModal()">✕</button>
+                <button class="close-announcement-modal" id="closeAnnouncementModalBtn">✕</button>
             </div>
             <form id="announcementForm">
                 <input type="hidden" id="editRowIndex" name="editRowIndex">
@@ -121,13 +121,12 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-submit" id="submitBtnText">Simpan</button>
-                    <button type="button" class="btn-cancel" onclick="closeAnnouncementModal()">Batal</button>
+                    <button type="button" class="btn-cancel" id="cancelAnnouncementBtn">Batal</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="js/dashboard.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
