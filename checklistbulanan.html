@@ -1214,10 +1214,10 @@ td:nth-child(4) {
         if (appState.currentSheet) {
             loadSheetData(appState.currentSheet, true);
         }
-        alert('✅ Berhasil authenticate!.');
+        alert('✅ Berhasil authenticate dengan akses Drive!');
     };
 
-    // Always request consent to ensure we get all scopes
+    // IMPORTANT: Always request consent to ensure we get all scopes
     tokenClient.requestAccessToken({prompt: 'consent'});
 }
 
@@ -2068,6 +2068,7 @@ function openImageUpload(rowIdx, colIdx) {
     </script>
 </body>
 </html>
+
 
 
 
