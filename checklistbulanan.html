@@ -793,6 +793,39 @@ td:nth-child(4) {
     transform: none;
 }
 
+.upload-buttons-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.camera-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.camera-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.camera-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+        
 .image-preview-container {
     margin-top: 8px;
     display: flex;
@@ -1477,9 +1510,14 @@ else if (header.toLowerCase().includes('foto') || header.toLowerCase().includes(
 
 if (isAdmin) {
     html += `<td class="editable">
-        <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
-            📷 Upload Foto
-        </button>`;
+        <div class="upload-buttons-group">
+            <button class="camera-btn" onclick="openCamera(${rowIdx}, ${colIdx})">
+                📷 Ambil Foto
+            </button>
+            <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
+                🖼️ Upload Foto
+            </button>
+        </div>`;
     
     // Show existing images with delete buttons
     if (cellValue) {
@@ -1739,75 +1777,45 @@ function getCurrentStoreFolderId() {
     return folderId;
 }
 
-// Upload image to Google Drive
-async function uploadImageToDrive(file, rowIdx, colIdx) {
-    if (!accessToken) {
-        alert('❌ Harap authenticate terlebih dahulu!');
-        return null;
-    }
-
+// Handle multiple image uploads
+async function uploadMultipleImages(files, rowIdx, colIdx) {
+    const totalFiles = files.length;
+    const uploadedLinks = [];
+    
+    const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
+    const cameraBtn = document.querySelector(`button[onclick="openCamera(${rowIdx}, ${colIdx})"]`);
+    
     try {
-        const folderId = getCurrentStoreFolderId();
-        
-        // Create file metadata
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const storeName = appState.currentSheet.split(' - ')[0]; // Get store code
-        const metadata = {
-            name: `${storeName}_row${rowIdx}_${timestamp}.${file.name.split('.').pop()}`,
-            parents: [folderId]
-        };
-
-        // Show uploading indicator
-        const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
-        if (uploadBtn) {
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '⏳ Uploading...';
-        }
-
-        // Create form data
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', file);
-
-        // Upload to Drive
-        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            },
-            body: form
-        });
-
-        const result = await response.json();
-        
-        if (result.error) {
-            throw new Error(result.error.message);
-        }
-
-        // Make file publicly accessible
-        await gapi.client.drive.permissions.create({
-            fileId: result.id,
-            resource: {
-                type: 'anyone',
-                role: 'reader'
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Update button text
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = `⏳ Uploading ${i + 1}/${totalFiles}...`;
             }
-        });
-
-        // Get shareable link
-        const fileLink = result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
-        
-        // Update spreadsheet with image link (append to existing links)
-        if (!appState.currentData[rowIdx]) {
-            appState.currentData[rowIdx] = [];
+            if (cameraBtn) {
+                cameraBtn.disabled = true;
+            }
+            
+            const link = await uploadSingleImageToDrive(file, rowIdx, colIdx, i, totalFiles);
+            if (link) {
+                uploadedLinks.push(link);
+            }
         }
         
-        const existingValue = appState.currentData[rowIdx][colIdx] || '';
-        const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
-        existingLinks.push(fileLink);
-        appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
-        
-        // AUTO-SAVE: Save immediately to the sheet instead of waiting for manual save
-        try {
+        if (uploadedLinks.length > 0) {
+            // Update spreadsheet with all image links
+            if (!appState.currentData[rowIdx]) {
+                appState.currentData[rowIdx] = [];
+            }
+            
+            const existingValue = appState.currentData[rowIdx][colIdx] || '';
+            const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
+            const allLinks = [...existingLinks, ...uploadedLinks];
+            appState.currentData[rowIdx][colIdx] = allLinks.join(', ');
+            
+            // AUTO-SAVE
             if (uploadBtn) {
                 uploadBtn.innerHTML = '💾 Menyimpan...';
             }
@@ -1822,54 +1830,67 @@ async function uploadImageToDrive(file, rowIdx, colIdx) {
             });
 
             appState.hasChanges = false;
-            
-            // Clear cache and reload
             delete appState.cache[appState.currentSheet];
             
-            // Restore button
-            if (uploadBtn) {
-                uploadBtn.disabled = false;
-                uploadBtn.innerHTML = '📷 Upload Foto';
-            }
-            
-            alert('✅ Foto berhasil diupload dan disimpan!');
-            
-            // Refresh display to show the new image
+            alert(`✅ ${uploadedLinks.length} foto berhasil diupload dan disimpan!`);
             await loadSheetData(appState.currentSheet, true);
-            
-            return fileLink;
-            
-        } catch (saveError) {
-            console.error('Error saving to sheet:', saveError);
-            alert('⚠️ Foto diupload ke Drive, tapi gagal menyimpan URL ke sheet. Klik "Simpan Semua" untuk menyimpan.');
-            
-            // Mark as changed so user can manually save
-            markAsChanged();
-            
-            // Restore button
-            if (uploadBtn) {
-                uploadBtn.disabled = false;
-                uploadBtn.innerHTML = '📷 Upload Foto';
-            }
-            
-            return fileLink;
         }
         
     } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('❌ Gagal upload foto: ' + error.message);
-        
-        // Restore button on error
-        const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
+        console.error('Error in batch upload:', error);
+        alert('❌ Error saat upload: ' + error.message);
+    } finally {
+        // Restore buttons
         if (uploadBtn) {
             uploadBtn.disabled = false;
-            uploadBtn.innerHTML = '📷 Upload Foto';
+            uploadBtn.innerHTML = '🖼️ Upload Foto';
         }
-        
-        return null;
+        if (cameraBtn) {
+            cameraBtn.disabled = false;
+        }
     }
 }
 
+// Upload single image to Google Drive (used by uploadMultipleImages)
+async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, totalFiles) {
+    const folderId = getCurrentStoreFolderId();
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const storeName = appState.currentSheet.split(' - ')[0];
+    const metadata = {
+        name: `${storeName}_row${rowIdx}_${timestamp}_${currentIndex}.${file.name.split('.').pop()}`,
+        parents: [folderId]
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+        body: form
+    });
+
+    const result = await response.json();
+    
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    await gapi.client.drive.permissions.create({
+        fileId: result.id,
+        resource: {
+            type: 'anyone',
+            role: 'reader'
+        }
+    });
+
+    return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
+}
+        
 // Delete image from Drive and update spreadsheet
 async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
     if (!accessToken) {
@@ -1943,6 +1964,46 @@ async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
         }
     }
 }
+
+// Open camera for taking photo
+function openCamera(rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk ambil foto!');
+        return;
+    }
+
+    try {
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // Use rear camera
+    input.multiple = false;
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('❌ File terlalu besar! Maksimal 10MB');
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                alert('❌ File harus berupa gambar!');
+                return;
+            }
+            
+            await uploadMultipleImages([file], rowIdx, colIdx);
+        }
+    };
+    
+    input.click();
+}
             
 // Open file picker for image upload
 function openImageUpload(rowIdx, colIdx) {
@@ -1962,26 +2023,27 @@ function openImageUpload(rowIdx, colIdx) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.multiple = false;
+    input.multiple = true;
     
     input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Check file size (max 10MB)
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+        // Validate all files first
+        for (const file of files) {
             if (file.size > 10 * 1024 * 1024) {
-                alert('❌ File terlalu besar! Maksimal 10MB');
+                alert(`❌ File "${file.name}" terlalu besar! Maksimal 10MB per file`);
                 return;
             }
             
-            // Check file type
             if (!file.type.startsWith('image/')) {
-                alert('❌ File harus berupa gambar!');
+                alert(`❌ File "${file.name}" harus berupa gambar!`);
                 return;
             }
-            
-            await uploadImageToDrive(file, rowIdx, colIdx);
         }
-    };
+        
+        await uploadMultipleImages(files, rowIdx, colIdx);
+    }
+};
     
     input.click();
 }
@@ -2068,6 +2130,7 @@ function openImageUpload(rowIdx, colIdx) {
     </script>
 </body>
 </html>
+
 
 
 
