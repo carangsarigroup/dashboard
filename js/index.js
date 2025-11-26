@@ -2,7 +2,7 @@
 const CONFIG = {
     CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
     API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
-    SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+    SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
     SPREADSHEET_ID: '1BUDa3SigMgbTfZf2rl1217kizSHSy57y6djhca91FKg',
     SHEET_NAME: 'Pengumuman',
 };
