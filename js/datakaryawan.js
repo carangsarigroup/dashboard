@@ -4,7 +4,7 @@ const CONFIG = {
     API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
     SPREADSHEET_ID: '1bcKwjW2Yq70Au9vV6Ql4k76qarny8q-5c_itxtBgzu0',
     SHEET_NAME: 'KaryawanToko',
-    SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+    SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
     CACHE_DURATION: 5 * 60 * 1000
 };
 
