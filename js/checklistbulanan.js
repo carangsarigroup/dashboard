@@ -887,260 +887,266 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
 }
 
 // Upload single image to Google Drive (used by uploadMultipleImages)
+// ============ IMAGE UPLOAD FUNCTIONS (CORRECTED) ============
+
+// Upload single image to Google Drive (used by uploadMultipleImages)
 async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, totalFiles) {
-const folderId = getCurrentStoreFolderId();
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-const storeName = appState.currentSheet.split(' - ')[0];
-const metadata = {
-    name: `${storeName}_row${rowIdx}_${timestamp}_${currentIndex}.${file.name.split('.').pop()}`,
-    parents: [folderId]
-};
+    const folderId = getCurrentStoreFolderId();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const storeName = appState.currentSheet.split(' - ')[0];
+    const metadata = {
+        name: `${storeName}_row${rowIdx}_${timestamp}_${currentIndex}.${file.name.split('.').pop()}`,
+        parents: [folderId]
+    };
 
-const form = new FormData();
-form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-form.append('file', file);
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
 
-const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${accessToken}`
-    },
-    body: form
-});
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+        body: form
+    });
 
-const result = await response.json();
+    const result = await response.json();
 
-if (result.error) {
-    throw new Error(result.error.message);
-}
-
-await gapi.client.drive.permissions.create({
-    fileId: result.id,
-    resource: {
-        type: 'anyone',
-        role: 'reader'
-    }
-});
-
-return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
-}
-// Delete image from Drive and update spreadsheet
-async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
-if (!accessToken) {
-alert('❌ Harap authenticate terlebih dahulu!');
-return;
-}
-if (!confirm('⚠️ Yakin ingin menghapus foto ini?\n\nFoto akan dihapus dari Google Drive dan tidak dapat dikembalikan!')) {
-    return;
-}
-
-try {
-    // Show deleting indicator
-    const deleteBtn = event.target;
-    deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '⏳';
-
-    // Delete file from Google Drive
-    try {
-        await gapi.client.drive.files.delete({
-            fileId: fileId
-        });
-        console.log('File deleted from Drive:', fileId);
-    } catch (driveError) {
-        console.warn('Could not delete file from Drive (might already be deleted):', driveError);
-        // Continue even if Drive deletion fails - update spreadsheet anyway
+    if (result.error) {
+        throw new Error(result.error.message);
     }
 
-    // Update spreadsheet - remove the image URL
-    if (!appState.currentData[rowIdx]) {
-        appState.currentData[rowIdx] = [];
-    }
-    
-    const existingValue = appState.currentData[rowIdx][colIdx] || '';
-    const existingLinks = existingValue.split(',').map(s => s.trim()).filter(s => s);
-    
-    // Remove the specific image URL
-    existingLinks.splice(imgIdx, 1);
-    
-    // Update the cell value
-    appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
-    
-    // AUTO-SAVE: Save immediately to the sheet
-    await gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId: CONFIG.SPREADSHEET_ID,
-        range: `${appState.currentSheet}!A1`,
-        valueInputOption: 'USER_ENTERED',
+    await gapi.client.drive.permissions.create({
+        fileId: result.id,
         resource: {
-            values: appState.currentData
+            type: 'anyone',
+            role: 'reader'
         }
     });
 
-    appState.hasChanges = false;
+    return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
+}
+
+// Delete image from Drive and update spreadsheet
+async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
     
-    // Clear cache and reload
-    delete appState.cache[appState.currentSheet];
-    
-    alert('✅ Foto berhasil dihapus!');
-    
-    // Refresh display
-    await loadSheetData(appState.currentSheet, true);
-    
-} catch (error) {
-    console.error('Error deleting image:', error);
-    alert('❌ Gagal menghapus foto: ' + error.message);
-    
-    // Restore button on error
-    if (deleteBtn) {
-        deleteBtn.disabled = false;
-        deleteBtn.innerHTML = '✕';
+    if (!confirm('⚠️ Yakin ingin menghapus foto ini?\n\nFoto akan dihapus dari Google Drive dan tidak dapat dikembalikan!')) {
+        return;
+    }
+
+    try {
+        // Show deleting indicator
+        const deleteBtn = event.target;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '⏳';
+
+        // Delete file from Google Drive
+        try {
+            await gapi.client.drive.files.delete({
+                fileId: fileId
+            });
+            console.log('File deleted from Drive:', fileId);
+        } catch (driveError) {
+            console.warn('Could not delete file from Drive (might already be deleted):', driveError);
+        }
+
+        // Update spreadsheet - remove the image URL
+        if (!appState.currentData[rowIdx]) {
+            appState.currentData[rowIdx] = [];
+        }
+        
+        const existingValue = appState.currentData[rowIdx][colIdx] || '';
+        const existingLinks = existingValue.split(',').map(s => s.trim()).filter(s => s);
+        
+        // Remove the specific image URL
+        existingLinks.splice(imgIdx, 1);
+        
+        // Update the cell value
+        appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
+        
+        // AUTO-SAVE: Save immediately to the sheet
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${appState.currentSheet}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: appState.currentData
+            }
+        });
+
+        appState.hasChanges = false;
+        delete appState.cache[appState.currentSheet];
+        
+        alert('✅ Foto berhasil dihapus!');
+        await loadSheetData(appState.currentSheet, true);
+        
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('❌ Gagal menghapus foto: ' + error.message);
+        
+        if (typeof deleteBtn !== 'undefined') {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '✕';
+        }
     }
 }
-}
+
 // Open camera for taking photo
 function openCamera(rowIdx, colIdx) {
-if (!accessToken) {
-alert('❌ Harap authenticate terlebih dahulu untuk ambil foto!');
-return;
-}
-try {
-    getCurrentStoreFolderId();
-} catch (error) {
-    alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
-    return;
-}
-
-const input = document.createElement('input');
-input.type = 'file';
-input.accept = 'image/*';
-input.capture = 'environment'; // Use rear camera
-input.multiple = false;
-
-input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        if (file.size > 10 * 1024 * 1024) {
-            alert('❌ File terlalu besar! Maksimal 10MB');
-            return;
-        }
-        
-        if (!file.type.startsWith('image/')) {
-            alert('❌ File harus berupa gambar!');
-            return;
-        }
-        
-        await uploadMultipleImages([file], rowIdx, colIdx);
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk ambil foto!');
+        return;
     }
-};
+    
+    try {
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
 
-input.click();
-}
-// Open file picker for image upload
-function openImageUpload(rowIdx, colIdx) {
-if (!accessToken) {
-alert('❌ Harap authenticate terlebih dahulu untuk upload foto!');
-return;
-}
-try {
-    // Verify folder is configured
-    getCurrentStoreFolderId();
-} catch (error) {
-    alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
-    return;
-}
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = false;
 
-const input = document.createElement('input');
-input.type = 'file';
-input.accept = 'image/*';
-input.multiple = true;
-
-input.onchange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-        // Validate all files first
-        for (const file of files) {
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
             if (file.size > 10 * 1024 * 1024) {
-                alert(`❌ File "${file.name}" terlalu besar! Maksimal 10MB per file`);
+                alert('❌ File terlalu besar! Maksimal 10MB');
                 return;
             }
             
             if (!file.type.startsWith('image/')) {
-                alert(`❌ File "${file.name}" harus berupa gambar!`);
+                alert('❌ File harus berupa gambar!');
                 return;
             }
+            
+            await uploadMultipleImages([file], rowIdx, colIdx);
         }
-        
-        await uploadMultipleImages(files, rowIdx, colIdx);
-    }
-};
+    };
 
-input.click();
-}
-// ============ EVENT HANDLERS ============
-function handleSheetChange() {
-const sheetSelect = document.getElementById('sheetSelect');
-const selectedSheet = sheetSelect.value;
-if (selectedSheet) {
-    loadSheetData(selectedSheet);
-} else {
-    showEmptyState();
-}
-}
-function handleRefresh() {
-const sheetSelect = document.getElementById('sheetSelect');
-const selectedSheet = sheetSelect.value;
-if (!selectedSheet) {
-    alert('Pilih sheet terlebih dahulu');
-    return;
+    input.click();
 }
 
-if (appState.hasChanges) {
-    if (!confirm('Ada perubahan yang belum disimpan. Yakin ingin refresh?')) {
+// Open file picker for image upload
+function openImageUpload(rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk upload foto!');
         return;
     }
+    
+    try {
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+
+    input.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            for (const file of files) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`❌ File "${file.name}" terlalu besar! Maksimal 10MB per file`);
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert(`❌ File "${file.name}" harus berupa gambar!`);
+                    return;
+                }
+            }
+            
+            await uploadMultipleImages(files, rowIdx, colIdx);
+        }
+    };
+
+    input.click();
 }
 
-loadSheetData(selectedSheet, true);
+// ============ EVENT HANDLERS (CORRECTED) ============
+function handleSheetChange() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    if (selectedSheet) {
+        loadSheetData(selectedSheet);
+    } else {
+        showEmptyState();
+    }
 }
+
+function handleRefresh() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    if (!selectedSheet) {
+        alert('Pilih sheet terlebih dahulu');
+        return;
+    }
+
+    if (appState.hasChanges) {
+        if (!confirm('Ada perubahan yang belum disimpan. Yakin ingin refresh?')) {
+            return;
+        }
+    }
+
+    loadSheetData(selectedSheet, true);
+}
+
 function handleDeleteColumn(colIdx) {
-const colNum = colIdx + 1;
-if (!confirm(⚠️ Yakin ingin menghapus Item ${colNum}?\n\nData yang dihapus tidak dapat dikembalikan!)) {
-return;
+    const colNum = colIdx + 1;
+    if (!confirm(`⚠️ Yakin ingin menghapus Item ${colNum}?\n\nData yang dihapus tidak dapat dikembalikan!`)) {
+        return;
+    }
+    deleteColumn(colIdx);
 }
-deleteColumn(colIdx);
-}
+
 async function handleFormSubmit(event) {
-event.preventDefault();
-const area = document.getElementById('area').value;
-const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
-const status = document.getElementById('status').value;
-const keterangan = document.getElementById('keterangan').value;
+    event.preventDefault();
+    const area = document.getElementById('area').value;
+    const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
+    const status = document.getElementById('status').value;
+    const keterangan = document.getElementById('keterangan').value;
 
-// Create row data matching the column structure (4 columns now)
-const rowData = [
-    area,
-    itemPemeriksaan,
-    status,
-    keterangan
-];
+    const rowData = [
+        area,
+        itemPemeriksaan,
+        status,
+        keterangan
+    ];
 
-await addColumn(rowData);
-closeModal();
+    await addColumn(rowData);
+    closeModal();
 }
+
 // ============ INITIALIZATION ============
 window.addEventListener('DOMContentLoaded', () => {
-console.log('Page loaded, waiting for Google APIs...');
-setTimeout(() => {
-    if (typeof gapi !== 'undefined') {
-        gapiLoaded();
-    }
-    if (typeof google !== 'undefined') {
-        gisLoaded();
-    }
-}, 500);
+    console.log('Page loaded, waiting for Google APIs...');
+    setTimeout(() => {
+        if (typeof gapi !== 'undefined') {
+            gapiLoaded();
+        }
+        if (typeof google !== 'undefined') {
+            gisLoaded();
+        }
+    }, 500);
 });
+
 window.onclick = function(event) {
-const modal = document.getElementById('dataModal');
-if (event.target === modal) {
-closeModal();
-}
-}
+    const modal = document.getElementById('dataModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+};
