@@ -1,10 +1,22 @@
-// ============ CONFIG ============
+ // ============ CONFIG ============
 const CONFIG = {
     CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
     API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
     SPREADSHEET_ID: '1M1U3U7aNUBC9R9CP1Ca6KC5lCKSr7OFKBIB1MW7JfvM',
     SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
-    CACHE_DURATION: 5 * 60 * 1000
+    CACHE_DURATION: 5 * 60 * 1000,
+    
+    // ✨ NEW: Year-based range configuration
+    YEAR_RANGES: {
+        '2025': {
+            table1: 'A1:G13',    // Surplus kas toko 2025
+            table2: 'I1:L23'     // Penggunaan surkas 2025
+        },
+        '2026': {
+            table1: 'A27:G39',   // Surplus kas toko 2026
+            table2: 'I27:L49'    // Penggunaan surkas 2026
+        }
+    }
 };
 
 // ============ OAUTH STATE ============
@@ -20,7 +32,9 @@ let appState = {
     cache: {},
     lastUpdate: null,
     currentData: [],
-    currentFilter: 'all'
+    currentData2: [],  
+    currentFilter: 'all',
+    currentYear: '2025'  // ✨ NEW: Default year
 };
 
 // ============ AUTH SYSTEM ============
@@ -437,22 +451,31 @@ async function loadSheetData(sheetName, forceRefresh = false) {
         return;
     }
 
+    // ✨ UPDATED: Use cache key that includes year
+    const cacheKey = `${sheetName}_${appState.currentYear}`;
+    
     if (!forceRefresh) {
-        const cached = getCachedData(sheetName);
+        const cached = getCachedData(cacheKey);
         if (cached) {
-            console.log('Using cached data for:', sheetName);
+            console.log('Using cached data for:', sheetName, 'Year:', appState.currentYear);
             displayData(cached.table1, cached.table2, sheetName);
             return;
         }
     }
     
-    showLoading(`Memuat data: ${sheetName}`);
+    showLoading(`Memuat data: ${sheetName} - Tahun ${appState.currentYear}`);
     appState.currentSheet = sheetName;
     
     try {
+        // ✨ UPDATED: Get ranges based on selected year
+        const ranges = CONFIG.YEAR_RANGES[appState.currentYear];
+        if (!ranges) {
+            throw new Error(`Konfigurasi tahun ${appState.currentYear} tidak ditemukan`);
+        }
+
         const [response1, response2] = await Promise.all([
-            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!A:G?key=${CONFIG.API_KEY}`),
-            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!I:L?key=${CONFIG.API_KEY}`)
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!${ranges.table1}?key=${CONFIG.API_KEY}`),
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}!${ranges.table2}?key=${CONFIG.API_KEY}`)
         ]);
         
         const data1 = await response1.json();
@@ -466,11 +489,12 @@ async function loadSheetData(sheetName, forceRefresh = false) {
         const table2Data = data2.values || [];
         
         if (table1Data.length === 0 && table2Data.length === 0) {
-            showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
+            showError('Data Kosong', `Tidak ada data di sheet "${sheetName}" untuk tahun ${appState.currentYear}`);
             return;
         }
         
-        setCachedData(sheetName, { table1: table1Data, table2: table2Data });
+        // ✨ UPDATED: Cache with year-specific key
+        setCachedData(cacheKey, { table1: table1Data, table2: table2Data });
         appState.lastUpdate = new Date();
         appState.currentData = table1Data;
         appState.currentData2 = table2Data;
@@ -482,7 +506,8 @@ async function loadSheetData(sheetName, forceRefresh = false) {
         showError('Gagal Memuat Data', `
             ${error.message}
             <br><br>
-            <strong>Sheet:</strong> "${sheetName}"
+            <strong>Sheet:</strong> "${sheetName}"<br>
+            <strong>Tahun:</strong> ${appState.currentYear}
         `);
     }
 }
@@ -573,6 +598,27 @@ function handleTriwulanFilter() {
     }
 }
 
+function handleYearChange() {
+    const yearSelect = document.getElementById('yearFilter');
+    const selectedYear = yearSelect.value;
+    appState.currentYear = selectedYear;
+
+    // Reset triwulan filter when changing year
+    appState.currentFilter = 'all';
+    const triwulanSelect = document.getElementById('triwulanFilter');
+    if (triwulanSelect) {
+        triwulanSelect.value = 'all';
+        triwulanSelect.classList.remove('filtered');
+    }
+
+    // Reload data with new year
+    if (appState.currentSheet) {
+        // Clear cache for current sheet
+        delete appState.cache[appState.currentSheet];
+        loadSheetData(appState.currentSheet, true);
+    }
+}
+
 function filterDataByTriwulan(dataRows) {
     if (appState.currentFilter === 'all') {
         return dataRows;
@@ -628,7 +674,7 @@ function displayData(values1, values2, sheetName) {
     ${filterBadge}
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">💰 Surplus Kas Toko</h2>
+        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">💰 Surplus Kas Toko - Tahun ${appState.currentYear}</h2>
         ${accessToken ? `
         <button class="add-btn" onclick="openAddModal(1)" style="display: inline-flex;">
             <span>➕</span>
@@ -707,9 +753,11 @@ function displayData(values1, values2, sheetName) {
             </tbody>
         </table>
     </div>
+    `;
     
+    html += `
     <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px 0;">
-        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">📋 Penggunaan Surkas</h2>
+        <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">📋 Penggunaan Surkas - Tahun ${appState.currentYear}</h2>
         ${accessToken ? `
         <button class="add-btn" onclick="openAddModal(2)" style="display: inline-flex;">
             <span>➕</span>
@@ -884,13 +932,21 @@ function calculateValues() {
 }
 
 // ============ CRUD FUNCTIONS ============
-async function addRow(sheetName, rowData, range, tableNumber) {
+async function addRow(sheetName, rowData, tableNumber) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
         return;
     }
     
     try {
+        // ✨ UPDATED: Get range based on year and table
+        const ranges = CONFIG.YEAR_RANGES[appState.currentYear];
+        if (!ranges) {
+            throw new Error(`Konfigurasi tahun ${appState.currentYear} tidak ditemukan`);
+        }
+        
+        const range = tableNumber === 1 ? ranges.table1 : ranges.table2;
+        
         const response = await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: CONFIG.SPREADSHEET_ID,
             range: `${sheetName}!${range}`,
@@ -902,7 +958,8 @@ async function addRow(sheetName, rowData, range, tableNumber) {
         
         console.log('Row added:', response);
         
-        delete appState.cache[sheetName];
+        // ✨ UPDATED: Clear cache with year-specific key
+        delete appState.cache[`${sheetName}_${appState.currentYear}`];
         await loadSheetData(sheetName, true);
         
         alert('✅ Data berhasil ditambahkan!');
@@ -914,15 +971,22 @@ async function addRow(sheetName, rowData, range, tableNumber) {
     }
 }
 
-async function updateRow(sheetName, rowIndex, rowData, range, tableNumber) {
+async function updateRow(sheetName, rowIndex, rowData, tableNumber) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu!\n\nKlik tombol "Authenticate" di pojok kanan atas.');
         return;
     }
     
     try {
-        const startCol = range.split(':')[0];
-        const endCol = range.split(':')[1];
+        // ✨ UPDATED: Get range based on year and table
+        const ranges = CONFIG.YEAR_RANGES[appState.currentYear];
+        if (!ranges) {
+            throw new Error(`Konfigurasi tahun ${appState.currentYear} tidak ditemukan`);
+        }
+        
+        const range = tableNumber === 1 ? ranges.table1 : ranges.table2;
+        const startCol = range.split(':')[0].match(/[A-Z]+/)[0];
+        const endCol = range.split(':')[1].match(/[A-Z]+/)[0];
         
         const response = await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: CONFIG.SPREADSHEET_ID,
@@ -935,7 +999,8 @@ async function updateRow(sheetName, rowIndex, rowData, range, tableNumber) {
         
         console.log('Row updated:', response);
         
-        delete appState.cache[sheetName];
+        // ✨ UPDATED: Clear cache with year-specific key
+        delete appState.cache[`${sheetName}_${appState.currentYear}`];
         await loadSheetData(sheetName, true);
         
         alert('✅ Data berhasil diupdate!');
@@ -986,7 +1051,8 @@ async function deleteRow(sheetName, rowIndex, tableNumber) {
         
         console.log('Row deleted:', response);
         
-        delete appState.cache[sheetName];
+        // ✨ UPDATED: Clear cache with year-specific key
+        delete appState.cache[`${sheetName}_${appState.currentYear}`];
         await loadSheetData(sheetName, true);
         
         alert('✅ Baris berhasil dihapus sepenuhnya!');
@@ -1005,12 +1071,11 @@ function handleSheetChange() {
 
     if (selectedSheet) {
         appState.currentFilter = 'all';
-        appState.currentFilterTable2 = 'all';
         
-        const filterSelect = document.getElementById('triwulanFilter');
-        if (filterSelect) {
-            filterSelect.value = 'all';
-            filterSelect.classList.remove('filtered');
+        const triwulanSelect = document.getElementById('triwulanFilter');
+        if (triwulanSelect) {
+            triwulanSelect.value = 'all';
+            triwulanSelect.classList.remove('filtered');
         }
         
         saveLastSheet(selectedSheet);
@@ -1046,7 +1111,7 @@ async function handleFormSubmit(event) {
     const editRowIndex = document.getElementById('editRowIndex').value;
     const tableNumber = parseInt(document.getElementById('editTableNumber').value) || 1;
     
-    let rowData, range;
+    let rowData;
     
     if (tableNumber === 1) {
         const triwulan = document.getElementById('triwulan').value;
@@ -1058,7 +1123,6 @@ async function handleFormSubmit(event) {
         const sisaSurkas = parseNumber(document.getElementById('sisaSurkas').value);
 
         rowData = [triwulan, bulan, ebitdaLR, penggunaanLabaKas, labaNetDitransfer, bayarListrik, sisaSurkas];
-        range = 'A:G';
     } else {
         const no = document.getElementById('no2').value;
         const bulan = document.getElementById('bulan2').value;
@@ -1066,13 +1130,13 @@ async function handleFormSubmit(event) {
         const tujuanPenggunaanSurkas = document.getElementById('tujuanPenggunaanSurkas').value;
 
         rowData = [no, bulan, nominalPenggunaanSurkas, tujuanPenggunaanSurkas];
-        range = 'I:L';
     }
 
+    // ✨ UPDATED: Pass tableNumber instead of range
     if (editRowIndex) {
-        await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData, range, tableNumber);
+        await updateRow(appState.currentSheet, parseInt(editRowIndex), rowData, tableNumber);
     } else {
-        await addRow(appState.currentSheet, rowData, range, tableNumber);
+        await addRow(appState.currentSheet, rowData, tableNumber);
     }
     
     closeModal();
