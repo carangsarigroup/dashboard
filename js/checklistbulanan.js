@@ -823,67 +823,69 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
     try {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-        // Update button text
+            
+            // Update button text
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = `⏳ Uploading ${i + 1}/${totalFiles}...`;
+            }
+            if (cameraBtn) {
+                cameraBtn.disabled = true;
+            }
+            
+            const link = await uploadSingleImageToDrive(file, rowIdx, colIdx, i, totalFiles);
+            if (link) {
+                uploadedLinks.push(link);
+            }
+        }
+        
+        if (uploadedLinks.length > 0) {
+            // Update spreadsheet with all image links
+            if (!appState.currentData[rowIdx]) {
+                appState.currentData[rowIdx] = [];
+            }
+            
+            const existingValue = appState.currentData[rowIdx][colIdx] || '';
+            const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
+            const allLinks = [...existingLinks, ...uploadedLinks];
+            appState.currentData[rowIdx][colIdx] = allLinks.join(', ');
+            
+            // AUTO-SAVE
+            if (uploadBtn) {
+                uploadBtn.innerHTML = '💾 Menyimpan...';
+            }
+            
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                range: `${appState.currentSheet}!A1`,
+                valueInputOption: 'USER_ENTERED',
+                resource: {
+                    values: appState.currentData
+                }
+            });
+
+            appState.hasChanges = false;
+            delete appState.cache[appState.currentSheet];
+            
+            alert(`✅ ${uploadedLinks.length} foto berhasil diupload dan disimpan!`);
+            await loadSheetData(appState.currentSheet, true);
+        }
+        
+    } catch (error) {
+        console.error('Error in batch upload:', error);
+        alert('❌ Error saat upload: ' + error.message);
+    } finally {
+        // Restore buttons
         if (uploadBtn) {
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = `⏳ Uploading ${i + 1}/${totalFiles}...`;
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '🖼️ Upload Foto';
         }
         if (cameraBtn) {
-            cameraBtn.disabled = true;
-        }
-        
-        const link = await uploadSingleImageToDrive(file, rowIdx, colIdx, i, totalFiles);
-        if (link) {
-            uploadedLinks.push(link);
+            cameraBtn.disabled = false;
         }
     }
-    
-    if (uploadedLinks.length > 0) {
-        // Update spreadsheet with all image links
-        if (!appState.currentData[rowIdx]) {
-            appState.currentData[rowIdx] = [];
-        }
-        
-        const existingValue = appState.currentData[rowIdx][colIdx] || '';
-        const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
-        const allLinks = [...existingLinks, ...uploadedLinks];
-        appState.currentData[rowIdx][colIdx] = allLinks.join(', ');
-        
-        // AUTO-SAVE
-        if (uploadBtn) {
-            uploadBtn.innerHTML = '💾 Menyimpan...';
-        }
-        
-        await gapi.client.sheets.spreadsheets.values.update({
-            spreadsheetId: CONFIG.SPREADSHEET_ID,
-            range: `${appState.currentSheet}!A1`,
-            valueInputOption: 'USER_ENTERED',
-            resource: {
-                values: appState.currentData
-            }
-        });
+}
 
-        appState.hasChanges = false;
-        delete appState.cache[appState.currentSheet];
-        
-        alert(`✅ ${uploadedLinks.length} foto berhasil diupload dan disimpan!`);
-        await loadSheetData(appState.currentSheet, true);
-    }
-    
-} catch (error) {
-    console.error('Error in batch upload:', error);
-    alert('❌ Error saat upload: ' + error.message);
-} finally {
-    // Restore buttons
-    if (uploadBtn) {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '🖼️ Upload Foto';
-    }
-    if (cameraBtn) {
-        cameraBtn.disabled = false;
-    }
-}
-}
 // Upload single image to Google Drive (used by uploadMultipleImages)
 async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, totalFiles) {
 const folderId = getCurrentStoreFolderId();
