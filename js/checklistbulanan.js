@@ -822,8 +822,7 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
     
     try {
         for (let i = 0; i < files.length; i++) {
-            const file = files
-			[i];
+            const file = files[i];
         // Update button text
         if (uploadBtn) {
             uploadBtn.disabled = true;
