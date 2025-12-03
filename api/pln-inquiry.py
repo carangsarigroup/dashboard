@@ -1,7 +1,3 @@
-# ====================
-# FILE: api/pln-inquiry.py
-# ====================
-
 from http.server import BaseHTTPRequestHandler
 import json
 import sys
@@ -10,8 +6,11 @@ import os
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-# Import your class
-from api.postpaidInquiries import postpaidInquiries
+try:
+    from api.postpaidInquiries import postpaidInquiries
+except ImportError:
+    # Fallback jika module belum ada
+    postpaidInquiries = None
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -23,6 +22,15 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.end_headers()
+            
+            # Check if postpaidInquiries module is available
+            if postpaidInquiries is None:
+                response = {
+                    'status': False,
+                    'message': 'API PLN belum dikonfigurasi. Silakan upload file postpaidInquiries.py'
+                }
+                self.wfile.write(json.dumps(response).encode())
+                return
             
             # Read request body
             content_length = int(self.headers['Content-Length'])
@@ -66,7 +74,7 @@ class handler(BaseHTTPRequestHandler):
         except Exception as e:
             response = {
                 'status': False,
-                'message': str(e)
+                'message': 'Error: ' + str(e)
             }
             self.wfile.write(json.dumps(response).encode())
     
@@ -77,29 +85,21 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
-
-
-# ====================
-# FILE: api/requirements.txt
-# ====================
-# requests==2.31.0
-
-
-# ====================
-# FILE: vercel.json (di root folder)
-# ====================
-# {
-#   "version": 2,
-#   "builds": [
-#     {
-#       "src": "api/pln-inquiry.py",
-#       "use": "@vercel/python"
-#     }
-#   ],
-#   "routes": [
-#     {
-#       "src": "/api/(.*)",
-#       "dest": "/api/$1"
-#     }
-#   ]
-# }
+    
+    def do_GET(self):
+        # Handle GET requests with info
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
+        response = {
+            'status': 'OK',
+            'message': 'PLN Inquiry API is running. Use POST method to check PLN bill.',
+            'endpoint': '/api/pln-inquiry',
+            'method': 'POST',
+            'body': {
+                'customer_number': '123456789012 (12 digits)'
+            }
+        }
+        self.wfile.write(json.dumps(response).encode())
