@@ -3,14 +3,19 @@ import json
 import sys
 import os
 
-# Add current directory to path
-sys.path.append(os.path.dirname(__file__))
+# Add parent directory to path for imports
+current_dir = os.path.dirname(__file__)
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, current_dir)
+sys.path.insert(0, parent_dir)
 
 # Try to import the PLN inquiry class
+postpaidInquiries = None
 try:
     from postpaidInquiries import postpaidInquiries
-except ImportError:
-    postpaidInquiries = None
+except ImportError as e:
+    print(f"Import error: {e}")
+    pass
 
 class handler(BaseHTTPRequestHandler):
     
@@ -42,7 +47,10 @@ class handler(BaseHTTPRequestHandler):
             'body_format': {
                 'customer_number': '123456789012 (12 digits)'
             },
-            'module_loaded': postpaidInquiries is not None
+            'module_loaded': postpaidInquiries is not None,
+            'python_version': sys.version,
+            'current_dir': current_dir,
+            'sys_path': sys.path[:3]
         }
         self.send_json_response(200, response)
     
@@ -53,7 +61,7 @@ class handler(BaseHTTPRequestHandler):
             if postpaidInquiries is None:
                 response = {
                     'status': False,
-                    'message': 'API PLN belum dikonfigurasi. File postpaidInquiries.py tidak ditemukan.'
+                    'message': 'API PLN belum dikonfigurasi. Pastikan file postpaidInquiries.py dan src/ScraperAPI.py tersedia.'
                 }
                 self.send_json_response(500, response)
                 return
@@ -99,8 +107,16 @@ class handler(BaseHTTPRequestHandler):
                 return
             
             # Call PLN API
-            inquiry = postpaidInquiries(customer_number)
-            result = inquiry._get_data()
+            try:
+                inquiry = postpaidInquiries(customer_number)
+                result = inquiry._get_data()
+            except Exception as e:
+                response = {
+                    'status': False,
+                    'message': f'Error saat query PLN: {str(e)}'
+                }
+                self.send_json_response(500, response)
+                return
             
             if result is None:
                 response = {
