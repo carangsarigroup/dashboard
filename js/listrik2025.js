@@ -133,6 +133,337 @@ const CONFIG = {
     CACHE_DURATION: 5 * 60 * 1000
 };
 
+// ============================================
+// TAMBAHKAN KODE INI KE FILE listrik2025.js
+// Letakkan setelah bagian CONFIG
+// ============================================
+
+// ============ PLN API INTEGRATION ============
+const PLN_API = {
+    endpoint: '/api/pln-inquiry',  // Endpoint Vercel
+    isLoading: false
+};
+
+/**
+ * Fetch data tagihan PLN dari API
+ */
+async function fetchPLNData(customerNumber) {
+    if (!customerNumber || customerNumber.length !== 12) {
+        return {
+            status: false,
+            message: 'Nomor pelanggan harus 12 digit'
+        };
+    }
+
+    try {
+        PLN_API.isLoading = true;
+        
+        const response = await fetch(PLN_API.endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                customer_number: customerNumber 
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data;
+        
+    } catch (error) {
+        console.error('Error fetching PLN data:', error);
+        return {
+            status: false,
+            message: 'Gagal terhubung ke server PLN: ' + error.message
+        };
+    } finally {
+        PLN_API.isLoading = false;
+    }
+}
+
+/**
+ * Auto-fill form dengan data dari PLN API
+ */
+async function autoFillFromPLN() {
+    const idPelanggan = document.getElementById('idPelanggan').value.trim();
+    
+    if (!idPelanggan) {
+        alert('⚠️ Masukkan ID Pelanggan terlebih dahulu!');
+        return;
+    }
+    
+    if (idPelanggan.length !== 12) {
+        alert('⚠️ ID Pelanggan harus 12 digit!');
+        return;
+    }
+    
+    // Show loading indicator
+    const autoFillBtn = document.getElementById('autoFillBtn');
+    const originalText = autoFillBtn.innerHTML;
+    autoFillBtn.disabled = true;
+    autoFillBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> Mengambil data...';
+    
+    try {
+        const result = await fetchPLNData(idPelanggan);
+        
+        if (result.status) {
+            // Success - auto fill form fields
+            document.getElementById('namaToko').value = result.customer_name || '';
+            document.getElementById('standAkhir').value = result.stand_meter || '';
+            document.getElementById('biaya').value = result.amount || '';
+            
+            // Auto calculate penggunaan if standAwal exists
+            calculateUsage();
+            
+            // Show success notification
+            showNotification('✅ Data berhasil diambil dari PLN!', 'success');
+            
+            // Optional: Show detailed info
+            showPLNDataPreview(result);
+            
+        } else {
+            // Failed
+            alert('❌ Gagal mengambil data PLN:\n\n' + result.message);
+        }
+        
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    } finally {
+        // Restore button
+        autoFillBtn.disabled = false;
+        autoFillBtn.innerHTML = originalText;
+    }
+}
+
+/**
+ * Show PLN data preview in modal
+ */
+function showPLNDataPreview(data) {
+    const previewHTML = `
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        ">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px;">📊 Data dari PLN:</h4>
+            <div style="font-size: 13px; line-height: 1.8;">
+                <div><strong>Nama:</strong> ${data.customer_name}</div>
+                <div><strong>Segmentasi:</strong> ${data.segmentation}</div>
+                <div><strong>Daya:</strong> ${data.power}</div>
+                <div><strong>Periode:</strong> ${data.period}</div>
+                <div><strong>Stand Meter:</strong> ${formatNumber(data.stand_meter)}</div>
+                <div><strong>Tagihan:</strong> ${formatRupiah(data.amount)}</div>
+            </div>
+        </div>
+    `;
+    
+    // Insert before form buttons
+    const existingPreview = document.getElementById('plnDataPreview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    const formButtons = document.querySelector('.form-buttons');
+    const previewDiv = document.createElement('div');
+    previewDiv.id = 'plnDataPreview';
+    previewDiv.innerHTML = previewHTML;
+    formButtons.parentNode.insertBefore(previewDiv, formButtons);
+}
+
+/**
+ * Show notification toast
+ */
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// ============================================
+// UPDATE FUNGSI openAddModal dan openEditModal
+// ============================================
+
+// GANTI fungsi openAddModal yang ada dengan yang ini:
+function openAddModal() {
+    if (!appState.currentMonth) {
+        alert('Pilih bulan terlebih dahulu!');
+        return;
+    }
+
+    if (appState.currentMonth === 'Informasi_Umum') {
+        openAddModalInfo();
+        return;
+    }
+
+    document.getElementById('modalTitle').textContent = 'Tambah Data Baru';
+    document.getElementById('submitBtnText').textContent = 'Simpan';
+    document.getElementById('dataForm').reset();
+    document.getElementById('editRowIndex').value = '';
+    
+    const form = document.getElementById('dataForm');
+    form.querySelectorAll('.form-group').forEach(group => {
+        group.style.display = 'block';
+    });
+    
+    // Remove existing PLN preview if any
+    const existingPreview = document.getElementById('plnDataPreview');
+    if (existingPreview) existingPreview.remove();
+    
+    // Add Auto-Fill button if not exists
+    addAutoFillButton();
+    
+    document.getElementById('dataModal').classList.add('active');
+}
+
+// GANTI fungsi openEditModal yang ada dengan yang ini:
+function openEditModal(rowIndex) {
+    if (!appState.currentData || appState.currentData.length < rowIndex) {
+        alert('Data tidak ditemukan!');
+        return;
+    }
+    
+    const row = appState.currentData[rowIndex - 1];
+    const form = document.getElementById('dataForm');
+
+    form.querySelectorAll('.form-group').forEach(group => {
+        group.style.display = 'block';
+    });
+
+    document.getElementById('modalTitle').textContent = 'Edit Data';
+    document.getElementById('submitBtnText').textContent = 'Update';
+    document.getElementById('editRowIndex').value = rowIndex;
+
+    document.getElementById('nomor').value = row[0] || '';
+    document.getElementById('namaToko').value = row[1] || '';
+    document.getElementById('idPelanggan').value = row[2] || '';
+    document.getElementById('standAwal').value = parseNumber(row[3]);
+    document.getElementById('standAkhir').value = parseNumber(row[4]);
+    document.getElementById('biaya').value = parseNumber(row[6]);
+
+    calculateUsage();
+
+    // Remove existing PLN preview if any
+    const existingPreview = document.getElementById('plnDataPreview');
+    if (existingPreview) existingPreview.remove();
+    
+    // Add Auto-Fill button if not exists
+    addAutoFillButton();
+
+    document.getElementById('dataModal').classList.add('active');
+}
+
+/**
+ * Add Auto-Fill button to ID Pelanggan field
+ */
+function addAutoFillButton() {
+    const idPelangganGroup = document.querySelector('label[for="idPelanggan"]')?.parentElement;
+    if (!idPelangganGroup) return;
+    
+    // Check if button already exists
+    if (document.getElementById('autoFillBtn')) return;
+    
+    // Create button
+    const autoFillBtn = document.createElement('button');
+    autoFillBtn.type = 'button';
+    autoFillBtn.id = 'autoFillBtn';
+    autoFillBtn.className = 'btn-autofill';
+    autoFillBtn.innerHTML = '🔄 Auto-Fill dari PLN';
+    autoFillBtn.onclick = autoFillFromPLN;
+    
+    autoFillBtn.style.cssText = `
+        margin-top: 8px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+    `;
+    
+    // Add hover effect
+    autoFillBtn.onmouseenter = () => {
+        autoFillBtn.style.transform = 'translateY(-2px)';
+        autoFillBtn.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+    };
+    autoFillBtn.onmouseleave = () => {
+        autoFillBtn.style.transform = 'translateY(0)';
+        autoFillBtn.style.boxShadow = 'none';
+    };
+    
+    idPelangganGroup.appendChild(autoFillBtn);
+}
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// ============================================
+// SELESAI - Integrasi PLN API
+// ============================================
+
 // ============ OAUTH STATE ============
 let tokenClient;
 let accessToken = null;
