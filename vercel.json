@@ -1,39 +1,17 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/pln-inquiry.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
-}
-```
-
-**Why This Works:**
-
-- Vercel will automatically serve static files from your root directory
-- The simplified routing configuration lets Vercel handle static assets naturally
-- Your Python API routes are still protected with the first route rule
-
-**Additional Recommendations:**
-
-1. **Add a `public` directory (optional but cleaner):**
-```
-   public/
-   ├── listriki2025.html
-   ├── checklistbulanan.html
-   ├── datakaryawan.html
-   └── ... (other HTML files)
-   css/
-   js/
-   api/
+     "version": 2,
+     "builds": [
+       {
+         "src": "api/pln-inquiry.py",
+         "use": "@vercel/python"
+       }
+     ],
+     "routes": [
+       {
+         "src": "/api/(.*)",
+         "dest": "/api/$1"
+       }
+     ],
+     "cleanUrls": true,
+     "trailingSlash": false
+   }
