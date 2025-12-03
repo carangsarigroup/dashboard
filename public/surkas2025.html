@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMTOCS - Surplus Kas Toko</title>
+    <link rel="stylesheet" href="css/surkas2025.css">
+</head>
+
+<body>
+    <!-- Auto-logout Warning Modal -->
+    <div class="logout-warning" id="logoutWarning">
+        <div class="warning-content">
+            <h3>⚠️ Peringatan Inaktivitas</h3>
+            <p>Anda akan logout otomatis dalam <strong><span id="warningCountdown">60</span> detik</strong> karena tidak ada aktivitas.</p>
+            <button onclick="resetInactivityTimer()">Saya Masih Di Sini</button>
+        </div>
+    </div>
+
+    <!-- User Bar -->
+    <div class="user-bar">
+        <div class="user-info">
+            <span>👤</span>
+            <span id="displayUsername">Guest</span>
+        </div>
+        <button id="authBtn" onclick="handleAuth()" class="auth-btn">
+            <span>🔐</span>
+            <span id="authBtnText">Otentikasi</span>
+        </button>
+        <button onclick="logout()" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="header">
+            <h1>💰 SIMTOCS - Surplus Kas Toko</h1>
+            <p>Monitoring dan Pelaporan Pembagian Laba & Kas Triwulanan</p>
+        </div>
+        
+        <div class="controls">
+            <a href="index.html" class="back-btn">
+                <span>🏠</span>
+                <span>Kembali ke Dashboard</span>
+            </a>
+            <div class="select-wrapper">
+                <select id="sheetSelect" onchange="handleSheetChange()">
+                    <option value="">Pilih Toko...</option>
+                </select>
+            </div>
+
+            <div class="select-wrapper">
+                <select id="yearFilter" onchange="handleYearChange()">
+                <option value="2025">📅 Tahun 2025</option>
+                <option value="2026">📅 Tahun 2026</option>
+                </select>
+            </div>
+            
+            <div class="select-wrapper">
+                <select id="triwulanFilter" onchange="handleTriwulanFilter()">
+                    <option value="all">Semua Triwulan (Kedua Tabel)</option>
+                    <option value="1">TW1 (Q1)</option>
+                    <option value="2">TW2 (Q2)</option>
+                    <option value="3">TW3 (Q3)</option>
+                    <option value="4">TW4 (Q4)</option>
+                </select>
+            </div>
+            <button class="refresh-btn" onclick="handleRefresh()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Memuat data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editRowIndex" value="">
+                <input type="hidden" id="editTableNumber" value="">
+
+                <!-- Table 1 Fields -->
+                <div id="table1Fields">
+                    <div class="form-group">
+                        <label for="triwulan">Triwulan *</label>
+                        <select id="triwulan" required>
+                            <option value="">Pilih Triwulan</option>
+                            <option value="1">TW1 (Q1)</option>
+                            <option value="2">TW2 (Q2)</option>
+                            <option value="3">TW3 (Q3)</option>
+                            <option value="4">TW4 (Q4)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bulan">Bulan *</label>
+                        <input type="text" id="bulan" placeholder="Contoh: Januari" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ebitdaLR">EBITDA LR *</label>
+                        <input type="number" id="ebitdaLR" placeholder="0" required oninput="calculateValues()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="penggunaanLabaKas">Penggunaan Laba Kas *</label>
+                        <input type="number" id="penggunaanLabaKas" placeholder="0" required oninput="calculateValues()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="labaNetDitransfer">Laba Net Ditransfer (Auto)</label>
+                        <input type="number" id="labaNetDitransfer" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bayarListrik">Bayar Listrik *</label>
+                        <input type="number" id="bayarListrik" placeholder="0" required oninput="calculateValues()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sisaSurkas">Sisa Surplus Kas (Auto)</label>
+                        <input type="number" id="sisaSurkas" placeholder="Otomatis dihitung" readonly style="background: #e9ecef; cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <!-- Table 2 Fields -->
+                <div id="table2Fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="no2">Triwulan (Q)</label>
+                        <input type="text" id="no2" placeholder="Contoh: 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bulan2">Bulan *</label>
+                        <input type="text" id="bulan2" placeholder="Contoh: Januari 2025">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nominalPenggunaanSurkas">Nominal Penggunaan Surkas *</label>
+                        <input type="number" id="nominalPenggunaanSurkas" placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tujuanPenggunaanSurkas">Tujuan Penggunaan Surkas *</label>
+                        <input type="text" id="tujuanPenggunaanSurkas" placeholder="Pembentukan Cadangan Renovasi...">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span id="submitBtnText">Simpan</span>
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="js/surkas2025.js"></script>
+</body>
+</html>
+
