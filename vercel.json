@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/pln-inquiry.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
