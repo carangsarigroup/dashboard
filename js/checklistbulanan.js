@@ -1216,8 +1216,8 @@ function generatePrintReport() {
         }
         
         .photo-container img {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 500px;
+            max-height: 500px;
             border: 1px solid #ccc;
             border-radius: 4px;
             object-fit: cover;
