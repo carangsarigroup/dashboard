@@ -65,6 +65,51 @@
                 <span>Refresh</span>
             </button>
         </div>
+
+<!-- Rating and Review Section -->
+<div class="rating-section" id="ratingSection" style="display: none;">
+    <div class="rating-container">
+        <h3>📊 PENILAIAN TOKO</h3>
+        
+        <div class="rating-form">
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="storeRating">
+                        <span class="label-icon">⭐</span>
+                        Score Toko (0.0 - 5.0)
+                    </label>
+                    <div class="rating-input-wrapper">
+                        <input 
+                            type="number" 
+                            id="storeRating" 
+                            placeholder="4.2" 
+                            min="0" 
+                            max="5" 
+                            step="0.1"
+                            class="rating-input">
+                        <span class="rating-max">/ 5.0</span>
+                    </div>
+                    <small class="help-text">Masukkan nilai antara 0.0 - 5.0</small>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field full-width">
+                    <label for="storeComment">
+                        <span class="label-icon">💬</span>
+                        Komentar / Review Toko
+                    </label>
+                    <textarea 
+                        id="storeComment" 
+                        placeholder="Tulis komentar atau review singkat tentang kondisi toko..."
+                        rows="4"
+                        class="comment-textarea"></textarea>
+                    <small class="help-text">Review akan muncul di laporan cetak</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         
         <!-- Content area -->
         <div class="content" id="content">
@@ -83,4 +128,5 @@
     <script src="js/checklistbulanan.js"></script>
 </body>
 </html>
+
 
