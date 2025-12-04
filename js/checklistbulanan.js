@@ -1091,6 +1091,10 @@ function generatePrintReport() {
         return;
     }
 
+    // Get rating and comment from form
+    const storeRating = document.getElementById('storeRating').value || '';
+    const storeComment = document.getElementById('storeComment').value || '';
+
     // Get store name and current date
     const storeName = appState.currentSheet;
     const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -1218,8 +1222,8 @@ function generatePrintReport() {
         }
         
         .photo-container img {
-            max-width: 500px;
-            max-height: 500px;
+            max-width: 100px;
+            max-height: 100px;
             border: 1px solid #ccc;
             border-radius: 4px;
             object-fit: cover;
@@ -1247,6 +1251,49 @@ function generatePrintReport() {
         .scoring-section h3 {
             color: #2E7D32;
             margin-bottom: 15px;
+            border-bottom: 2px solid #2E7D32;
+            padding-bottom: 5px;
+        }
+        
+        .score-display {
+            margin-bottom: 15px;
+        }
+        
+        .score-display label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2E7D32;
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #2E7D32;
+            border-radius: 8px;
+        }
+        
+        .comment-display {
+            margin-bottom: 15px;
+        }
+        
+        .comment-display label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .comment-text {
+            padding: 12px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.6;
         }
         
         .signature-area {
@@ -1270,6 +1317,11 @@ function generatePrintReport() {
             padding-top: 5px;
             display: inline-block;
             min-width: 150px;
+        }
+        
+        .empty-rating {
+            color: #dc3545;
+            font-style: italic;
         }
         
         @media print {
@@ -1299,49 +1351,43 @@ function generatePrintReport() {
     
     dataRows.forEach(row => {
         const firstCell = (row[0] || '').trim();
-        // Check if this is a section header (starts with Roman numerals)
         const isSectionHeader = /^[IVX]+\.\s+/.test(firstCell);
         
         if (isSectionHeader) {
-            // Print previous section if exists
             if (currentSection && sectionData.length > 0) {
                 printHTML += generateSectionTable(currentSection, sectionData, headers);
                 sectionData = [];
             }
             currentSection = firstCell;
         } else if (firstCell) {
-            // Add to current section
             sectionData.push(row);
         }
     });
     
-    // Print last section
     if (currentSection && sectionData.length > 0) {
         printHTML += generateSectionTable(currentSection, sectionData, headers);
     }
 
-    // Footer with scoring section and signatures
+    // Footer with scoring section (pre-filled from form)
     printHTML += `
     <div class="footer-section">
         <div class="scoring-section">
-            <h3 style="margin-bottom: 15px; border-bottom: 2px solid #2E7D32; padding-bottom: 5px;">PENILAIAN TOKO</h3>
+            <h3>PENILAIAN TOKO</h3>
             
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Score Toko (0.0 - 5.0):</label>
-                <input type="text" 
-                       placeholder="Contoh: 4.2" 
-                       style="width: 150px; padding: 8px; border: 2px solid #000; border-radius: 4px; font-size: 14pt; font-weight: bold;"
-                       pattern="[0-5](\.[0-9])?"
-                       maxlength="3">
-                <span style="margin-left: 10px; color: #666; font-size: 10pt;">/ 5.0</span>
+            <div class="score-display">
+                <label>Score Toko:</label>
+                ${storeRating ? 
+                    `<span class="score-value">${storeRating}</span> <span style="color: #666; margin-left: 10px;">/ 5.0</span>` 
+                    : 
+                    `<span class="empty-rating">Belum ada penilaian</span>`
+                }
             </div>
             
-            <div style="margin-bottom: 20px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Komentar / Review Toko:</label>
-                <textarea 
-                    placeholder="Tulis komentar atau review singkat tentang kondisi toko..."
-                    style="width: 100%; min-height: 80px; padding: 10px; border: 2px solid #000; border-radius: 4px; font-size: 11pt; font-family: Arial, sans-serif; resize: vertical;"
-                    rows="4"></textarea>
+            <div class="comment-display">
+                <label>Komentar / Review Toko:</label>
+                <div class="comment-text">
+                    ${storeComment || '<span class="empty-rating">Belum ada komentar</span>'}
+                </div>
             </div>
         </div>
         
@@ -1365,13 +1411,17 @@ function generatePrintReport() {
     printWindow.document.write(printHTML);
     printWindow.document.close();
     
-    // Wait for content to load then print
     printWindow.onload = function() {
         setTimeout(() => {
             printWindow.print();
-        }, 500); // Increased timeout to allow images to load
+        }, 500);
     };
 }
+
+// ============================================================
+// END OF UPDATES
+// ============================================================
+
 
 function generateSectionTable(sectionTitle, rows, headers) {
     let html = `
