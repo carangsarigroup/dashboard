@@ -1077,8 +1077,11 @@ function openImageUpload(rowIdx, colIdx) {
     input.click();
 }
 
-// ============ PRINT REPORT FUNCTION - FIXED VERSION ============
-// Replace the existing generatePrintReport() and generateSectionTable() functions
+// ============================================================
+// PRINT REPORT FUNCTION - COMPLETE FIX
+// Copy paste kedua fungsi ini ke checklistbulanan.js
+// Ganti SELURUH fungsi generatePrintReport() dan generateSectionTable() yang lama
+// ============================================================
 
 function generatePrintReport() {
     if (!appState.currentSheet || !appState.currentData || appState.currentData.length < 2) {
@@ -1217,6 +1220,7 @@ function generatePrintReport() {
             max-height: 100px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            object-fit: cover;
         }
         
         .no-photo {
@@ -1341,11 +1345,11 @@ function generatePrintReport() {
         
         <div class="signature-area">
             <div class="signature-box">
-                <div class="title">Kepala Toko</div>
+                <div class="title">Diperiksa Oleh,</div>
                 <div class="name">(_________________)</div>
             </div>
             <div class="signature-box">
-                <div class="title">Manager Carang Sari Group</div>
+                <div class="title">Diketahui Oleh,</div>
                 <div class="name">(_________________)</div>
             </div>
         </div>
@@ -1363,7 +1367,7 @@ function generatePrintReport() {
     printWindow.onload = function() {
         setTimeout(() => {
             printWindow.print();
-        }, 250);
+        }, 500); // Increased timeout to allow images to load
     };
 }
 
@@ -1384,27 +1388,41 @@ function generateSectionTable(sectionTitle, rows, headers) {
 
     rows.forEach(row => {
         const item = row[1] || '-';
-        const status = row[2] || '-';
+        const status = row[2] || '';
         const notes = row[3] || '-';
         const photos = row[4] || '';
         
-        // FIX 1: Show actual user selection (Ya/Tidak) instead of [Baik/Kurang]
-        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
-                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
+        // CRITICAL FIX: Show actual user selection (Ya/Tidak)
+        let statusText = '-';
+        let statusClass = '';
         
-        const statusText = status || '-';
+        if (status) {
+            const statusLower = status.toLowerCase().trim();
+            if (statusLower === 'ya') {
+                statusText = 'Ya';
+                statusClass = 'status-baik';
+            } else if (statusLower === 'tidak') {
+                statusText = 'Tidak';
+                statusClass = 'status-kurang';
+            } else {
+                statusText = status; // Show original if not Ya/Tidak
+            }
+        }
         
-        // FIX 2: Display actual images instead of text
+        // CRITICAL FIX: Display actual images
         let photoHTML = '';
-        if (photos) {
+        if (photos && photos.trim() !== '') {
             const imageUrls = photos.split(',').map(url => url.trim()).filter(url => url);
+            
             if (imageUrls.length > 0) {
                 photoHTML = '<div class="photo-container">';
                 imageUrls.forEach(url => {
-                    const fileId = url.match(/[-\w]{25,}/);
-                    if (fileId) {
-                        // Use thumbnail URL for display
-                        photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
+                    // Extract file ID from Google Drive URL
+                    const fileIdMatch = url.match(/[-\w]{25,}/);
+                    if (fileIdMatch) {
+                        const fileId = fileIdMatch[0];
+                        // Use Google Drive thumbnail API
+                        photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
                     }
                 });
                 photoHTML += '</div>';
@@ -1433,122 +1451,9 @@ function generateSectionTable(sectionTitle, rows, headers) {
     return html;
 }
 
-function generateSectionTable(sectionTitle, rows, headers) {
-    let html = `
-    <div class="section-title">${sectionTitle}</div>
-    <table class="checklist-table">
-        <thead>
-            <tr>
-                <th class="item-column">Item Pemeriksaan</th>
-                <th class="status-column">Status</th>
-                <th class="notes-column">Keterangan</th>
-                <th class="photo-column">Dokumentasi</th>
-            </tr>
-        </thead>
-        <tbody>
-`;
-
-    rows.forEach(row => {
-        const item = row[1] || '-';
-        const status = row[2] || '-';
-        const notes = row[3] || '-';
-        const photos = row[4] || '';
-        
-        // FIX 1: Show actual user selection (Ya/Tidak) instead of [Baik/Kurang]
-        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
-                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
-        
-        const statusText = status || '-';
-        
-        // FIX 2: Display actual images instead of text
-        let photoHTML = '';
-        if (photos) {
-            const imageUrls = photos.split(',').map(url => url.trim()).filter(url => url);
-            if (imageUrls.length > 0) {
-                photoHTML = '<div class="photo-container">';
-                imageUrls.forEach(url => {
-                    const fileId = url.match(/[-\w]{25,}/);
-                    if (fileId) {
-                        // Use thumbnail URL for display
-                        photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
-                    }
-                });
-                photoHTML += '</div>';
-            } else {
-                photoHTML = '<span class="no-photo">Tidak ada foto</span>';
-            }
-        } else {
-            photoHTML = '<span class="no-photo">Tidak ada foto</span>';
-        }
-
-        html += `
-            <tr>
-                <td>${item}</td>
-                <td class="status-column ${statusClass}">${statusText}</td>
-                <td>${notes}</td>
-                <td class="photo-column">${photoHTML}</td>
-            </tr>
-        `;
-    });
-
-    html += `
-        </tbody>
-    </table>
-`;
-
-    return html;
-}
-
-function generateSectionTable(sectionTitle, rows, headers) {
-    let html = `
-    <div class="section-title">${sectionTitle}</div>
-    <table class="checklist-table">
-        <thead>
-            <tr>
-                <th class="item-column">Item Pemeriksaan</th>
-                <th class="status-column">Status</th>
-                <th class="notes-column">Keterangan</th>
-                <th class="photo-column">Dokumentasi</th>
-            </tr>
-        </thead>
-        <tbody>
-`;
-
-    rows.forEach(row => {
-        const item = row[1] || '-';
-        const status = row[2] || '-';
-        const notes = row[3] || '-';
-        const photos = row[4] || '';
-        
-        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
-                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
-        
-        const statusText = status.toLowerCase() === 'ya' ? '[Baik/Kurang]' : 
-                          status.toLowerCase() === 'tidak' ? '[Baik/Kurang]' : 
-                          '[Baik/Kurang]';
-        
-        const photoCount = photos ? photos.split(',').length : 0;
-        const photoText = photoCount > 0 ? 
-            `[Foto yang diupload user]<br><span class="photo-note">${photoCount} foto</span>` : 
-            '[Foto yang diupload user]';
-
-        html += `
-            <tr>
-                <td>${item}</td>
-                <td class="status-column ${statusClass}">${statusText}</td>
-                <td>${notes}</td>
-                <td class="photo-column">${photoText}</td>
-            </tr>
-        `;
-    });
-
-    html += `
-        </tbody>
-    </table>
-`;
-
-    return html;
-}
+// ============================================================
+// END OF PRINT REPORT FUNCTIONS
+// ============================================================
 
 // ============ EVENT HANDLERS (CORRECTED) ============
 function handleSheetChange() {
