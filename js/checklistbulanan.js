@@ -1230,6 +1230,19 @@ function generatePrintReport() {
             page-break-inside: avoid;
         }
         
+        .scoring-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 2px solid #2E7D32;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .scoring-section h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+        }
+        
         .signature-area {
             margin-top: 20px;
             display: flex;
@@ -1301,18 +1314,38 @@ function generatePrintReport() {
         printHTML += generateSectionTable(currentSection, sectionData, headers);
     }
 
-    // Footer with scoring note and signatures
+    // Footer with scoring section and signatures
     printHTML += `
     <div class="footer-section">
-        <p><strong>[Score Toko : ]</strong></p>
+        <div class="scoring-section">
+            <h3 style="margin-bottom: 15px; border-bottom: 2px solid #2E7D32; padding-bottom: 5px;">PENILAIAN TOKO</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Score Toko (0.0 - 5.0):</label>
+                <input type="text" 
+                       placeholder="Contoh: 4.2" 
+                       style="width: 150px; padding: 8px; border: 2px solid #000; border-radius: 4px; font-size: 14pt; font-weight: bold;"
+                       pattern="[0-5](\.[0-9])?"
+                       maxlength="3">
+                <span style="margin-left: 10px; color: #666; font-size: 10pt;">/ 5.0</span>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Komentar / Review Toko:</label>
+                <textarea 
+                    placeholder="Tulis komentar atau review singkat tentang kondisi toko..."
+                    style="width: 100%; min-height: 80px; padding: 10px; border: 2px solid #000; border-radius: 4px; font-size: 11pt; font-family: Arial, sans-serif; resize: vertical;"
+                    rows="4"></textarea>
+            </div>
+        </div>
         
         <div class="signature-area">
             <div class="signature-box">
-                <div class="title">Diperiksa Oleh,</div>
+                <div class="title">Kepala Toko</div>
                 <div class="name">(_________________)</div>
             </div>
             <div class="signature-box">
-                <div class="title">Diketahui Oleh,</div>
+                <div class="title">Manager Carang Sari Group</div>
                 <div class="name">(_________________)</div>
             </div>
         </div>
@@ -1332,6 +1365,72 @@ function generatePrintReport() {
             printWindow.print();
         }, 250);
     };
+}
+
+function generateSectionTable(sectionTitle, rows, headers) {
+    let html = `
+    <div class="section-title">${sectionTitle}</div>
+    <table class="checklist-table">
+        <thead>
+            <tr>
+                <th class="item-column">Item Pemeriksaan</th>
+                <th class="status-column">Status</th>
+                <th class="notes-column">Keterangan</th>
+                <th class="photo-column">Dokumentasi</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+    rows.forEach(row => {
+        const item = row[1] || '-';
+        const status = row[2] || '-';
+        const notes = row[3] || '-';
+        const photos = row[4] || '';
+        
+        // FIX 1: Show actual user selection (Ya/Tidak) instead of [Baik/Kurang]
+        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
+                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
+        
+        const statusText = status || '-';
+        
+        // FIX 2: Display actual images instead of text
+        let photoHTML = '';
+        if (photos) {
+            const imageUrls = photos.split(',').map(url => url.trim()).filter(url => url);
+            if (imageUrls.length > 0) {
+                photoHTML = '<div class="photo-container">';
+                imageUrls.forEach(url => {
+                    const fileId = url.match(/[-\w]{25,}/);
+                    if (fileId) {
+                        // Use thumbnail URL for display
+                        photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
+                    }
+                });
+                photoHTML += '</div>';
+            } else {
+                photoHTML = '<span class="no-photo">Tidak ada foto</span>';
+            }
+        } else {
+            photoHTML = '<span class="no-photo">Tidak ada foto</span>';
+        }
+
+        html += `
+            <tr>
+                <td>${item}</td>
+                <td class="status-column ${statusClass}">${statusText}</td>
+                <td>${notes}</td>
+                <td class="photo-column">${photoHTML}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+    </table>
+`;
+
+    return html;
 }
 
 function generateSectionTable(sectionTitle, rows, headers) {
