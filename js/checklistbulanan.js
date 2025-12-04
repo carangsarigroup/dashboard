@@ -338,6 +338,7 @@ function showEmptyState() {
             <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
         </div>
     `;
+    document.getElementById('ratingSection').style.display = 'none';
 }
 
 function markAsChanged() {
@@ -632,6 +633,7 @@ function displayData(values, sheetName) {
     `;
     
     document.getElementById('content').innerHTML = html;
+    document.getElementById('ratingSection').style.display = 'block';
 }
 
 // ============ EDIT FUNCTIONS ============
