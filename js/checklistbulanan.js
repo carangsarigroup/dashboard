@@ -1077,6 +1077,298 @@ function openImageUpload(rowIdx, colIdx) {
     input.click();
 }
 
+// ============ PRINT REPORT FUNCTION ============
+function generatePrintReport() {
+    if (!appState.currentSheet || !appState.currentData || appState.currentData.length < 2) {
+        alert('⚠️ Tidak ada data untuk dicetak!');
+        return;
+    }
+
+    // Get store name and current date
+    const storeName = appState.currentSheet;
+    const currentDate = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    // Prepare data
+    const headers = appState.currentData[0];
+    const dataRows = appState.currentData.slice(1);
+
+    // Build print HTML
+    let printHTML = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Checklist - ${storeName}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        .header-section h1 {
+            font-size: 16pt;
+            margin-bottom: 5px;
+        }
+        
+        .header-section .store-name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .header-section .date {
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 12pt;
+            margin: 15px 0 10px 0;
+            padding: 5px;
+            background: #f0f0f0;
+            border-left: 4px solid #2E7D32;
+        }
+        
+        .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .checklist-table th,
+        .checklist-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .checklist-table th {
+            background: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .checklist-table .item-column {
+            width: 40%;
+        }
+        
+        .checklist-table .status-column {
+            width: 15%;
+            text-align: center;
+        }
+        
+        .checklist-table .notes-column {
+            width: 30%;
+        }
+        
+        .checklist-table .photo-column {
+            width: 15%;
+            text-align: center;
+        }
+        
+        .status-baik {
+            color: #2E7D32;
+            font-weight: bold;
+        }
+        
+        .status-kurang {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .photo-note {
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .footer-section {
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-area {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-box .title {
+            font-weight: bold;
+            margin-bottom: 60px;
+        }
+        
+        .signature-box .name {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            display: inline-block;
+            min-width: 150px;
+        }
+        
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-section">
+        <h1>LAPORAN CHECKLIST PEMERIKSAAN TOKO</h1>
+        <div class="store-name">Kode Toko – Nama Toko: ${storeName}</div>
+        <div class="date">Tanggal Pengecekan: ${currentDate}</div>
+    </div>
+`;
+
+    // Group data by sections (Area I, Area II, etc.)
+    let currentSection = '';
+    let sectionData = [];
+    
+    dataRows.forEach(row => {
+        const firstCell = (row[0] || '').trim();
+        // Check if this is a section header (starts with Roman numerals)
+        const isSectionHeader = /^[IVX]+\.\s+/.test(firstCell);
+        
+        if (isSectionHeader) {
+            // Print previous section if exists
+            if (currentSection && sectionData.length > 0) {
+                printHTML += generateSectionTable(currentSection, sectionData, headers);
+                sectionData = [];
+            }
+            currentSection = firstCell;
+        } else if (firstCell) {
+            // Add to current section
+            sectionData.push(row);
+        }
+    });
+    
+    // Print last section
+    if (currentSection && sectionData.length > 0) {
+        printHTML += generateSectionTable(currentSection, sectionData, headers);
+    }
+
+    // Footer with scoring note and signatures
+    printHTML += `
+    <div class="footer-section">
+        <p><strong>[Score Toko : ]</strong></p>
+        
+        <div class="signature-area">
+            <div class="signature-box">
+                <div class="title">Diperiksa Oleh,</div>
+                <div class="name">(_________________)</div>
+            </div>
+            <div class="signature-box">
+                <div class="title">Diketahui Oleh,</div>
+                <div class="name">(_________________)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+    // Open print preview
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printHTML);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    };
+}
+
+function generateSectionTable(sectionTitle, rows, headers) {
+    let html = `
+    <div class="section-title">${sectionTitle}</div>
+    <table class="checklist-table">
+        <thead>
+            <tr>
+                <th class="item-column">Item Pemeriksaan</th>
+                <th class="status-column">Status</th>
+                <th class="notes-column">Keterangan</th>
+                <th class="photo-column">Dokumentasi</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+    rows.forEach(row => {
+        const item = row[1] || '-';
+        const status = row[2] || '-';
+        const notes = row[3] || '-';
+        const photos = row[4] || '';
+        
+        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
+                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
+        
+        const statusText = status.toLowerCase() === 'ya' ? '[Baik/Kurang]' : 
+                          status.toLowerCase() === 'tidak' ? '[Baik/Kurang]' : 
+                          '[Baik/Kurang]';
+        
+        const photoCount = photos ? photos.split(',').length : 0;
+        const photoText = photoCount > 0 ? 
+            `[Foto yang diupload user]<br><span class="photo-note">${photoCount} foto</span>` : 
+            '[Foto yang diupload user]';
+
+        html += `
+            <tr>
+                <td>${item}</td>
+                <td class="status-column ${statusClass}">${statusText}</td>
+                <td>${notes}</td>
+                <td class="photo-column">${photoText}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+    </table>
+`;
+
+    return html;
+}
+
 // ============ EVENT HANDLERS (CORRECTED) ============
 function handleSheetChange() {
     const sheetSelect = document.getElementById('sheetSelect');
