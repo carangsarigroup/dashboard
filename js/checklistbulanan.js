@@ -54,7 +54,10 @@ function startInactivityTimer() {
     clearInterval(countdownInterval);
     
     // Hide warning if shown
-    document.getElementById('logoutWarning').classList.remove('show');
+    const warningElement = document.getElementById('logoutWarning');
+    if (warningElement) {
+        warningElement.classList.remove('show');
+    }
     
     // Set warning timer (4 minutes)
     warningTimer = setTimeout(() => {
@@ -68,13 +71,18 @@ function startInactivityTimer() {
 }
 
 function showLogoutWarning() {
-    document.getElementById('logoutWarning').classList.add('show');
+    const warningElement = document.getElementById('logoutWarning');
+    const countdownElement = document.getElementById('warningCountdown');
+    
+    if (!warningElement || !countdownElement) return;
+    
+    warningElement.classList.add('show');
     let countdown = 60;
-    document.getElementById('warningCountdown').textContent = countdown;
+    countdownElement.textContent = countdown;
     
     countdownInterval = setInterval(() => {
         countdown--;
-        document.getElementById('warningCountdown').textContent = countdown;
+        countdownElement.textContent = countdown;
         if (countdown <= 0) {
             clearInterval(countdownInterval);
         }
@@ -124,7 +132,10 @@ let currentUserRole = null;
 if (checkAuth()) {
     const authData = getAuthData();
     if (authData?.username) {
-        document.getElementById('displayUsername').textContent = authData.username;
+        const usernameElement = document.getElementById('displayUsername');
+        if (usernameElement) {
+            usernameElement.textContent = authData.username;
+        }
     }
     if (authData?.role) {
         currentUserRole = authData.role;
@@ -139,7 +150,6 @@ const CONFIG = {
     SPREADSHEET_ID: '1kOKzSSAYlXG33LokTmwRLpzFG-wYlAWUDCjEYvzKKNA',
     SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
     CACHE_DURATION: 5 * 60 * 1000,
-    // Store folder mapping - you'll need to create these folders and get their IDs
     STORE_FOLDERS: {
         'F4SD - Indomaret SPBU Teras Ayung': '1l-jJd8dNJVYhwUXaxWBmzKKbWX3Xa2Yl',
         'FKOM - Indomaret Wanagiri': '18AafBvDTFXXEXDKJQ8ZYfuX2tbCs9huV',
@@ -263,7 +273,6 @@ function clearStoredToken() {
 
 function handleAuth() {
     if (accessToken) {
-        // Clear and re-authenticate
         accessToken = null;
         clearStoredToken();
         gapi.client.setToken(null);
@@ -290,24 +299,24 @@ function handleAuth() {
         alert('✅ Berhasil authenticate dengan akses Drive!');
     };
 
-    // IMPORTANT: Always request consent to ensure we get all scopes
     tokenClient.requestAccessToken({prompt: 'consent'});
 }
 
 function updateAuthButton(isAuthenticated) {
     const authBtn = document.getElementById('authBtn');
     const authBtnText = document.getElementById('authBtnText');
-    const addBtn = document.getElementById('addBtn');
     const saveBtn = document.getElementById('saveBtn');
     
-    if (isAuthenticated) {
-        authBtn.classList.add('authenticated');
-        authBtnText.textContent = '✓ Terotentikasi';
-        if (saveBtn) saveBtn.style.display = 'inline-flex';
-    } else {
-        authBtn.classList.remove('authenticated');
-        authBtnText.textContent = 'Authenticate';
-        if (saveBtn) saveBtn.style.display = 'none';
+    if (authBtn && authBtnText) {
+        if (isAuthenticated) {
+            authBtn.classList.add('authenticated');
+            authBtnText.textContent = '✓ Terotentikasi';
+            if (saveBtn) saveBtn.style.display = 'inline-flex';
+        } else {
+            authBtn.classList.remove('authenticated');
+            authBtnText.textContent = 'Authenticate';
+            if (saveBtn) saveBtn.style.display = 'none';
+        }
     }
 }
 
@@ -338,7 +347,10 @@ function showEmptyState() {
             <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
         </div>
     `;
-    document.getElementById('ratingSection').style.display = 'none';
+    const ratingSection = document.getElementById('ratingSection');
+    if (ratingSection) {
+        ratingSection.style.display = 'none';
+    }
 }
 
 function markAsChanged() {
@@ -385,10 +397,12 @@ async function loadSheetsList() {
         appState.sheets = data.sheets.map(sheet => sheet.properties.title);
         
         const sheetSelect = document.getElementById('sheetSelect');
-        sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
-            appState.sheets.map(name => 
-                `<option value="${name}">${name}</option>`
-            ).join('');
+        if (sheetSelect) {
+            sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
+                appState.sheets.map(name => 
+                    `<option value="${name}">${name}</option>`
+                ).join('');
+        }
         
         showEmptyState();
         
@@ -456,6 +470,281 @@ async function loadSheetData(sheetName, forceRefresh = false) {
     }
 }
 
+// ============ AUTO SCORE & REVIEW FUNCTIONS ============
+function calculateAutoScore() {
+    if (!appState.currentData || appState.currentData.length < 2) {
+        return null;
+    }
+
+    const headers = appState.currentData[0];
+    const dataRows = appState.currentData.slice(1);
+    
+    let statusColIndex = -1;
+    headers.forEach((header, idx) => {
+        if (header && header.toLowerCase().includes('status')) {
+            statusColIndex = idx;
+        }
+    });
+    
+    if (statusColIndex === -1) {
+        return null;
+    }
+    
+    let totalItems = 0;
+    let yesCount = 0;
+    let noCount = 0;
+    let categoryStats = {};
+    let currentCategory = '';
+    
+    dataRows.forEach(row => {
+        const firstCell = (row[0] || '').trim();
+        const isSectionHeader = /^[IVX]+\.\s+/.test(firstCell);
+        
+        if (isSectionHeader) {
+            currentCategory = firstCell;
+            if (!categoryStats[currentCategory]) {
+                categoryStats[currentCategory] = { yes: 0, no: 0, total: 0 };
+            }
+        } else if (firstCell) {
+            const status = (row[statusColIndex] || '').toLowerCase().trim();
+            if (status === 'ya') {
+                yesCount++;
+                totalItems++;
+                if (currentCategory && categoryStats[currentCategory]) {
+                    categoryStats[currentCategory].yes++;
+                    categoryStats[currentCategory].total++;
+                }
+            } else if (status === 'tidak') {
+                noCount++;
+                totalItems++;
+                if (currentCategory && categoryStats[currentCategory]) {
+                    categoryStats[currentCategory].no++;
+                    categoryStats[currentCategory].total++;
+                }
+            }
+        }
+    });
+    
+    if (totalItems === 0) {
+        return null;
+    }
+    
+    const score = (yesCount / totalItems) * 5;
+    const percentage = (yesCount / totalItems) * 100;
+    
+    return {
+        score: score.toFixed(1),
+        yesCount: yesCount,
+        noCount: noCount,
+        totalItems: totalItems,
+        percentage: percentage.toFixed(1),
+        categoryStats: categoryStats
+    };
+}
+
+function generateSmartReview(userComment, scoreData) {
+    if (!scoreData) {
+        return "Belum ada data untuk dianalisis. Silakan isi status pemeriksaan terlebih dahulu.";
+    }
+    
+    const score = parseFloat(scoreData.score);
+    const percentage = parseFloat(scoreData.percentage);
+    
+    let performanceLevel = '';
+    let performanceEmoji = '';
+    
+    if (percentage >= 90) {
+        performanceLevel = 'SANGAT BAIK';
+        performanceEmoji = '🌟';
+    } else if (percentage >= 75) {
+        performanceLevel = 'BAIK';
+        performanceEmoji = '✅';
+    } else if (percentage >= 60) {
+        performanceLevel = 'CUKUP';
+        performanceEmoji = '⚠️';
+    } else {
+        performanceLevel = 'PERLU PERBAIKAN';
+        performanceEmoji = '❌';
+    }
+    
+    let categoryAnalysis = [];
+    let bestCategories = [];
+    let worstCategories = [];
+    
+    for (let [category, stats] of Object.entries(scoreData.categoryStats)) {
+        if (stats.total > 0) {
+            const catPercentage = (stats.yes / stats.total) * 100;
+            categoryAnalysis.push({
+                name: category,
+                percentage: catPercentage,
+                yes: stats.yes,
+                no: stats.no,
+                total: stats.total
+            });
+        }
+    }
+    
+    categoryAnalysis.sort((a, b) => b.percentage - a.percentage);
+    
+    if (categoryAnalysis.length > 0) {
+        bestCategories = categoryAnalysis.slice(0, 2);
+        worstCategories = categoryAnalysis.slice(-2).reverse();
+    }
+    
+    let review = `${performanceEmoji} PENILAIAN KESELURUHAN: ${performanceLevel}\n\n`;
+    
+    review += `Berdasarkan pemeriksaan komprehensif terhadap ${scoreData.totalItems} item, toko menunjukkan `;
+    review += `tingkat kepatuhan ${scoreData.percentage}% dengan score ${scoreData.score}/5.0. `;
+    review += `Dari total pemeriksaan, ${scoreData.yesCount} item memenuhi standar dan ${scoreData.noCount} item memerlukan perbaikan.\n\n`;
+    
+    if (bestCategories.length > 0 && bestCategories[0].percentage >= 70) {
+        review += `✨ ASPEK POSITIF:\n`;
+        bestCategories.forEach(cat => {
+            if (cat.percentage >= 70) {
+                review += `• ${cat.name}: Performa baik (${cat.percentage.toFixed(0)}% - ${cat.yes}/${cat.total} item)\n`;
+            }
+        });
+        review += `\n`;
+    }
+    
+    if (worstCategories.length > 0 && worstCategories[0].percentage < 80) {
+        review += `🔧 AREA YANG PERLU PERBAIKAN:\n`;
+        worstCategories.forEach(cat => {
+            if (cat.percentage < 80) {
+                review += `• ${cat.name}: Perlu perhatian (${cat.percentage.toFixed(0)}% - ${cat.no} item tidak sesuai)\n`;
+            }
+        });
+        review += `\n`;
+    }
+    
+    if (userComment && userComment.trim() !== '') {
+        review += `📝 OBSERVASI AUDITOR:\n`;
+        review += `"${userComment.trim()}"\n\n`;
+    }
+    
+    review += `💡 REKOMENDASI:\n`;
+    
+    if (percentage >= 90) {
+        review += `• Pertahankan standar operasional yang sudah sangat baik\n`;
+        review += `• Jadikan toko ini sebagai benchmark untuk toko lain\n`;
+        review += `• Fokus pada continuous improvement untuk area minor yang masih bisa ditingkatkan\n`;
+    } else if (percentage >= 75) {
+        review += `• Tingkatkan konsistensi pada ${scoreData.noCount} item yang masih kurang\n`;
+        review += `• Lakukan monitoring rutin untuk mempertahankan performa\n`;
+        review += `• Identifikasi root cause dari item yang tidak memenuhi standar\n`;
+    } else if (percentage >= 60) {
+        review += `• Diperlukan action plan segera untuk ${scoreData.noCount} item yang tidak sesuai standar\n`;
+        review += `• Lakukan training atau briefing ulang kepada tim toko\n`;
+        review += `• Follow-up pemeriksaan dalam 2 minggu untuk memastikan perbaikan\n`;
+    } else {
+        review += `• URGENSI TINGGI: Diperlukan intervensi manajemen segera\n`;
+        review += `• Buat action plan detail dengan timeline perbaikan jelas\n`;
+        review += `• Pertimbangkan support tambahan dari tim regional\n`;
+        review += `• Follow-up pemeriksaan dalam 1 minggu\n`;
+    }
+    
+    review += `\n📊 KESIMPULAN:\n`;
+    if (percentage >= 75) {
+        review += `Toko menunjukkan kinerja yang baik secara keseluruhan. Dengan sedikit perbaikan pada area yang masih kurang, toko dapat mencapai standar optimal.`;
+    } else {
+        review += `Toko memerlukan perhatian khusus dan tindakan perbaikan yang terstruktur untuk meningkatkan kepatuhan terhadap standar operasional.`;
+    }
+    
+    return review;
+}
+
+function updateAutoScore() {
+    const scoreData = calculateAutoScore();
+    const scoreInput = document.getElementById('storeRating');
+    const autoScoreDisplay = document.getElementById('autoScoreDisplay');
+    
+    if (scoreData && scoreInput) {
+        scoreInput.value = scoreData.score;
+        
+        let statusColor = '#28a745';
+        if (scoreData.percentage < 60) {
+            statusColor = '#dc3545';
+        } else if (scoreData.percentage < 75) {
+            statusColor = '#ffc107';
+        }
+        
+        if (autoScoreDisplay) {
+            autoScoreDisplay.innerHTML = `
+                <div style="margin-top: 10px; padding: 12px; background: #e8f5e9; border-left: 4px solid ${statusColor}; border-radius: 4px;">
+                    <strong>📊 Statistik Pemeriksaan:</strong><br>
+                    <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+                        <span>✅ Ya: <strong>${scoreData.yesCount}</strong></span>
+                        <span>❌ Tidak: <strong>${scoreData.noCount}</strong></span>
+                        <span>📋 Total: <strong>${scoreData.totalItems}</strong></span>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 16px;">
+                        <strong style="color: ${statusColor};">Tingkat Kepatuhan: ${scoreData.percentage}%</strong>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
+function handleSmartReview() {
+    const commentTextarea = document.getElementById('storeComment');
+    const smartReviewBtn = document.getElementById('aiReviewBtn');
+    
+    if (!commentTextarea || !smartReviewBtn) return;
+    
+    const userComment = commentTextarea.value.trim();
+    const scoreData = calculateAutoScore();
+    
+    if (!scoreData) {
+        alert('⚠️ Belum ada data status yang terisi. Silakan isi status terlebih dahulu.');
+        return;
+    }
+    
+    const originalText = smartReviewBtn.innerHTML;
+    smartReviewBtn.disabled = true;
+    smartReviewBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
+    
+    setTimeout(() => {
+        try {
+            const smartReview = generateSmartReview(userComment, scoreData);
+            commentTextarea.value = smartReview;
+            showNotificationBanner('✅ Review berhasil di-generate!', 'success');
+        } catch (error) {
+            console.error('Error generating smart review:', error);
+            alert('❌ Gagal generate review: ' + error.message);
+        } finally {
+            smartReviewBtn.disabled = false;
+            smartReviewBtn.innerHTML = originalText;
+        }
+    }, 800);
+}
+
+function showNotificationBanner(message, type = 'info') {
+    const banner = document.createElement('div');
+    const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+    
+    banner.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 9999;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    banner.textContent = message;
+    document.body.appendChild(banner);
+    
+    setTimeout(() => {
+        banner.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+    }, 3000);
+}
+
 // ============ DISPLAY FUNCTIONS ============
 function displayData(values, sheetName) {
     if (values.length < 2) {
@@ -463,7 +752,6 @@ function displayData(values, sheetName) {
         return;
     }
 
-    // Get headers from first row
     const headers = values[0] || [];
     
     let html = `
@@ -473,7 +761,6 @@ function displayData(values, sheetName) {
                     <tr>
     `;
 
-    // Display column headers from first row
     headers.forEach((header, idx) => {
         html += `<th>${header || `Kolom ${idx + 1}`}</th>`;
     });
@@ -484,12 +771,10 @@ function displayData(values, sheetName) {
                 <tbody>
     `;
 
-    // Display data rows (starting from row 1)
     for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
         const row = values[rowIdx] || [];
         html += `<tr>`;
         
-        // Check if this is a section header (starts with Roman numerals like I., II., III., etc.)
         const firstCell = (row[0] || '').trim();
         const isSectionHeader = /^[IVX]+\.\s+[A-Z]/.test(firstCell);
         
@@ -497,11 +782,9 @@ function displayData(values, sheetName) {
             const cellValue = row[colIdx] || '';
             const header = headers[colIdx] || '';
             
-            // For section headers, show empty cells (for merged cells)
             if (isSectionHeader && (header.toLowerCase().includes('status') || header.toLowerCase().includes('keterangan'))) {
                 html += `<td style="background: #f8f9fa;"></td>`;
             }
-            // Check if this is a Status column
             else if (header.toLowerCase().includes('status')) {
                 const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
                 
@@ -517,13 +800,11 @@ function displayData(values, sheetName) {
                         </div>
                     </td>`;
                 } else {
-                    // Read-only display for non-admin
                     html += `<td class="status-cell" style="text-align: center; font-weight: 600; color: ${cellValue === 'Ya' ? '#28a745' : cellValue === 'Tidak' ? '#dc3545' : '#6c757d'};">
                         ${cellValue || '-'}
                     </td>`;
                 }
             }
-            // Check if this is a Keterangan column
             else if (header.toLowerCase().includes('keterangan')) {
                 const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
                 
@@ -537,11 +818,9 @@ function displayData(values, sheetName) {
                                placeholder="Masukkan keterangan...">
                     </td>`;
                 } else {
-                    // Read-only display for non-admin
                     html += `<td>${cellValue || '-'}</td>`;
                 }
             }
-            // Check if this is a Foto/Photo column
             else if (header.toLowerCase().includes('foto') || header.toLowerCase().includes('photo') || header.toLowerCase().includes('gambar')) {
                 const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
                 
@@ -556,7 +835,6 @@ function displayData(values, sheetName) {
                             </button>
                         </div>`;
                     
-                    // Show existing images with delete buttons
                     if (cellValue) {
                         const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
                         if (imageUrls.length > 0) {
@@ -586,7 +864,6 @@ function displayData(values, sheetName) {
                     
                     html += `</td>`;
                 } else {
-                    // Read-only display for non-admin
                     html += `<td>`;
                     if (cellValue) {
                         const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
@@ -613,11 +890,9 @@ function displayData(values, sheetName) {
                     html += `</td>`;
                 }
             }
-            // Check if this is the first column (Bagian) - make it bold
             else if (colIdx === 0) {
                 html += `<td class="row-label">${cellValue}</td>`;
             }
-            // Regular data cell
             else {
                 html += `<td>${cellValue}</td>`;
             }
@@ -633,7 +908,15 @@ function displayData(values, sheetName) {
     `;
     
     document.getElementById('content').innerHTML = html;
-    document.getElementById('ratingSection').style.display = 'block';
+    
+    const ratingSection = document.getElementById('ratingSection');
+    if (ratingSection) {
+        ratingSection.style.display = 'block';
+    }
+    
+    setTimeout(() => {
+        updateAutoScore();
+    }, 100);
 }
 
 // ============ EDIT FUNCTIONS ============
@@ -642,18 +925,16 @@ function setStatus(rowIdx, colIdx, status) {
         appState.currentData[rowIdx] = [];
     }
     
-    // If clicking the same button again, unselect it (set to empty)
     const currentValue = appState.currentData[rowIdx][colIdx];
     if (currentValue === status) {
         appState.currentData[rowIdx][colIdx] = '';
-        status = ''; // Set to empty to remove active state
+        status = '';
     } else {
         appState.currentData[rowIdx][colIdx] = status;
     }
     
     markAsChanged();
     
-    // Update button states
     const buttons = document.querySelectorAll(`[data-row="${rowIdx}"][data-col="${colIdx}"]`);
     buttons.forEach(btn => {
         if (btn.classList.contains('status-btn')) {
@@ -687,8 +968,10 @@ async function handleSaveAll() {
     }
 
     const saveBtn = document.getElementById('saveBtn');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span>⏳</span><span>Menyimpan...</span>';
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span>⏳</span><span>Menyimpan...</span>';
+    }
 
     try {
         await gapi.client.sheets.spreadsheets.values.update({
@@ -701,22 +984,32 @@ async function handleSaveAll() {
         });
 
         appState.hasChanges = false;
-        saveBtn.innerHTML = '<span>✓</span><span>Tersimpan</span>';
         
-        setTimeout(() => {
-            saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
-            saveBtn.disabled = false;
-        }, 2000);
+        if (saveBtn) {
+            saveBtn.innerHTML = '<span>✓</span><span>Tersimpan</span>';
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
+                saveBtn.disabled = false;
+            }, 2000);
+        }
 
         delete appState.cache[appState.currentSheet];
         await loadSheetData(appState.currentSheet, true);
         
         alert('✅ Semua perubahan berhasil disimpan!');
+        
+        setTimeout(() => {
+            updateAutoScore();
+        }, 500);
+        
     } catch (error) {
         console.error('Error saving data:', error);
         alert('❌ Gagal menyimpan data: ' + error.message);
-        saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
-        saveBtn.disabled = false;
+        if (saveBtn) {
+            saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
+            saveBtn.disabled = false;
+        }
     }
 }
 
@@ -727,7 +1020,6 @@ async function addColumn(rowData) {
     }
 
     try {
-        // Add new row to the data
         appState.currentData.push(rowData);
 
         await gapi.client.sheets.spreadsheets.values.update({
@@ -799,8 +1091,6 @@ async function deleteColumn(colIdx) {
 }
 
 // ============ IMAGE UPLOAD FUNCTIONS ============
-
-// Get folder ID for current store
 function getCurrentStoreFolderId() {
     if (!appState.currentSheet) {
         throw new Error('No store sheet selected');
@@ -814,7 +1104,6 @@ function getCurrentStoreFolderId() {
     return folderId;
 }
 
-// Handle multiple image uploads
 async function uploadMultipleImages(files, rowIdx, colIdx) {
     const totalFiles = files.length;
     const uploadedLinks = [];
@@ -826,7 +1115,6 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             
-            // Update button text
             if (uploadBtn) {
                 uploadBtn.disabled = true;
                 uploadBtn.innerHTML = `⏳ Uploading ${i + 1}/${totalFiles}...`;
@@ -842,7 +1130,6 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
         }
         
         if (uploadedLinks.length > 0) {
-            // Update spreadsheet with all image links
             if (!appState.currentData[rowIdx]) {
                 appState.currentData[rowIdx] = [];
             }
@@ -852,7 +1139,6 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
             const allLinks = [...existingLinks, ...uploadedLinks];
             appState.currentData[rowIdx][colIdx] = allLinks.join(', ');
             
-            // AUTO-SAVE
             if (uploadBtn) {
                 uploadBtn.innerHTML = '💾 Menyimpan...';
             }
@@ -877,7 +1163,6 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
         console.error('Error in batch upload:', error);
         alert('❌ Error saat upload: ' + error.message);
     } finally {
-        // Restore buttons
         if (uploadBtn) {
             uploadBtn.disabled = false;
             uploadBtn.innerHTML = '🖼️ Upload Foto';
@@ -888,10 +1173,6 @@ async function uploadMultipleImages(files, rowIdx, colIdx) {
     }
 }
 
-// Upload single image to Google Drive (used by uploadMultipleImages)
-// ============ IMAGE UPLOAD FUNCTIONS (CORRECTED) ============
-
-// Upload single image to Google Drive (used by uploadMultipleImages)
 async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, totalFiles) {
     const folderId = getCurrentStoreFolderId();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -930,7 +1211,6 @@ async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, tota
     return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
 }
 
-// Delete image from Drive and update spreadsheet
 async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu!');
@@ -941,13 +1221,14 @@ async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
         return;
     }
 
+    const deleteBtn = event ? event.target : null;
+    
     try {
-        // Show deleting indicator
-        const deleteBtn = event.target;
-        deleteBtn.disabled = true;
-        deleteBtn.innerHTML = '⏳';
+        if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '⏳';
+        }
 
-        // Delete file from Google Drive
         try {
             await gapi.client.drive.files.delete({
                 fileId: fileId
@@ -957,7 +1238,6 @@ async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
             console.warn('Could not delete file from Drive (might already be deleted):', driveError);
         }
 
-        // Update spreadsheet - remove the image URL
         if (!appState.currentData[rowIdx]) {
             appState.currentData[rowIdx] = [];
         }
@@ -965,13 +1245,10 @@ async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
         const existingValue = appState.currentData[rowIdx][colIdx] || '';
         const existingLinks = existingValue.split(',').map(s => s.trim()).filter(s => s);
         
-        // Remove the specific image URL
         existingLinks.splice(imgIdx, 1);
         
-        // Update the cell value
         appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
         
-        // AUTO-SAVE: Save immediately to the sheet
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: CONFIG.SPREADSHEET_ID,
             range: `${appState.currentSheet}!A1`,
@@ -991,14 +1268,13 @@ async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
         console.error('Error deleting image:', error);
         alert('❌ Gagal menghapus foto: ' + error.message);
         
-        if (typeof deleteBtn !== 'undefined') {
+        if (deleteBtn) {
             deleteBtn.disabled = false;
             deleteBtn.innerHTML = '✕';
         }
     }
 }
 
-// Open camera for taking photo
 function openCamera(rowIdx, colIdx) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu untuk ambil foto!');
@@ -1038,7 +1314,6 @@ function openCamera(rowIdx, colIdx) {
     input.click();
 }
 
-// Open file picker for image upload
 function openImageUpload(rowIdx, colIdx) {
     if (!accessToken) {
         alert('❌ Harap authenticate terlebih dahulu untuk upload foto!');
@@ -1079,23 +1354,16 @@ function openImageUpload(rowIdx, colIdx) {
     input.click();
 }
 
-// ============================================================
-// PRINT REPORT FUNCTION - COMPLETE FIX
-// Copy paste kedua fungsi ini ke checklistbulanan.js
-// Ganti SELURUH fungsi generatePrintReport() dan generateSectionTable() yang lama
-// ============================================================
-
+// ============ PRINT REPORT FUNCTIONS ============
 function generatePrintReport() {
     if (!appState.currentSheet || !appState.currentData || appState.currentData.length < 2) {
         alert('⚠️ Tidak ada data untuk dicetak!');
         return;
     }
 
-    // Get rating and comment from form
-    const storeRating = document.getElementById('storeRating').value || '';
-    const storeComment = document.getElementById('storeComment').value || '';
+    const storeRating = document.getElementById('storeRating') ? document.getElementById('storeRating').value : '';
+    const storeComment = document.getElementById('storeComment') ? document.getElementById('storeComment').value : '';
 
-    // Get store name and current date
     const storeName = appState.currentSheet;
     const currentDate = new Date().toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -1103,11 +1371,9 @@ function generatePrintReport() {
         year: 'numeric'
     });
 
-    // Prepare data
     const headers = appState.currentData[0];
     const dataRows = appState.currentData.slice(1);
 
-    // Build print HTML
     let printHTML = `
 <!DOCTYPE html>
 <html lang="id">
@@ -1337,7 +1603,6 @@ function generatePrintReport() {
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header-section">
         <h1>LAPORAN CHECKLIST PEMERIKSAAN TOKO</h1>
         <div class="store-name">Kode Toko – Nama Toko: ${storeName}</div>
@@ -1345,7 +1610,6 @@ function generatePrintReport() {
     </div>
 `;
 
-    // Group data by sections (Area I, Area II, etc.)
     let currentSection = '';
     let sectionData = [];
     
@@ -1368,7 +1632,6 @@ function generatePrintReport() {
         printHTML += generateSectionTable(currentSection, sectionData, headers);
     }
 
-    // Footer with scoring section (pre-filled from form)
     printHTML += `
     <div class="footer-section">
         <div class="scoring-section">
@@ -1406,22 +1669,20 @@ function generatePrintReport() {
 </html>
 `;
 
-    // Open print preview
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(printHTML);
-    printWindow.document.close();
-    
-    printWindow.onload = function() {
-        setTimeout(() => {
-            printWindow.print();
-        }, 500);
-    };
+    if (printWindow) {
+        printWindow.document.write(printHTML);
+        printWindow.document.close();
+        
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        };
+    } else {
+        alert('❌ Tidak dapat membuka window print. Pastikan popup tidak diblokir.');
+    }
 }
-
-// ============================================================
-// END OF UPDATES
-// ============================================================
-
 
 function generateSectionTable(sectionTitle, rows, headers) {
     let html = `
@@ -1444,7 +1705,6 @@ function generateSectionTable(sectionTitle, rows, headers) {
         const notes = row[3] || '-';
         const photos = row[4] || '';
         
-        // CRITICAL FIX: Show actual user selection (Ya/Tidak)
         let statusText = '-';
         let statusClass = '';
         
@@ -1457,11 +1717,10 @@ function generateSectionTable(sectionTitle, rows, headers) {
                 statusText = 'Tidak';
                 statusClass = 'status-kurang';
             } else {
-                statusText = status; // Show original if not Ya/Tidak
+                statusText = status;
             }
         }
         
-        // CRITICAL FIX: Display actual images
         let photoHTML = '';
         if (photos && photos.trim() !== '') {
             const imageUrls = photos.split(',').map(url => url.trim()).filter(url => url);
@@ -1469,11 +1728,9 @@ function generateSectionTable(sectionTitle, rows, headers) {
             if (imageUrls.length > 0) {
                 photoHTML = '<div class="photo-container">';
                 imageUrls.forEach(url => {
-                    // Extract file ID from Google Drive URL
                     const fileIdMatch = url.match(/[-\w]{25,}/);
                     if (fileIdMatch) {
                         const fileId = fileIdMatch[0];
-                        // Use Google Drive thumbnail API
                         photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
                     }
                 });
@@ -1503,13 +1760,11 @@ function generateSectionTable(sectionTitle, rows, headers) {
     return html;
 }
 
-// ============================================================
-// END OF PRINT REPORT FUNCTIONS
-// ============================================================
-
-// ============ EVENT HANDLERS (CORRECTED) ============
+// ============ EVENT HANDLERS ============
 function handleSheetChange() {
     const sheetSelect = document.getElementById('sheetSelect');
+    if (!sheetSelect) return;
+    
     const selectedSheet = sheetSelect.value;
     if (selectedSheet) {
         loadSheetData(selectedSheet);
@@ -1520,6 +1775,8 @@ function handleSheetChange() {
 
 function handleRefresh() {
     const sheetSelect = document.getElementById('sheetSelect');
+    if (!sheetSelect) return;
+    
     const selectedSheet = sheetSelect.value;
     if (!selectedSheet) {
         alert('Pilih sheet terlebih dahulu');
@@ -1545,10 +1802,21 @@ function handleDeleteColumn(colIdx) {
 
 async function handleFormSubmit(event) {
     event.preventDefault();
-    const area = document.getElementById('area').value;
-    const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
-    const status = document.getElementById('status').value;
-    const keterangan = document.getElementById('keterangan').value;
+    
+    const areaInput = document.getElementById('area');
+    const itemInput = document.getElementById('itemPemeriksaan');
+    const statusInput = document.getElementById('status');
+    const keteranganInput = document.getElementById('keterangan');
+    
+    if (!areaInput || !itemInput || !statusInput || !keteranganInput) {
+        alert('❌ Form elements tidak ditemukan!');
+        return;
+    }
+    
+    const area = areaInput.value;
+    const itemPemeriksaan = itemInput.value;
+    const status = statusInput.value;
+    const keterangan = keteranganInput.value;
 
     const rowData = [
         area,
@@ -1559,6 +1827,13 @@ async function handleFormSubmit(event) {
 
     await addColumn(rowData);
     closeModal();
+}
+
+function closeModal() {
+    const modal = document.getElementById('dataModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // ============ INITIALIZATION ============
@@ -1576,7 +1851,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.onclick = function(event) {
     const modal = document.getElementById('dataModal');
-    if (event.target === modal) {
+    if (modal && event.target === modal) {
         closeModal();
     }
 };
