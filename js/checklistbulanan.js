@@ -1,0 +1,1152 @@
+// ============ AUTH SYSTEM ============
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function getAuthData() {
+    try {
+        const authString = getCookie('userAuth');
+        if (!authString) return null;
+        return JSON.parse(atob(authString));
+    } catch (e) {
+        console.error('Auth parse error:', e);
+        return null;
+    }
+}
+
+function checkAuth() {
+    const authData = getAuthData();
+    if (!authData) {
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        return false;
+    }
+
+    if (authData.expiresAt && new Date() > new Date(authData.expiresAt)) {
+        deleteCookie('userAuth');
+        window.location.href = 'login.html?message=' + encodeURIComponent('Session expired');
+        return false;
+    }
+
+    updateUIBasedOnRole(authData.role);
+    return authData;
+}
+
+// ============ AUTO-LOGOUT INACTIVITY TIMER ============
+let inactivityTimer;
+let warningTimer;
+let countdownInterval;
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+const WARNING_TIME = 60 * 1000; // Show warning 60 seconds before logout
+
+function startInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    clearTimeout(warningTimer);
+    clearInterval(countdownInterval);
+    
+    // Hide warning if shown
+    document.getElementById('logoutWarning').classList.remove('show');
+    
+    // Set warning timer (4 minutes)
+    warningTimer = setTimeout(() => {
+        showLogoutWarning();
+    }, INACTIVITY_LIMIT - WARNING_TIME);
+    
+    // Set logout timer (5 minutes)
+    inactivityTimer = setTimeout(() => {
+        logout('Anda telah logout otomatis karena tidak ada aktivitas selama 5 menit');
+    }, INACTIVITY_LIMIT);
+}
+
+function showLogoutWarning() {
+    document.getElementById('logoutWarning').classList.add('show');
+    let countdown = 60;
+    document.getElementById('warningCountdown').textContent = countdown;
+    
+    countdownInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('warningCountdown').textContent = countdown;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+function resetInactivityTimer() {
+    startInactivityTimer();
+}
+
+// Listen for user activity
+const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+activityEvents.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+});
+
+// Start timer when page loads
+window.addEventListener('DOMContentLoaded', () => {
+    startInactivityTimer();
+});
+
+function updateUIBasedOnRole(role) {
+    const authBtn = document.getElementById('authBtn');
+    const isAdmin = role && role.toLowerCase() === 'admin';
+    
+    if (authBtn) {
+        authBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+}
+
+function logout(message = null) {
+    if (!message && !confirm('Yakin ingin logout?')) return;
+    
+    accessToken = null;
+    clearStoredToken();
+    if (typeof gapi !== 'undefined' && gapi.client) {
+        gapi.client.setToken(null);
+    }
+    updateAuthButton(false);
+    
+    deleteCookie('userAuth');
+    window.location.href = 'login.html' + (message ? '?message=' + encodeURIComponent(message) : '');
+}
+
+let currentUserRole = null;
+
+if (checkAuth()) {
+    const authData = getAuthData();
+    if (authData?.username) {
+        document.getElementById('displayUsername').textContent = authData.username;
+    }
+    if (authData?.role) {
+        currentUserRole = authData.role;
+        updateUIBasedOnRole(authData.role);
+    }
+}
+
+// ============ CONFIG ============
+const CONFIG = {
+    CLIENT_ID: '874016971039-g91m2mt64mid7sh9vkk14vpjmpbc095o.apps.googleusercontent.com',
+    API_KEY: 'AIzaSyCMpk-2HdASd6oX-MBRqehgXX-kTfzpFw0',
+    SPREADSHEET_ID: '1kOKzSSAYlXG33LokTmwRLpzFG-wYlAWUDCjEYvzKKNA',
+    SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive',
+    CACHE_DURATION: 5 * 60 * 1000,
+    // Store folder mapping - you'll need to create these folders and get their IDs
+    STORE_FOLDERS: {
+        'F4SD - Indomaret SPBU Teras Ayung': '1l-jJd8dNJVYhwUXaxWBmzKKbWX3Xa2Yl',
+        'FKOM - Indomaret Wanagiri': '18AafBvDTFXXEXDKJQ8ZYfuX2tbCs9huV',
+        'FHEN - Indomaret SPBU Cempaga': '1K_F60Geylo2kqK3NCNiiVGBN981pBH2K',
+        'FEHU - Indomaret SPBU Latusari 2 Mambal': '17FWdHTTkFmmmfWaG6xoKeAQnPwRbGvmp',
+        'FIVI - Indomaret Toko Anugrah Ketapang': '1HGEqDAeKLUzIEpLbP1t5Op_UcfCPCU1R',
+        'FZ7Y - Indomaret Pemuda 28 Mataram': '1VQsrHH9WeBVbTUj9f9OKcuBcKWQLMUAh',
+        '1SFY - Alfamart SPBU Mantang': '1CtVrHqICW2EeIGtbEtPmqCnpF7618FW9',
+        'Q789- Alfamart SPBU Dewi Anom Rendang': '1x2__YhRwjPXbEHaAPOrVO0lLUCxkVUEH'
+    }
+};
+
+// ============ OAUTH STATE ============
+let tokenClient;
+let accessToken = null;
+let gapiInited = false;
+let gisInited = false;
+
+// ============ STATE MANAGEMENT ============
+let appState = {
+    sheets: [],
+    currentSheet: null,
+    cache: {},
+    lastUpdate: null,
+    currentData: [],
+    hasChanges: false
+};
+
+// ============ OAUTH INITIALIZATION ============
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
+
+async function initializeGapiClient() {
+    try {
+        await gapi.client.init({
+            apiKey: CONFIG.API_KEY,
+            discoveryDocs: [
+                'https://sheets.googleapis.com/$discovery/rest?version=v4',
+                'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+            ]
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+        console.log('GAPI client initialized with Drive support');
+    } catch (error) {
+        console.error('Error initializing GAPI client:', error);
+    }
+}
+
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.CLIENT_ID,
+        scope: CONFIG.SCOPES,
+        prompt: '',
+        callback: ''
+    });
+    gisInited = true;
+    maybeEnableButtons();
+    console.log('GIS initialized');
+}
+
+function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+        if (restoreStoredToken()) {
+            console.log('Restored OAuth token from storage');
+        }
+        loadSheetsList();
+    }
+}
+
+// ============ TOKEN STORAGE ============
+function storeOAuthToken(token, expiresIn = 3600) {
+    try {
+        const expiryTime = Date.now() + (expiresIn * 1000);
+        localStorage.setItem('oauth_token', token);
+        localStorage.setItem('oauth_expiry', expiryTime.toString());
+        console.log('OAuth token stored');
+    } catch (e) {
+        console.warn('Could not store OAuth token:', e);
+    }
+}
+
+function restoreStoredToken() {
+    try {
+        const storedToken = localStorage.getItem('oauth_token');
+        const expiry = localStorage.getItem('oauth_expiry');
+        
+        if (!storedToken || !expiry) {
+            return false;
+        }
+        
+        const expiryTime = parseInt(expiry);
+        const now = Date.now();
+        
+        if (now < expiryTime - 300000) {
+            accessToken = storedToken;
+            gapi.client.setToken({ access_token: storedToken });
+            updateAuthButton(true);
+            console.log('Using stored OAuth token');
+            return true;
+        } else {
+            clearStoredToken();
+            console.log('Stored token expired');
+            return false;
+        }
+    } catch (e) {
+        console.warn('Error restoring token:', e);
+        return false;
+    }
+}
+
+function clearStoredToken() {
+    try {
+        localStorage.removeItem('oauth_token');
+        localStorage.removeItem('oauth_expiry');
+    } catch (e) {
+        console.warn('Error clearing token:', e);
+    }
+}
+
+function handleAuth() {
+    if (accessToken) {
+        // Clear and re-authenticate
+        accessToken = null;
+        clearStoredToken();
+        gapi.client.setToken(null);
+        updateAuthButton(false);
+    }
+
+    tokenClient.callback = async (response) => {
+        if (response.error !== undefined) {
+            console.error('Auth error:', response);
+            alert('Gagal authenticate: ' + response.error);
+            clearStoredToken();
+            return;
+        }
+        
+        accessToken = response.access_token;
+        const expiresIn = response.expires_in || 3600;
+        storeOAuthToken(accessToken, expiresIn);
+        gapi.client.setToken({ access_token: accessToken });
+        
+        updateAuthButton(true);
+        if (appState.currentSheet) {
+            loadSheetData(appState.currentSheet, true);
+        }
+        alert('✅ Berhasil authenticate dengan akses Drive!');
+    };
+
+    // IMPORTANT: Always request consent to ensure we get all scopes
+    tokenClient.requestAccessToken({prompt: 'consent'});
+}
+
+function updateAuthButton(isAuthenticated) {
+    const authBtn = document.getElementById('authBtn');
+    const authBtnText = document.getElementById('authBtnText');
+    const addBtn = document.getElementById('addBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    
+    if (isAuthenticated) {
+        authBtn.classList.add('authenticated');
+        authBtnText.textContent = '✓ Terotentikasi';
+        if (saveBtn) saveBtn.style.display = 'inline-flex';
+    } else {
+        authBtn.classList.remove('authenticated');
+        authBtnText.textContent = 'Authenticate';
+        if (saveBtn) saveBtn.style.display = 'none';
+    }
+}
+
+// ============ UTILITY FUNCTIONS ============
+function showLoading(message = 'Memuat data...') {
+    document.getElementById('content').innerHTML = `
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">${message}</div>
+        </div>
+    `;
+}
+
+function showError(title, message) {
+    document.getElementById('content').innerHTML = `
+        <div class="error">
+            <strong>❌ ${title}</strong>
+            ${message}
+        </div>
+    `;
+}
+
+function showEmptyState() {
+    document.getElementById('content').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h2>Pilih Toko untuk Melihat Data</h2>
+            <p>Gunakan dropdown di atas untuk memilih toko yang ingin ditampilkan</p>
+        </div>
+    `;
+}
+
+function markAsChanged() {
+    appState.hasChanges = true;
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn && accessToken) {
+        saveBtn.style.display = 'inline-flex';
+        saveBtn.disabled = false;
+    }
+}
+
+// ============ CACHE MANAGEMENT ============
+function getCachedData(sheetName) {
+    const cached = appState.cache[sheetName];
+    if (!cached) return null;
+    
+    const now = Date.now();
+    if (now - cached.timestamp > CONFIG.CACHE_DURATION) {
+        delete appState.cache[sheetName];
+        return null;
+    }
+    
+    return cached.data;
+}
+
+function setCachedData(sheetName, data) {
+    appState.cache[sheetName] = {
+        data: data,
+        timestamp: Date.now()
+    };
+}
+
+// ============ API FUNCTIONS ============
+async function loadSheetsList() {
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}?key=${CONFIG.API_KEY}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+        
+        appState.sheets = data.sheets.map(sheet => sheet.properties.title);
+        
+        const sheetSelect = document.getElementById('sheetSelect');
+        sheetSelect.innerHTML = '<option value="">Pilih Toko...</option>' + 
+            appState.sheets.map(name => 
+                `<option value="${name}">${name}</option>`
+            ).join('');
+        
+        showEmptyState();
+        
+    } catch (error) {
+        console.error('Error loading sheets:', error);
+        showError('Gagal Memuat Daftar Toko', `
+            ${error.message}
+            <br><br>
+            <strong>Pastikan:</strong>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+                <li>Database ID benar</li>
+                <li>API Key valid</li>
+                <li>Google API sudah enabled</li>
+            </ul>
+        `);
+    }
+}
+
+async function loadSheetData(sheetName, forceRefresh = false) {
+    if (!sheetName) {
+        showEmptyState();
+        return;
+    }
+
+    if (!forceRefresh) {
+        const cached = getCachedData(sheetName);
+        if (cached) {
+            console.log('Using cached data for:', sheetName);
+            displayData(cached, sheetName);
+            return;
+        }
+    }
+    
+    showLoading(`Memuat data: ${sheetName}`);
+    appState.currentSheet = sheetName;
+    
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${CONFIG.API_KEY}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+        
+        if (!data.values || data.values.length === 0) {
+            showError('Data Kosong', `Tidak ada data di sheet "${sheetName}"`);
+            return;
+        }
+        
+        setCachedData(sheetName, data.values);
+        appState.lastUpdate = new Date();
+        appState.currentData = data.values;
+        appState.hasChanges = false;
+        
+        displayData(data.values, sheetName);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showError('Gagal Memuat Data', `
+            ${error.message}
+            <br><br>
+            <strong>Sheet:</strong> "${sheetName}"
+        `);
+    }
+}
+
+// ============ DISPLAY FUNCTIONS ============
+function displayData(values, sheetName) {
+    if (values.length < 2) {
+        showError('Format Data Salah', 'Sheet harus memiliki minimal 2 baris (header dan data)');
+        return;
+    }
+
+    // Get headers from first row
+    const headers = values[0] || [];
+    
+    let html = `
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+    `;
+
+    // Display column headers from first row
+    headers.forEach((header, idx) => {
+        html += `<th>${header || `Kolom ${idx + 1}`}</th>`;
+    });
+    
+    html += `
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Display data rows (starting from row 1)
+    for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
+        const row = values[rowIdx] || [];
+        html += `<tr>`;
+        
+        // Check if this is a section header (starts with Roman numerals like I., II., III., etc.)
+        const firstCell = (row[0] || '').trim();
+        const isSectionHeader = /^[IVX]+\.\s+[A-Z]/.test(firstCell);
+        
+        for (let colIdx = 0; colIdx < headers.length; colIdx++) {
+            const cellValue = row[colIdx] || '';
+            const header = headers[colIdx] || '';
+            
+            // For section headers, show empty cells (for merged cells)
+            if (isSectionHeader && (header.toLowerCase().includes('status') || header.toLowerCase().includes('keterangan'))) {
+                html += `<td style="background: #f8f9fa;"></td>`;
+            }
+            // Check if this is a Status column
+            else if (header.toLowerCase().includes('status')) {
+                const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+                
+                if (isAdmin) {
+                    html += `<td class="editable status-cell">
+                        <div class="status-buttons">
+                            <button class="status-btn ya ${cellValue === 'Ya' ? 'active' : ''}" 
+                                    onclick="setStatus(${rowIdx}, ${colIdx}, 'Ya')" 
+                                    data-row="${rowIdx}" data-col="${colIdx}">Ya</button>
+                            <button class="status-btn tidak ${cellValue === 'Tidak' ? 'active' : ''}" 
+                                    onclick="setStatus(${rowIdx}, ${colIdx}, 'Tidak')" 
+                                    data-row="${rowIdx}" data-col="${colIdx}">Tidak</button>
+                        </div>
+                    </td>`;
+                } else {
+                    // Read-only display for non-admin
+                    html += `<td class="status-cell" style="text-align: center; font-weight: 600; color: ${cellValue === 'Ya' ? '#28a745' : cellValue === 'Tidak' ? '#dc3545' : '#6c757d'};">
+                        ${cellValue || '-'}
+                    </td>`;
+                }
+            }
+            // Check if this is a Keterangan column
+            else if (header.toLowerCase().includes('keterangan')) {
+                const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+                
+                if (isAdmin) {
+                    html += `<td class="editable">
+                        <input type="text" 
+                               class="keterangan-input" 
+                               value="${cellValue}" 
+                               data-row="${rowIdx}" data-col="${colIdx}"
+                               onchange="updateKeterangan(${rowIdx}, ${colIdx}, this.value)"
+                               placeholder="Masukkan keterangan...">
+                    </td>`;
+                } else {
+                    // Read-only display for non-admin
+                    html += `<td>${cellValue || '-'}</td>`;
+                }
+            }
+            // Check if this is a Foto/Photo column
+            else if (header.toLowerCase().includes('foto') || header.toLowerCase().includes('photo') || header.toLowerCase().includes('gambar')) {
+                const isAdmin = currentUserRole && currentUserRole.toLowerCase() === 'admin';
+                
+                if (isAdmin) {
+                    html += `<td class="editable">
+                        <div class="upload-buttons-group">
+                            <button class="camera-btn" onclick="openCamera(${rowIdx}, ${colIdx})">
+                                📷 Ambil Foto
+                            </button>
+                            <button class="upload-btn" onclick="openImageUpload(${rowIdx}, ${colIdx})">
+                                🖼️ Upload Foto
+                            </button>
+                        </div>`;
+                    
+                    // Show existing images with delete buttons
+                    if (cellValue) {
+                        const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
+                        if (imageUrls.length > 0) {
+                            html += `<div class="image-preview-container">`;
+                            imageUrls.forEach((url, imgIdx) => {
+                                const fileId = url.match(/[-\w]{25,}/);
+                                if (fileId) {
+                                    html += `
+                                        <div style="position: relative; display: inline-block;">
+                                            <a href="${url}" target="_blank">
+                                                <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
+                                                     class="image-preview" 
+                                                     alt="Foto"
+                                                     onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                                            </a>
+                                            <button class="delete-image-btn" 
+                                                    onclick="event.preventDefault(); deleteImage(${rowIdx}, ${colIdx}, ${imgIdx}, '${fileId[0]}');"
+                                                    title="Hapus foto">
+                                                ✕
+                                            </button>
+                                        </div>`;
+                                }
+                            });
+                            html += `</div>`;
+                        }
+                    }
+                    
+                    html += `</td>`;
+                } else {
+                    // Read-only display for non-admin
+                    html += `<td>`;
+                    if (cellValue) {
+                        const imageUrls = cellValue.split(',').map(url => url.trim()).filter(url => url);
+                        if (imageUrls.length > 0) {
+                            html += `<div class="image-preview-container">`;
+                            imageUrls.forEach(url => {
+                                const fileId = url.match(/[-\w]{25,}/);
+                                if (fileId) {
+                                    html += `<a href="${url}" target="_blank">
+                                        <img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" 
+                                             class="image-preview" 
+                                             alt="Foto"
+                                             onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+                                    </a>`;
+                                }
+                            });
+                            html += `</div>`;
+                        } else {
+                            html += '-';
+                        }
+                    } else {
+                        html += '-';
+                    }
+                    html += `</td>`;
+                }
+            }
+            // Check if this is the first column (Bagian) - make it bold
+            else if (colIdx === 0) {
+                html += `<td class="row-label">${cellValue}</td>`;
+            }
+            // Regular data cell
+            else {
+                html += `<td>${cellValue}</td>`;
+            }
+        }
+        
+        html += `</tr>`;
+    }
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('content').innerHTML = html;
+}
+
+// ============ EDIT FUNCTIONS ============
+function setStatus(rowIdx, colIdx, status) {
+    if (!appState.currentData[rowIdx]) {
+        appState.currentData[rowIdx] = [];
+    }
+    
+    // If clicking the same button again, unselect it (set to empty)
+    const currentValue = appState.currentData[rowIdx][colIdx];
+    if (currentValue === status) {
+        appState.currentData[rowIdx][colIdx] = '';
+        status = ''; // Set to empty to remove active state
+    } else {
+        appState.currentData[rowIdx][colIdx] = status;
+    }
+    
+    markAsChanged();
+    
+    // Update button states
+    const buttons = document.querySelectorAll(`[data-row="${rowIdx}"][data-col="${colIdx}"]`);
+    buttons.forEach(btn => {
+        if (btn.classList.contains('status-btn')) {
+            btn.classList.remove('active');
+            if (status !== '' && ((status === 'Ya' && btn.classList.contains('ya')) || 
+                (status === 'Tidak' && btn.classList.contains('tidak')))) {
+                btn.classList.add('active');
+            }
+        }
+    });
+}
+
+function updateKeterangan(rowIdx, colIdx, value) {
+    if (!appState.currentData[rowIdx]) {
+        appState.currentData[rowIdx] = [];
+    }
+    appState.currentData[rowIdx][colIdx] = value;
+    markAsChanged();
+}
+
+// ============ CRUD FUNCTIONS ============
+async function handleSaveAll() {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
+
+    if (!appState.hasChanges) {
+        alert('Tidak ada perubahan untuk disimpan.');
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span>⏳</span><span>Menyimpan...</span>';
+
+    try {
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${appState.currentSheet}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: appState.currentData
+            }
+        });
+
+        appState.hasChanges = false;
+        saveBtn.innerHTML = '<span>✓</span><span>Tersimpan</span>';
+        
+        setTimeout(() => {
+            saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
+            saveBtn.disabled = false;
+        }, 2000);
+
+        delete appState.cache[appState.currentSheet];
+        await loadSheetData(appState.currentSheet, true);
+        
+        alert('✅ Semua perubahan berhasil disimpan!');
+    } catch (error) {
+        console.error('Error saving data:', error);
+        alert('❌ Gagal menyimpan data: ' + error.message);
+        saveBtn.innerHTML = '<span>💾</span><span>Simpan Semua</span>';
+        saveBtn.disabled = false;
+    }
+}
+
+async function addColumn(rowData) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
+
+    try {
+        // Add new row to the data
+        appState.currentData.push(rowData);
+
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${appState.currentSheet}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: appState.currentData
+            }
+        });
+
+        delete appState.cache[appState.currentSheet];
+        await loadSheetData(appState.currentSheet, true);
+        
+        alert('✅ Baris baru berhasil ditambahkan!');
+    } catch (error) {
+        console.error('Error adding row:', error);
+        alert('❌ Gagal menambahkan baris: ' + error.message);
+        throw error;
+    }
+}
+
+async function deleteColumn(colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
+
+    try {
+        const spreadsheet = await gapi.client.sheets.spreadsheets.get({
+            spreadsheetId: CONFIG.SPREADSHEET_ID
+        });
+        
+        const sheet = spreadsheet.result.sheets.find(
+            s => s.properties.title === appState.currentSheet
+        );
+        
+        if (!sheet) {
+            throw new Error('Sheet not found');
+        }
+        
+        const sheetId = sheet.properties.sheetId;
+        
+        await gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            resource: {
+                requests: [{
+                    deleteDimension: {
+                        range: {
+                            sheetId: sheetId,
+                            dimension: 'COLUMNS',
+                            startIndex: colIdx,
+                            endIndex: colIdx + 1
+                        }
+                    }
+                }]
+            }
+        });
+
+        delete appState.cache[appState.currentSheet];
+        await loadSheetData(appState.currentSheet, true);
+        
+        alert('✅ Kolom berhasil dihapus!');
+    } catch (error) {
+        console.error('Error deleting column:', error);
+        alert('❌ Gagal menghapus kolom: ' + error.message);
+        throw error;
+    }
+}
+
+// ============ IMAGE UPLOAD FUNCTIONS ============
+
+// Get folder ID for current store
+function getCurrentStoreFolderId() {
+    if (!appState.currentSheet) {
+        throw new Error('No store sheet selected');
+    }
+    
+    const folderId = CONFIG.STORE_FOLDERS[appState.currentSheet];
+    if (!folderId || folderId.startsWith('FOLDER_ID_')) {
+        throw new Error(`Folder belum dikonfigurasi untuk toko: ${appState.currentSheet}`);
+    }
+    
+    return folderId;
+}
+
+// Handle multiple image uploads
+async function uploadMultipleImages(files, rowIdx, colIdx) {
+    const totalFiles = files.length;
+    const uploadedLinks = [];
+    
+    const uploadBtn = document.querySelector(`button[onclick="openImageUpload(${rowIdx}, ${colIdx})"]`);
+    const cameraBtn = document.querySelector(`button[onclick="openCamera(${rowIdx}, ${colIdx})"]`);
+    
+    try {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Update button text
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = `⏳ Uploading ${i + 1}/${totalFiles}...`;
+            }
+            if (cameraBtn) {
+                cameraBtn.disabled = true;
+            }
+            
+            const link = await uploadSingleImageToDrive(file, rowIdx, colIdx, i, totalFiles);
+            if (link) {
+                uploadedLinks.push(link);
+            }
+        }
+        
+        if (uploadedLinks.length > 0) {
+            // Update spreadsheet with all image links
+            if (!appState.currentData[rowIdx]) {
+                appState.currentData[rowIdx] = [];
+            }
+            
+            const existingValue = appState.currentData[rowIdx][colIdx] || '';
+            const existingLinks = existingValue ? existingValue.split(',').map(s => s.trim()).filter(s => s) : [];
+            const allLinks = [...existingLinks, ...uploadedLinks];
+            appState.currentData[rowIdx][colIdx] = allLinks.join(', ');
+            
+            // AUTO-SAVE
+            if (uploadBtn) {
+                uploadBtn.innerHTML = '💾 Menyimpan...';
+            }
+            
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                range: `${appState.currentSheet}!A1`,
+                valueInputOption: 'USER_ENTERED',
+                resource: {
+                    values: appState.currentData
+                }
+            });
+
+            appState.hasChanges = false;
+            delete appState.cache[appState.currentSheet];
+            
+            alert(`✅ ${uploadedLinks.length} foto berhasil diupload dan disimpan!`);
+            await loadSheetData(appState.currentSheet, true);
+        }
+        
+    } catch (error) {
+        console.error('Error in batch upload:', error);
+        alert('❌ Error saat upload: ' + error.message);
+    } finally {
+        // Restore buttons
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '🖼️ Upload Foto';
+        }
+        if (cameraBtn) {
+            cameraBtn.disabled = false;
+        }
+    }
+}
+
+// Upload single image to Google Drive (used by uploadMultipleImages)
+// ============ IMAGE UPLOAD FUNCTIONS (CORRECTED) ============
+
+// Upload single image to Google Drive (used by uploadMultipleImages)
+async function uploadSingleImageToDrive(file, rowIdx, colIdx, currentIndex, totalFiles) {
+    const folderId = getCurrentStoreFolderId();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const storeName = appState.currentSheet.split(' - ')[0];
+    const metadata = {
+        name: `${storeName}_row${rowIdx}_${timestamp}_${currentIndex}.${file.name.split('.').pop()}`,
+        parents: [folderId]
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        },
+        body: form
+    });
+
+    const result = await response.json();
+
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    await gapi.client.drive.permissions.create({
+        fileId: result.id,
+        resource: {
+            type: 'anyone',
+            role: 'reader'
+        }
+    });
+
+    return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
+}
+
+// Delete image from Drive and update spreadsheet
+async function deleteImage(rowIdx, colIdx, imgIdx, fileId) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu!');
+        return;
+    }
+    
+    if (!confirm('⚠️ Yakin ingin menghapus foto ini?\n\nFoto akan dihapus dari Google Drive dan tidak dapat dikembalikan!')) {
+        return;
+    }
+
+    try {
+        // Show deleting indicator
+        const deleteBtn = event.target;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '⏳';
+
+        // Delete file from Google Drive
+        try {
+            await gapi.client.drive.files.delete({
+                fileId: fileId
+            });
+            console.log('File deleted from Drive:', fileId);
+        } catch (driveError) {
+            console.warn('Could not delete file from Drive (might already be deleted):', driveError);
+        }
+
+        // Update spreadsheet - remove the image URL
+        if (!appState.currentData[rowIdx]) {
+            appState.currentData[rowIdx] = [];
+        }
+        
+        const existingValue = appState.currentData[rowIdx][colIdx] || '';
+        const existingLinks = existingValue.split(',').map(s => s.trim()).filter(s => s);
+        
+        // Remove the specific image URL
+        existingLinks.splice(imgIdx, 1);
+        
+        // Update the cell value
+        appState.currentData[rowIdx][colIdx] = existingLinks.join(', ');
+        
+        // AUTO-SAVE: Save immediately to the sheet
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range: `${appState.currentSheet}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: appState.currentData
+            }
+        });
+
+        appState.hasChanges = false;
+        delete appState.cache[appState.currentSheet];
+        
+        alert('✅ Foto berhasil dihapus!');
+        await loadSheetData(appState.currentSheet, true);
+        
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('❌ Gagal menghapus foto: ' + error.message);
+        
+        if (typeof deleteBtn !== 'undefined') {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '✕';
+        }
+    }
+}
+
+// Open camera for taking photo
+function openCamera(rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk ambil foto!');
+        return;
+    }
+    
+    try {
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = false;
+
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('❌ File terlalu besar! Maksimal 10MB');
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                alert('❌ File harus berupa gambar!');
+                return;
+            }
+            
+            await uploadMultipleImages([file], rowIdx, colIdx);
+        }
+    };
+
+    input.click();
+}
+
+// Open file picker for image upload
+function openImageUpload(rowIdx, colIdx) {
+    if (!accessToken) {
+        alert('❌ Harap authenticate terlebih dahulu untuk upload foto!');
+        return;
+    }
+    
+    try {
+        getCurrentStoreFolderId();
+    } catch (error) {
+        alert('❌ ' + error.message + '\n\nSilakan hubungi admin untuk konfigurasi folder.');
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+
+    input.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            for (const file of files) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`❌ File "${file.name}" terlalu besar! Maksimal 10MB per file`);
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert(`❌ File "${file.name}" harus berupa gambar!`);
+                    return;
+                }
+            }
+            
+            await uploadMultipleImages(files, rowIdx, colIdx);
+        }
+    };
+
+    input.click();
+}
+
+// ============ EVENT HANDLERS (CORRECTED) ============
+function handleSheetChange() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    if (selectedSheet) {
+        loadSheetData(selectedSheet);
+    } else {
+        showEmptyState();
+    }
+}
+
+function handleRefresh() {
+    const sheetSelect = document.getElementById('sheetSelect');
+    const selectedSheet = sheetSelect.value;
+    if (!selectedSheet) {
+        alert('Pilih sheet terlebih dahulu');
+        return;
+    }
+
+    if (appState.hasChanges) {
+        if (!confirm('Ada perubahan yang belum disimpan. Yakin ingin refresh?')) {
+            return;
+        }
+    }
+
+    loadSheetData(selectedSheet, true);
+}
+
+function handleDeleteColumn(colIdx) {
+    const colNum = colIdx + 1;
+    if (!confirm(`⚠️ Yakin ingin menghapus Item ${colNum}?\n\nData yang dihapus tidak dapat dikembalikan!`)) {
+        return;
+    }
+    deleteColumn(colIdx);
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    const area = document.getElementById('area').value;
+    const itemPemeriksaan = document.getElementById('itemPemeriksaan').value;
+    const status = document.getElementById('status').value;
+    const keterangan = document.getElementById('keterangan').value;
+
+    const rowData = [
+        area,
+        itemPemeriksaan,
+        status,
+        keterangan
+    ];
+
+    await addColumn(rowData);
+    closeModal();
+}
+
+// ============ INITIALIZATION ============
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, waiting for Google APIs...');
+    setTimeout(() => {
+        if (typeof gapi !== 'undefined') {
+            gapiLoaded();
+        }
+        if (typeof google !== 'undefined') {
+            gisLoaded();
+        }
+    }, 500);
+});
+
+window.onclick = function(event) {
+    const modal = document.getElementById('dataModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+};
