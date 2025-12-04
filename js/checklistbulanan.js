@@ -1077,7 +1077,9 @@ function openImageUpload(rowIdx, colIdx) {
     input.click();
 }
 
-// ============ PRINT REPORT FUNCTION ============
+// ============ PRINT REPORT FUNCTION - FIXED VERSION ============
+// Replace the existing generatePrintReport() and generateSectionTable() functions
+
 function generatePrintReport() {
     if (!appState.currentSheet || !appState.currentData || appState.currentData.length < 2) {
         alert('⚠️ Tidak ada data untuk dicetak!');
@@ -1176,20 +1178,20 @@ function generatePrintReport() {
         }
         
         .checklist-table .item-column {
-            width: 40%;
+            width: 35%;
         }
         
         .checklist-table .status-column {
-            width: 15%;
+            width: 12%;
             text-align: center;
         }
         
         .checklist-table .notes-column {
-            width: 30%;
+            width: 28%;
         }
         
         .checklist-table .photo-column {
-            width: 15%;
+            width: 25%;
             text-align: center;
         }
         
@@ -1203,9 +1205,23 @@ function generatePrintReport() {
             font-weight: bold;
         }
         
-        .photo-note {
+        .photo-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .photo-container img {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .no-photo {
             font-size: 9pt;
-            color: #666;
+            color: #999;
             font-style: italic;
         }
         
@@ -1316,6 +1332,72 @@ function generatePrintReport() {
             printWindow.print();
         }, 250);
     };
+}
+
+function generateSectionTable(sectionTitle, rows, headers) {
+    let html = `
+    <div class="section-title">${sectionTitle}</div>
+    <table class="checklist-table">
+        <thead>
+            <tr>
+                <th class="item-column">Item Pemeriksaan</th>
+                <th class="status-column">Status</th>
+                <th class="notes-column">Keterangan</th>
+                <th class="photo-column">Dokumentasi</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+    rows.forEach(row => {
+        const item = row[1] || '-';
+        const status = row[2] || '-';
+        const notes = row[3] || '-';
+        const photos = row[4] || '';
+        
+        // FIX 1: Show actual user selection (Ya/Tidak) instead of [Baik/Kurang]
+        const statusClass = status.toLowerCase() === 'ya' ? 'status-baik' : 
+                           status.toLowerCase() === 'tidak' ? 'status-kurang' : '';
+        
+        const statusText = status || '-';
+        
+        // FIX 2: Display actual images instead of text
+        let photoHTML = '';
+        if (photos) {
+            const imageUrls = photos.split(',').map(url => url.trim()).filter(url => url);
+            if (imageUrls.length > 0) {
+                photoHTML = '<div class="photo-container">';
+                imageUrls.forEach(url => {
+                    const fileId = url.match(/[-\w]{25,}/);
+                    if (fileId) {
+                        // Use thumbnail URL for display
+                        photoHTML += `<img src="https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w200" alt="Foto" onerror="this.style.display='none'">`;
+                    }
+                });
+                photoHTML += '</div>';
+            } else {
+                photoHTML = '<span class="no-photo">Tidak ada foto</span>';
+            }
+        } else {
+            photoHTML = '<span class="no-photo">Tidak ada foto</span>';
+        }
+
+        html += `
+            <tr>
+                <td>${item}</td>
+                <td class="status-column ${statusClass}">${statusText}</td>
+                <td>${notes}</td>
+                <td class="photo-column">${photoHTML}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+    </table>
+`;
+
+    return html;
 }
 
 function generateSectionTable(sectionTitle, rows, headers) {
