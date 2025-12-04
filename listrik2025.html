@@ -199,45 +199,6 @@
             <p>Monitoring Penggunaan dan Biaya Listrik</p>
         </div>
 
-        <!-- PLN Quick Check Section -->
-        <div class="pln-quick-check">
-            <h3>
-                <span>🔍</span>
-                <span>Cek Tagihan PLN Cepat</span>
-            </h3>
-            <p style="margin: 0 0 15px 0; opacity: 0.9; font-size: 14px;">
-                Masukkan 12 digit ID Pelanggan PLN untuk mengecek tagihan secara langsung
-            </p>
-            
-            <div class="pln-check-form">
-                <div class="pln-input-group">
-                    <label for="quickPlnId">ID Pelanggan PLN (12 digit)</label>
-                    <input 
-                        type="text" 
-                        id="quickPlnId" 
-                        placeholder="Contoh: 123456789012" 
-                        maxlength="12"
-                        pattern="[0-9]{12}"
-                    >
-                </div>
-                <button class="btn-check-pln" onclick="quickCheckPLN()" id="quickCheckBtn">
-                    <span>⚡</span>
-                    <span>Cek Tagihan</span>
-                </button>
-            </div>
-            
-            <!-- Error display -->
-            <div class="pln-error" id="plnError"></div>
-            
-            <!-- Result display -->
-            <div class="pln-result" id="plnResult">
-                <h4>📊 Hasil Pengecekan:</h4>
-                <div class="pln-result-grid" id="plnResultGrid">
-                    <!-- Results will be populated here -->
-                </div>
-            </div>
-        </div>
-        
         <!-- Controls section -->
         <div class="controls">
             <a href="index.html" class="back-btn">
