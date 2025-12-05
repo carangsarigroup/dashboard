@@ -798,8 +798,12 @@ function displayData(values, sheetName) {
                 <tbody>
     `;
 
-    for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
+  for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
         const row = values[rowIdx] || [];
+        if (rowIdx === 31 || rowIdx === 32) {
+            continue;
+        }
+        
         html += `<tr>`;
         
         const firstCell = (row[0] || '').trim();
