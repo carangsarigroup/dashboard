@@ -653,6 +653,33 @@ function generateSmartReview(userComment, scoreData) {
     return review;
 }
 
+// Helper function to get signature data from sheet
+function getSignatureData() {
+    let titleLeft = 'Diperiksa Oleh';
+    let nameLeft = '';
+    let titleRight = 'Diketahui Oleh';
+    let nameRight = '';
+    
+    // Row 32 (index 31) = Kepala Toko
+    // Row 33 (index 32) = Manager Carang Sari Group
+    if (appState.currentData && appState.currentData.length > 32) {
+        const row32 = appState.currentData[31]; // A32, B32
+        const row33 = appState.currentData[32]; // A33, B33
+        
+        if (row32 && row32.length >= 2) {
+            titleLeft = row32[0] || titleLeft;   // A32: Kepala Toko
+            nameLeft = row32[1] || '';            // B32: Nama Kepala Toko
+        }
+        
+        if (row33 && row33.length >= 2) {
+            titleRight = row33[0] || titleRight;  // A33: Manager Carang Sari Group
+            nameRight = row33[1] || '';           // B33: Nama Manager
+        }
+    }
+    
+    return { titleLeft, nameLeft, titleRight, nameRight };
+}
+
 function updateAutoScore() {
     const scoreData = calculateAutoScore();
     const scoreInput = document.getElementById('storeRating');
@@ -1373,7 +1400,8 @@ function generatePrintReport() {
 
     const headers = appState.currentData[0];
     const dataRows = appState.currentData.slice(1);
-
+    const signatureData = getSignatureData();
+    
     let printHTML = `
 <!DOCTYPE html>
 <html lang="id">
@@ -1656,12 +1684,12 @@ function generatePrintReport() {
         
         <div class="signature-area">
             <div class="signature-box">
-                <div class="title">Diperiksa Oleh,</div>
-                <div class="name">(_________________)</div>
+                <div class="title">${signatureData.titleLeft},</div>
+                <div class="name">(${signatureData.nameLeft || '_________________'})</div>
             </div>
             <div class="signature-box">
-                <div class="title">Diketahui Oleh,</div>
-                <div class="name">(_________________)</div>
+                <div class="title">${signatureData.titleRight},</div>
+                <div class="name">(${signatureData.nameRight || '_________________'})</div>
             </div>
         </div>
     </div>
