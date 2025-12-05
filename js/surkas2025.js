@@ -673,14 +673,20 @@ function displayData(values1, values2, sheetName) {
     let html = `
     ${filterBadge}
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2 style="color: #FF69B4; margin: 0; font-size: 1.5em;">💰 Surplus Kas Toko - Tahun ${appState.currentYear}</h2>
-        ${accessToken ? `
-        <button class="add-btn" onclick="openAddModal(1)" style="display: inline-flex;">
-            <span>➕</span>
-            <span>Tambah Data Surplus Kas</span>
-        </button>
-        ` : ''}
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="print-btn" onclick="generatePrintReport()" style="display: inline-flex;">
+                <span>🖨️</span>
+                <span>Cetak Laporan</span>
+            </button>
+            ${accessToken ? `
+            <button class="add-btn" onclick="openAddModal(1)" style="display: inline-flex;">
+                <span>➕</span>
+                <span>Tambah Data Surplus Kas</span>
+            </button>
+            ` : ''}
+        </div>
     </div>
     
     <div class="stats">
@@ -1568,4 +1574,5 @@ window.onclick = function(event) {
         closeModal();
     }
 }
+
 
