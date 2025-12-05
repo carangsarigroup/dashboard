@@ -647,6 +647,7 @@ function displayData(values, sheetName) {
 
     for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
         const row = values[rowIdx] || [];
+        // Skip rows 32 and 33 (index 31 and 32) - signature data
         if (rowIdx === 31 || rowIdx === 32) {
             continue;
         }
