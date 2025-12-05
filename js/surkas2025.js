@@ -1064,6 +1064,410 @@ async function deleteRow(sheetName, rowIndex, tableNumber) {
     }
 }
 
+// ============ PRINT REPORT FUNCTION ============
+function generatePrintReport() {
+    if (!appState.currentSheet || !appState.currentData || appState.currentData.length < 2) {
+        alert('⚠️ Tidak ada data untuk dicetak!');
+        return;
+    }
+
+    const storeName = appState.currentSheet;
+    const currentDate = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    // Get filtered data
+    const allDataRows1 = appState.currentData.slice(1).filter(row => row[1]);
+    const dataRows1 = filterDataByTriwulan(allDataRows1);
+    
+    const allDataRows2 = appState.currentData2.length > 1 ? appState.currentData2.slice(1).filter(row => row[0]) : [];
+    const dataRows2 = appState.currentFilter !== 'all' 
+        ? allDataRows2.filter(row => {
+            const triwulan = row[0] ? row[0].toString().trim() : '';
+            return triwulan === appState.currentFilter;
+        })
+        : allDataRows2;
+
+    // Calculate totals
+    const totals1 = calculateTotals(dataRows1);
+    const totals2 = calculateTotalsTable2(dataRows2);
+
+    const filterInfo = appState.currentFilter !== 'all' 
+        ? `Filter: ${getTriwulanLabel(appState.currentFilter)}`
+        : 'Menampilkan Semua Triwulan';
+
+    let printHTML = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Surplus Kas Toko - ${storeName}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #000;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #FF69B4;
+        }
+        
+        .header-section h1 {
+            font-size: 18pt;
+            color: #FF69B4;
+            margin-bottom: 5px;
+        }
+        
+        .header-section .store-name {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #333;
+            margin: 8px 0;
+        }
+        
+        .header-section .meta-info {
+            font-size: 10pt;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .header-section .filter-info {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #FF69B4;
+            margin-top: 8px;
+        }
+        
+        .section-title {
+            background: linear-gradient(to right, #FF69B4, #4A90E2);
+            color: white;
+            padding: 10px 15px;
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            border-radius: 5px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-left: 4px solid #FF69B4;
+            border-radius: 5px;
+        }
+        
+        .summary-card.finale {
+            border-left-color: #28a745;
+            background: #e8f5e9;
+        }
+        
+        .summary-card .label {
+            font-size: 8pt;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .summary-card .value {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .summary-card.finale .value {
+            color: #28a745;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9pt;
+        }
+        
+        .data-table th {
+            background: linear-gradient(to right, #FF69B4, #4A90E2);
+            color: white;
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        
+        .data-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .data-table td.center {
+            text-align: center;
+        }
+        
+        .data-table td.right {
+            text-align: right;
+        }
+        
+        .data-table td.triwulan {
+            text-align: center;
+            font-weight: bold;
+            background: #f8f9fa;
+            color: #FF69B4;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table .positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .data-table .negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .data-table .zero {
+            color: #6c757d;
+        }
+        
+        .footer-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .signature-area {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-box {
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .signature-box .title {
+            font-weight: bold;
+            margin-bottom: 60px;
+            color: #333;
+        }
+        
+        .signature-box .name {
+            border-top: 2px solid #000;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        
+        .footer-notes {
+            font-size: 8pt;
+            color: #666;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section">
+        <h1>📊 LAPORAN SURPLUS KAS TOKO</h1>
+        <div class="store-name">Toko: ${storeName}</div>
+        <div class="meta-info">
+            <div>Tahun: ${appState.currentYear}</div>
+            <div>Tanggal Cetak: ${currentDate}</div>
+        </div>
+        <div class="filter-info">${filterInfo}</div>
+    </div>
+    
+    <!-- TABLE 1: SURPLUS KAS TOKO -->
+    <div class="section-title">💰 SURPLUS KAS TOKO - TAHUN ${appState.currentYear}</div>
+    
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="label">Total EBITDA LR</div>
+            <div class="value">${formatRupiah(totals1.ebitdaLR)}</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Total Laba Net Ditransfer</div>
+            <div class="value">${formatRupiah(totals1.labaNetDitransfer)}</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Total Bayar Listrik</div>
+            <div class="value">${formatRupiah(totals1.bayarListrik)}</div>
+        </div>
+        <div class="summary-card finale">
+            <div class="label">Total Sisa Surplus Kas</div>
+            <div class="value">${formatRupiah(totals1.sisaSurkas)}</div>
+        </div>
+    </div>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 8%;">TRIWULAN</th>
+                <th style="width: 12%;">BULAN</th>
+                <th style="width: 15%;">EBITDA LR</th>
+                <th style="width: 15%;">PENGGUNAAN LABA KAS</th>
+                <th style="width: 15%;">LABA NET DITRANSFER</th>
+                <th style="width: 15%;">BAYAR LISTRIK</th>
+                <th style="width: 20%;">SISA SURPLUS KAS</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+    dataRows1.forEach((row) => {
+        const data = processRowData(row);
+        let colorClass = 'zero';
+        if (data.sisaSurkas > 0) colorClass = 'positive';
+        else if (data.sisaSurkas < 0) colorClass = 'negative';
+        
+        printHTML += `
+            <tr>
+                <td class="triwulan">${data.triwulan}</td>
+                <td>${data.bulan}</td>
+                <td class="right">${formatRupiah(data.ebitdaLR)}</td>
+                <td class="right">${formatRupiah(data.penggunaanLabaKas)}</td>
+                <td class="right">${formatRupiah(data.labaNetDitransfer)}</td>
+                <td class="right">${formatRupiah(data.bayarListrik)}</td>
+                <td class="right ${colorClass}">${formatRupiah(data.sisaSurkas)}</td>
+            </tr>
+        `;
+    });
+
+    printHTML += `
+        </tbody>
+    </table>
+`;
+
+    // TABLE 2: PENGGUNAAN SURKAS
+    if (dataRows2.length > 0) {
+        printHTML += `
+    <div class="section-title page-break">📋 PENGGUNAAN SURPLUS KAS - TAHUN ${appState.currentYear}</div>
+    
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="label">Total Nominal Penggunaan</div>
+            <div class="value">${formatRupiah(totals2.nominalPenggunaanSurkas)}</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Total Transaksi</div>
+            <div class="value">${dataRows2.length}</div>
+        </div>
+    </div>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 10%;">TRIWULAN</th>
+                <th style="width: 15%;">BULAN</th>
+                <th style="width: 25%;">NOMINAL PENGGUNAAN</th>
+                <th style="width: 50%;">TUJUAN PENGGUNAAN</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+
+        dataRows2.forEach((row) => {
+            const data = processRowDataTable2(row);
+            
+            printHTML += `
+            <tr>
+                <td class="center triwulan">${data.no}</td>
+                <td>${data.bulan}</td>
+                <td class="right">${formatRupiah(data.nominalPenggunaanSurkas)}</td>
+                <td>${data.tujuanPenggunaanSurkas}</td>
+            </tr>
+            `;
+        });
+
+        printHTML += `
+        </tbody>
+    </table>
+`;
+    }
+
+    // Footer with signatures
+    printHTML += `
+    <div class="footer-section">
+        <div class="signature-area">
+            <div class="signature-box">
+                <div class="title">Disiapkan Oleh,</div>
+                <div class="name">Manager Carang Sari Group</div>
+            </div>
+        </div>
+        
+        <div class="footer-notes">
+            Dokumen ini dicetak secara otomatis dari SIMTOCS - Sistem Informasi Manajemen Toko Carang Sari<br>
+            Dicetak pada: ${currentDate}
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+    // Open print window
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.write(printHTML);
+        printWindow.document.close();
+        
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        };
+    } else {
+        alert('❌ Tidak dapat membuka window print. Pastikan popup tidak diblokir.');
+    }
+}
+
 // ============ EVENT HANDLERS ============
 function handleSheetChange() {
     const sheetSelect = document.getElementById('sheetSelect');
@@ -1164,3 +1568,4 @@ window.onclick = function(event) {
         closeModal();
     }
 }
+
