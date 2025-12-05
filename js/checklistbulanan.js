@@ -470,7 +470,7 @@ async function loadSheetData(sheetName, forceRefresh = false) {
     }
 }
 
-// ============ AUTO SCORE & REVIEW FUNCTIONS ============
+// ============ AUTO SCORE FUNCTIONS ============
 function calculateAutoScore() {
     if (!appState.currentData || appState.currentData.length < 2) {
         return null;
@@ -542,142 +542,22 @@ function calculateAutoScore() {
     };
 }
 
-function generateSmartReview(userComment, scoreData) {
-    if (!scoreData) {
-        return "Belum ada data untuk dianalisis. Silakan isi status pemeriksaan terlebih dahulu.";
-    }
-    
-    const score = parseFloat(scoreData.score);
-    const percentage = parseFloat(scoreData.percentage);
-    
-    let performanceLevel = '';
-    let performanceEmoji = '';
-    
-    if (percentage >= 90) {
-        performanceLevel = 'SANGAT BAIK';
-        performanceEmoji = '🌟';
-    } else if (percentage >= 75) {
-        performanceLevel = 'BAIK';
-        performanceEmoji = '✅';
-    } else if (percentage >= 60) {
-        performanceLevel = 'CUKUP';
-        performanceEmoji = '⚠️';
-    } else {
-        performanceLevel = 'PERLU PERBAIKAN';
-        performanceEmoji = '❌';
-    }
-    
-    let categoryAnalysis = [];
-    let bestCategories = [];
-    let worstCategories = [];
-    
-    for (let [category, stats] of Object.entries(scoreData.categoryStats)) {
-        if (stats.total > 0) {
-            const catPercentage = (stats.yes / stats.total) * 100;
-            categoryAnalysis.push({
-                name: category,
-                percentage: catPercentage,
-                yes: stats.yes,
-                no: stats.no,
-                total: stats.total
-            });
-        }
-    }
-    
-    categoryAnalysis.sort((a, b) => b.percentage - a.percentage);
-    
-    if (categoryAnalysis.length > 0) {
-        bestCategories = categoryAnalysis.slice(0, 2);
-        worstCategories = categoryAnalysis.slice(-2).reverse();
-    }
-    
-    let review = `${performanceEmoji} PENILAIAN KESELURUHAN: ${performanceLevel}\n\n`;
-    
-    review += `Berdasarkan pemeriksaan komprehensif terhadap ${scoreData.totalItems} item, toko menunjukkan `;
-    review += `tingkat kepatuhan ${scoreData.percentage}% dengan score ${scoreData.score}/5.0. `;
-    review += `Dari total pemeriksaan, ${scoreData.yesCount} item memenuhi standar dan ${scoreData.noCount} item memerlukan perbaikan.\n\n`;
-    
-    if (bestCategories.length > 0 && bestCategories[0].percentage >= 70) {
-        review += `✨ ASPEK POSITIF:\n`;
-        bestCategories.forEach(cat => {
-            if (cat.percentage >= 70) {
-                review += `• ${cat.name}: Performa baik (${cat.percentage.toFixed(0)}% - ${cat.yes}/${cat.total} item)\n`;
-            }
-        });
-        review += `\n`;
-    }
-    
-    if (worstCategories.length > 0 && worstCategories[0].percentage < 80) {
-        review += `🔧 AREA YANG PERLU PERBAIKAN:\n`;
-        worstCategories.forEach(cat => {
-            if (cat.percentage < 80) {
-                review += `• ${cat.name}: Perlu perhatian (${cat.percentage.toFixed(0)}% - ${cat.no} item tidak sesuai)\n`;
-            }
-        });
-        review += `\n`;
-    }
-    
-    if (userComment && userComment.trim() !== '') {
-        review += `📝 OBSERVASI AUDITOR:\n`;
-        review += `"${userComment.trim()}"\n\n`;
-    }
-    
-    review += `💡 REKOMENDASI:\n`;
-    
-    if (percentage >= 90) {
-        review += `• Pertahankan standar operasional yang sudah sangat baik\n`;
-        review += `• Jadikan toko ini sebagai benchmark untuk toko lain\n`;
-        review += `• Fokus pada continuous improvement untuk area minor yang masih bisa ditingkatkan\n`;
-    } else if (percentage >= 75) {
-        review += `• Tingkatkan konsistensi pada ${scoreData.noCount} item yang masih kurang\n`;
-        review += `• Lakukan monitoring rutin untuk mempertahankan performa\n`;
-        review += `• Identifikasi root cause dari item yang tidak memenuhi standar\n`;
-    } else if (percentage >= 60) {
-        review += `• Diperlukan action plan segera untuk ${scoreData.noCount} item yang tidak sesuai standar\n`;
-        review += `• Lakukan training atau briefing ulang kepada tim toko\n`;
-        review += `• Follow-up pemeriksaan dalam 2 minggu untuk memastikan perbaikan\n`;
-    } else {
-        review += `• URGENSI TINGGI: Diperlukan intervensi manajemen segera\n`;
-        review += `• Buat action plan detail dengan timeline perbaikan jelas\n`;
-        review += `• Pertimbangkan support tambahan dari tim regional\n`;
-        review += `• Follow-up pemeriksaan dalam 1 minggu\n`;
-    }
-    
-    review += `\n📊 KESIMPULAN:\n`;
-    if (percentage >= 75) {
-        review += `Toko menunjukkan kinerja yang baik secara keseluruhan. Dengan sedikit perbaikan pada area yang masih kurang, toko dapat mencapai standar optimal.`;
-    } else {
-        review += `Toko memerlukan perhatian khusus dan tindakan perbaikan yang terstruktur untuk meningkatkan kepatuhan terhadap standar operasional.`;
-    }
-    
-    return review;
-}
-
-// Helper function to get signature data from sheet
+// Helper function to get signature data from sheet (only right signature)
 function getSignatureData() {
-    let titleLeft = 'Diperiksa Oleh';
-    let nameLeft = '';
-    let titleRight = 'Diketahui Oleh';
-    let nameRight = '';
+    let title = 'Diketahui Oleh';
+    let name = '';
     
-    // Row 32 (index 31) = Kepala Toko
     // Row 33 (index 32) = Manager Carang Sari Group
     if (appState.currentData && appState.currentData.length > 32) {
-        const row32 = appState.currentData[31]; // A32, B32
         const row33 = appState.currentData[32]; // A33, B33
         
-        if (row32 && row32.length >= 2) {
-            titleLeft = row32[0] || titleLeft;   // A32: Kepala Toko
-            nameLeft = row32[1] || '';            // B32: Nama Kepala Toko
-        }
-        
         if (row33 && row33.length >= 2) {
-            titleRight = row33[0] || titleRight;  // A33: Manager Carang Sari Group
-            nameRight = row33[1] || '';           // B33: Nama Manager
+            title = row33[0] || title;  // A33: Manager Carang Sari Group
+            name = row33[1] || '';       // B33: Nama Manager
         }
     }
     
-    return { titleLeft, nameLeft, titleRight, nameRight };
+    return { title, name };
 }
 
 function updateAutoScore() {
@@ -711,39 +591,6 @@ function updateAutoScore() {
             `;
         }
     }
-}
-
-function handleSmartReview() {
-    const commentTextarea = document.getElementById('storeComment');
-    const smartReviewBtn = document.getElementById('aiReviewBtn');
-    
-    if (!commentTextarea || !smartReviewBtn) return;
-    
-    const userComment = commentTextarea.value.trim();
-    const scoreData = calculateAutoScore();
-    
-    if (!scoreData) {
-        alert('⚠️ Belum ada data status yang terisi. Silakan isi status terlebih dahulu.');
-        return;
-    }
-    
-    const originalText = smartReviewBtn.innerHTML;
-    smartReviewBtn.disabled = true;
-    smartReviewBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
-    
-    setTimeout(() => {
-        try {
-            const smartReview = generateSmartReview(userComment, scoreData);
-            commentTextarea.value = smartReview;
-            showNotificationBanner('✅ Review berhasil di-generate!', 'success');
-        } catch (error) {
-            console.error('Error generating smart review:', error);
-            alert('❌ Gagal generate review: ' + error.message);
-        } finally {
-            smartReviewBtn.disabled = false;
-            smartReviewBtn.innerHTML = originalText;
-        }
-    }, 800);
 }
 
 function showNotificationBanner(message, type = 'info') {
@@ -798,7 +645,7 @@ function displayData(values, sheetName) {
                 <tbody>
     `;
 
-  for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
+    for (let rowIdx = 1; rowIdx < values.length; rowIdx++) {
         const row = values[rowIdx] || [];
         if (rowIdx === 31 || rowIdx === 32) {
             continue;
@@ -1597,7 +1444,7 @@ function generatePrintReport() {
         .signature-area {
             margin-top: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
         }
         
         .signature-box {
@@ -1688,12 +1535,8 @@ function generatePrintReport() {
         
         <div class="signature-area">
             <div class="signature-box">
-                <div class="title">${signatureData.titleLeft},</div>
-                <div class="name">(${signatureData.nameLeft || '_________________'})</div>
-            </div>
-            <div class="signature-box">
-                <div class="title">${signatureData.titleRight},</div>
-                <div class="name">(${signatureData.nameRight || '_________________'})</div>
+                <div class="title">${signatureData.title},</div>
+                <div class="name">(${signatureData.name || '_________________'})</div>
             </div>
         </div>
     </div>
@@ -1886,4 +1729,4 @@ window.onclick = function(event) {
     if (modal && event.target === modal) {
         closeModal();
     }
-};
+}
