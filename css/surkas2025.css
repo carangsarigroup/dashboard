@@ -640,6 +640,42 @@ tbody tr:hover {
     margin-bottom: 10px;
 }
 
+.print-btn {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.print-btn:hover {
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+.print-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive for print button */
+@media (max-width: 768px) {
+    .print-btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+}
+
 /* Auto-logout warning modal */
 .logout-warning {
     display: none;
@@ -752,3 +788,4 @@ tbody tr:hover {
         align-items: flex-start !important;
     }
 }
+
